@@ -25,7 +25,7 @@ A native Mac desktop app (Tauri) that reads Obsidian project files and renders a
 #### Timeline:
 - 2026-03-24 | milestone | Direction approved
 - 2026-03-24 to 2026-03-28 | phase | Refine + build out elements
-- 2026-03-27 | review | Joe review
+- 2026-03-27 | review | Stakeholder review
 ```
 
 ### Entry types:
@@ -89,7 +89,7 @@ Each project = one block in both columns, pixel-aligned:
 - **Right:** Gantt block (96px height) containing:
   - Top half: Phase bar(s) — black rounded pill spanning the date range
   - Bottom half: Checkpoint dots positioned at their dates
-  - Hover on dot → black tooltip pill showing "Mar 27 — Joe review"
+  - Hover on dot → black tooltip pill showing "Mar 27 — Stakeholder review"
 
 ### Spacing system:
 - All margins/gaps = 8px consistently
