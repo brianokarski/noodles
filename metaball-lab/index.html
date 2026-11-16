@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metaball Lab</title>
+  <style>
+    @font-face { font-family: 'Inter'; src: url('fonts/Inter-Regular.ttf') format('truetype'); font-weight: 400; }
+    @font-face { font-family: 'Inter'; src: url('fonts/Inter-Medium.ttf') format('truetype'); font-weight: 500; }
+    @font-face { font-family: 'Inter'; src: url('fonts/Inter-SemiBold.ttf') format('truetype'); font-weight: 600; }
+
+    :root {
+      --bg: #ffffff; --fg: #0a0a0a; --muted: #737373; --border: #e5e5e5;
+      --canvas-bg: #111; --accent: #00ff41;
+      --font-display: 'Inter', system-ui, sans-serif;
+      --font-mono: 'Inter', system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body { display: flex; font-family: var(--font-mono); font-size: 13px; color: var(--fg); background: var(--bg); }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      width: 340px; min-width: 340px; height: 100vh; overflow-y: auto;
+      border-right: 1px solid var(--border); padding: 16px 18px; display: flex; flex-direction: column; gap: 0;
+    }
+    .side-header {
+      font-family: var(--font-display); font-weight: 900; font-size: 18px; letter-spacing: -0.02em;
+      padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 10px;
+    }
+    #mode-indicator {
+      font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--muted);
+      letter-spacing: 0.04em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+    .section { padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .section-label {
+      font-family: var(--font-mono); font-size: 10px; font-weight: 600; color: var(--muted);
+      letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .ctrl { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+    .ctrl label { font-family: var(--font-mono); font-size: 11px; color: var(--muted); min-width: 80px; flex-shrink: 0; }
+    .ctrl input[type=range] { flex: 1; height: 1px; background: var(--border); appearance: none; outline: none; }
+    .ctrl input[type=range]::-webkit-slider-thumb { appearance: none; width: 10px; height: 10px; border-radius: 50%; background: var(--fg); cursor: pointer; }
+    .ctrl .val { font-family: var(--font-mono); font-size: 10px; color: var(--muted); min-width: 24px; text-align: right; }
+    .toggle-row { display: flex; flex-wrap: wrap; gap: 0; }
+    .toggle-btn {
+      font-family: var(--font-mono); font-size: 11px; padding: 5px 10px; border: 1px solid var(--border);
+      margin: -0.5px; background: var(--bg); color: var(--fg); cursor: pointer; transition: all 0.1s;
+    }
+    .toggle-btn:first-child { border-radius: 6px 0 0 6px; }
+    .toggle-btn:last-child { border-radius: 0 6px 6px 0; }
+    .toggle-btn.active { background: var(--fg); color: var(--bg); border-color: var(--fg); z-index: 1; }
+    .swatch-row { display: flex; flex-wrap: wrap; gap: 4px; }
+    .swatch {
+      width: 20px; height: 20px; border-radius: 4px; border: 2px solid transparent; cursor: pointer;
+      transition: border-color 0.1s;
+    }
+    .swatch:hover { border-color: var(--muted); }
+    .swatch.active { border-color: var(--fg); }
+    .btn {
+      font-family: var(--font-mono); font-size: 12px; font-weight: 600; padding: 8px 14px;
+      border-radius: 6px; border: 1px solid var(--border); cursor: pointer; transition: all 0.1s;
+    }
+    .btn-outline { background: transparent; color: var(--fg); }
+    .btn-seafoam { background: #F5572D; color: #ffffff; border-color: #F5572D; }
+    .btn-seafoam:hover { background: #d94a25; border-color: #d94a25; }
+    .btn-outline:hover { border-color: var(--fg); }
+    .btn-danger { background: transparent; color: #ff4444; border-color: #e5e5e5; }
+    .side-actions { display: flex; flex-direction: column; gap: 6px; padding-top: 12px; margin-top: auto; }
+
+    /* ── Canvas ── */
+    #canvas-area {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      background: var(--canvas-bg); position: relative; overflow: auto;
+    }
+    #canvas-area svg { display: block; cursor: crosshair; }
+    #stage-toolbar {
+      position: absolute; top: 14px; right: 16px; display: flex; flex-direction: column;
+      align-items: stretch; gap: 6px; background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px; padding: 8px 10px; z-index: 10;
+    }
+    #stage-toolbar .btn {
+      font-size: 11px; padding: 5px 12px; color: rgba(255,255,255,0.85);
+      border-color: rgba(255,255,255,0.25); background: transparent;
+    }
+    #stage-toolbar .btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.5); color: #fff; }
+    #stage-toolbar .btn-randomize { background: #ff4444; color: #ffcccc; border-color: #ff4444; }
+    #stage-toolbar .btn-randomize:hover { background: #e63c3c; color: #fff; }
+    #stage-toolbar .btn-primary { background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.3); }
+    #stage-toolbar .btn-primary:hover { background: rgba(255,255,255,0.25); }
+    #zoom-controls {
+      position: absolute; bottom: 14px; right: 16px; display: flex; align-items: center; gap: 4px;
+      background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 4px 6px; z-index: 10;
+    }
+    #zoom-controls button {
+      background: none; border: none; color: rgba(255,255,255,0.7); font-size: 15px; line-height: 1;
+      width: 22px; height: 22px; cursor: pointer; border-radius: 4px; display: flex; align-items: center; justify-content: center;
+    }
+    #zoom-controls button:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    #zoom-label { font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.55); min-width: 36px; text-align: center; }
+    .grid-line { stroke: rgba(255,255,255,0.1); stroke-width: 0.5; }
+    .blob-hover { cursor: pointer; }
+    .blob-hover:hover { filter: brightness(1.2); }
+  </style>
+</head>
+<body>
+
+<aside id="sidebar">
+  <div class="side-header">Metaball Lab</div>
+
+  <!-- Dots -->
+  <div class="section">
+    <div class="section-label">Dots</div>
+    <div class="ctrl"><label>Density</label><input type="range" id="sl-density" min="30" max="100" value="85" step="5"><span class="val" id="val-density">85%</span></div>
+    <div class="ctrl"><label>Min radius</label><input type="range" id="sl-min-r" min="10" max="80" value="20"><span class="val" id="val-min-r">20</span></div>
+    <div class="ctrl"><label>Max radius</label><input type="range" id="sl-max-r" min="20" max="120" value="53"><span class="val" id="val-max-r">53</span></div>
+    <div class="ctrl"><label>Contrast</label><input type="range" id="sl-contrast" min="0" max="100" value="0"><span class="val" id="val-contrast">0</span></div>
+  </div>
+
+  <!-- Grid -->
+  <div class="section">
+    <div class="section-label">Adjust Grid</div>
+    <div class="ctrl"><label>Columns</label><input type="range" id="sl-cols" min="2" max="12" value="6"><span class="val" id="val-cols">6</span></div>
+    <div class="ctrl"><label>Rows</label><input type="range" id="sl-rows" min="2" max="12" value="6"><span class="val" id="val-rows">6</span></div>
+    <div class="ctrl"><label>Gap</label><input type="range" id="sl-gap" min="0" max="40" value="12"><span class="val" id="val-gap">12</span></div>
+    <div class="ctrl"><label>Margin</label><input type="range" id="sl-margin" min="10" max="80" value="40"><span class="val" id="val-margin">40</span></div>
+    <button class="btn btn-seafoam" id="btn-rand-blobs" style="margin-top:6px; width:100%">Add Dots</button>
+  </div>
+
+  <!-- Blobs -->
+  <div class="section">
+    <div class="section-label">Generate Blobs</div>
+    <div class="ctrl"><label>Membrane</label><input type="range" id="sl-bridge-r" min="5" max="60" value="17"><span class="val" id="val-bridge-r">17</span></div>
+    <button class="btn btn-seafoam" id="btn-rand-bridges" style="margin-top:6px; width:100%">Generate Blobs</button>
+  </div>
+
+  <!-- Color -->
+  <div class="section">
+    <div class="section-label">Color</div>
+    <div class="swatch-row" id="bg-colors">
+      <div class="swatch active" data-color="#0a0a0a" style="background:#0a0a0a"></div>
+      <div class="swatch" data-color="#1e1e1e" style="background:#1e1e1e"></div>
+      <div class="swatch" data-color="#323232" style="background:#323232"></div>
+      <div class="swatch" data-color="#b9b9b9" style="background:#b9b9b9"></div>
+      <div class="swatch" data-color="#ffffff" style="background:#ffffff"></div>
+      <div class="swatch" data-color="#FF8A1D" style="background:#FF8A1D"></div>
+      <div class="swatch" data-color="#057C09" style="background:#057C09"></div>
+      <div class="swatch" data-color="#8DCBDB" style="background:#8DCBDB"></div>
+      <div class="swatch" data-color="#F5572D" style="background:#F5572D"></div>
+      <div class="swatch" data-color="#C9B2FF" style="background:#C9B2FF"></div>
+      <div class="swatch" data-color="#D3D3D3" style="background:#D3D3D3"></div>
+      <div class="swatch" data-color="#9BF1B0" style="background:#9BF1B0"></div>
+      <div class="swatch" data-color="#031E1D" style="background:#031E1D"></div>
+    </div>
+    <div class="section-label" style="margin-top:10px">Blob Color</div>
+    <div class="swatch-row" id="blob-colors">
+      <div class="swatch active" data-color="#FF8A1D" style="background:#FF8A1D"></div>
+      <div class="swatch" data-color="#057C09" style="background:#057C09"></div>
+      <div class="swatch" data-color="#8DCBDB" style="background:#8DCBDB"></div>
+      <div class="swatch" data-color="#F5572D" style="background:#F5572D"></div>
+      <div class="swatch" data-color="#C9B2FF" style="background:#C9B2FF"></div>
+      <div class="swatch" data-color="#D3D3D3" style="background:#D3D3D3"></div>
+      <div class="swatch" data-color="#9BF1B0" style="background:#9BF1B0"></div>
+      <div class="swatch" data-color="#031E1D" style="background:#031E1D"></div>
+    </div>
+    <label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin-top:8px;">
+      <input type="checkbox" id="multi-color" style="width:14px; height:14px; cursor:pointer;">
+      <span style="font-family:var(--font-mono); font-size:10px; color:var(--muted)">Multi-color mode</span>
+    </label>
+    <button class="btn btn-seafoam" id="btn-rand-colors" style="margin-top:8px; width:100%">Randomize Colors</button>
+  </div>
+
+  <!-- Export + Clear -->
+  <div class="side-actions">
+    <button class="btn btn-outline" id="btn-export">Export SVG</button>
+    <button class="btn btn-outline" id="btn-clear-bridges">Clear Blobs</button>
+    <button class="btn btn-danger" id="btn-clear">Clear All</button>
+  </div>
+</aside>
+
+<div id="canvas-area">
+  <svg id="canvas"></svg>
+  <div id="zoom-controls">
+    <button id="btn-zoom-out">&minus;</button>
+    <span id="zoom-label">100%</span>
+    <button id="btn-zoom-in">+</button>
+    <button id="btn-zoom-reset" title="Reset zoom">&lceil;</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const svg = document.getElementById('canvas');
+
+  // ── State ──
+  const S = {
+    w: 900, h: 900,
+    cols: 6, rows: 6, gap: 12, margin: 40,
+    bgColor: '#0a0a0a',
+    blobMinR: 20, blobMaxR: 53,
+    blurAmount: 18, threshold: 150,
+    density: 85, contrast: 0,
+    blobColor: '#FF8A1D',
+    multiColor: false,
+    bridgeR: 17, // bridge blob size
+    mode: 'place',
+    blobs: [], bridges: [], // bridges: { cx, cy, r, color }
+    selectedBlob: null, connStart: null,
+    nextId: 0, zoomLevel: 1,
+  };
+
+  // ── Grid math ──
+  function cellW() { return (S.w - S.margin * 2 - (S.cols - 1) * S.gap) / S.cols; }
+  function cellH() { return (S.h - S.margin * 2 - (S.rows - 1) * S.gap) / S.rows; }
+  function cellCenter(col, row) {
+    const cw = cellW(), ch = cellH();
+    return {
+      x: S.margin + col * (cw + S.gap) + cw / 2,
+      y: S.margin + row * (ch + S.gap) + ch / 2,
+    };
+  }
+  function cellFromPoint(px, py) {
+    const cw = cellW(), ch = cellH();
+    const col = Math.floor((px - S.margin + S.gap / 2) / (cw + S.gap));
+    const row = Math.floor((py - S.margin + S.gap / 2) / (ch + S.gap));
+    return { col: Math.max(0, Math.min(col, S.cols - 1)), row: Math.max(0, Math.min(row, S.rows - 1)) };
+  }
+
+  // ── SVG helpers ──
+  function el(tag, attrs) {
+    const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    if (attrs) Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+    return e;
+  }
+
+  // ── Themes ──
+  // New palette: #FF8A1D #057C09 #8DCBDB #F5572D #C9B2FF #D3D3D3 #9BF1B0 #031E1D
+  const PALETTE = ['#FF8A1D','#057C09','#8DCBDB','#F5572D','#C9B2FF','#D3D3D3','#9BF1B0','#031E1D'];
+  const THEMES = [
+    { bg: '#0a0a0a', blobs: ['#FF8A1D','#057C09','#9BF1B0','#031E1D'] },
+    { bg: '#0a0a0a', blobs: ['#8DCBDB','#C9B2FF','#057C09','#9BF1B0'] },
+    { bg: '#0a0a0a', blobs: ['#F5572D','#FF8A1D','#D3D3D3','#031E1D'] },
+    { bg: '#0a0a0a', blobs: ['#C9B2FF','#8DCBDB','#F5572D','#FF8A1D'] },
+    { bg: '#0a0a0a', blobs: ['#9BF1B0','#057C09','#8DCBDB','#C9B2FF','#031E1D'] },
+    { bg: '#031E1D', blobs: ['#FF8A1D','#9BF1B0','#8DCBDB','#D3D3D3'] },
+    { bg: '#0a0a0a', blobs: ['#F5572D','#C9B2FF','#9BF1B0','#FF8A1D','#8DCBDB'] },
+    { bg: '#0a0a0a', blobs: PALETTE },
+  ];
+
+  // ── Render ──
+  function render() {
+    svg.setAttribute('viewBox', `0 0 ${S.w} ${S.h}`);
+    svg.setAttribute('width', Math.round(S.w * S.zoomLevel));
+    svg.setAttribute('height', Math.round(S.h * S.zoomLevel));
+    svg.innerHTML = '';
+
+    // Background
+    svg.appendChild(el('rect', { x: 0, y: 0, width: S.w, height: S.h, fill: S.bgColor }));
+
+    // Grid lines
+    const cw = cellW(), ch = cellH();
+    const gridG = el('g');
+    for (let c = 0; c <= S.cols; c++) {
+      const x = S.margin + c * (cw + S.gap) - S.gap / 2;
+      gridG.appendChild(el('line', { x1: x, y1: S.margin - S.gap / 2, x2: x, y2: S.h - S.margin + S.gap / 2, class: 'grid-line' }));
+    }
+    for (let r = 0; r <= S.rows; r++) {
+      const y = S.margin + r * (ch + S.gap) - S.gap / 2;
+      gridG.appendChild(el('line', { x1: S.margin - S.gap / 2, y1: y, x2: S.w - S.margin + S.gap / 2, y2: y, class: 'grid-line' }));
+    }
+    svg.appendChild(gridG);
+
+    // Build all circles: main blobs (with contrast applied) + bridge blobs
+    const allCircles = [];
+    // Contrast: push radii away from the average
+    const avgR = S.blobs.length > 0 ? S.blobs.reduce((s, b) => s + b.r, 0) / S.blobs.length : 0;
+    const cFactor = S.contrast / 100; // 0 to 1
+    S.blobs.forEach(b => {
+      const adjusted = b.r + (b.r - avgR) * cFactor * 2;
+      const displayR = Math.max(5, adjusted);
+      allCircles.push({ cx: b.cx, cy: b.cy, r: displayR, color: b.color });
+    });
+
+    // For each bridge, place uniform circles tightly packed between the two blobs
+    S.bridges.forEach(br => {
+      const a = S.blobs.find(b => b.id === br.aId);
+      const b = S.blobs.find(bl => bl.id === br.bId);
+      if (!a || !b) return;
+      const dx = b.cx - a.cx, dy = b.cy - a.cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      // Pack circles tightly — spacing = bridgeR * 0.6 for dense overlap
+      const spacing = Math.max(S.bridgeR * 0.6, 4);
+      const steps = Math.max(2, Math.floor(dist / spacing));
+      for (let i = 1; i < steps; i++) {
+        const t = i / steps;
+        allCircles.push({
+          cx: a.cx + dx * t,
+          cy: a.cy + dy * t,
+          r: S.bridgeR,
+          color: a.color,
+        });
+      }
+    });
+
+    // Group all circles by color
+    const colorGroups = {};
+    allCircles.forEach(b => {
+      if (!colorGroups[b.color]) colorGroups[b.color] = [];
+      colorGroups[b.color].push(b);
+    });
+
+    // Defs — one metaball filter per color group
+    const defs = el('defs');
+    const filterIds = {};
+    Object.keys(colorGroups).forEach((color, i) => {
+      const fid = 'meta-' + i;
+      filterIds[color] = fid;
+      // Parse color to RGB for flood fill
+      const c = color.replace('#', '');
+      const cr = parseInt(c.substr(0, 2), 16) / 255;
+      const cg = parseInt(c.substr(2, 2), 16) / 255;
+      const cb = parseInt(c.substr(4, 2), 16) / 255;
+
+      const filter = el('filter', { id: fid, x: '-50%', y: '-50%', width: '200%', height: '200%' });
+      // 1. Blur the source
+      filter.appendChild(el('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: S.blurAmount, result: 'blur' }));
+      // 2. Threshold the alpha channel only (set RGB to white, only alpha matters)
+      filter.appendChild(el('feColorMatrix', { in: 'blur', type: 'matrix', result: 'thresh',
+        values: `0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 ${S.threshold} -${Math.floor(S.threshold * 0.45)}`,
+      }));
+      // 3. Flood fill with the actual color
+      filter.appendChild(el('feFlood', { 'flood-color': color, 'flood-opacity': 1, result: 'color' }));
+      // 4. Composite: use thresholded alpha as mask over the solid color
+      filter.appendChild(el('feComposite', { in: 'color', in2: 'thresh', operator: 'in' }));
+      defs.appendChild(filter);
+    });
+    svg.appendChild(defs);
+
+    // Render each color group with its filter
+    Object.entries(colorGroups).forEach(([color, circles]) => {
+      const g = el('g', { filter: `url(#${filterIds[color]})` });
+      circles.forEach(c => {
+        g.appendChild(el('circle', { cx: c.cx, cy: c.cy, r: c.r, fill: color }));
+      });
+      svg.appendChild(g);
+    });
+  }
+
+  // ── SVG point from mouse ──
+  function svgPoint(e) {
+    const rect = svg.getBoundingClientRect();
+    const vb = svg.viewBox.baseVal;
+    return { x: (e.clientX - rect.left) / rect.width * vb.width, y: (e.clientY - rect.top) / rect.height * vb.height };
+  }
+
+  // ── Slider binding ──
+  function bindSlider(id, key, valId, suffix) {
+    const sl = document.getElementById(id);
+    const vEl = document.getElementById(valId);
+    sl.addEventListener('input', () => {
+      S[key] = Number(sl.value);
+      vEl.textContent = sl.value + (suffix || '');
+      render();
+    });
+  }
+
+  // Grid sliders reposition all blobs to new cell centers
+  function bindGridSlider(id, key, valId) {
+    const sl = document.getElementById(id);
+    const vEl = document.getElementById(valId);
+    sl.addEventListener('input', () => {
+      S[key] = Number(sl.value);
+      vEl.textContent = sl.value;
+      // Remove blobs that no longer fit in the grid
+      S.blobs = S.blobs.filter(b => b.gridCol < S.cols && b.gridRow < S.rows);
+      // Reposition remaining blobs to new cell centers
+      S.blobs.forEach(b => {
+        const c = cellCenter(b.gridCol, b.gridRow);
+        b.cx = c.x; b.cy = c.y;
+      });
+      render();
+    });
+  }
+  bindGridSlider('sl-cols', 'cols', 'val-cols');
+  bindGridSlider('sl-rows', 'rows', 'val-rows');
+  bindGridSlider('sl-gap', 'gap', 'val-gap');
+  bindGridSlider('sl-margin', 'margin', 'val-margin');
+  // Min/max radius sliders rescale all existing blobs in real time
+  ['sl-min-r', 'sl-max-r'].forEach(id => {
+    const sl = document.getElementById(id);
+    const key = id === 'sl-min-r' ? 'blobMinR' : 'blobMaxR';
+    const valId = id === 'sl-min-r' ? 'val-min-r' : 'val-max-r';
+    sl.addEventListener('input', () => {
+      S[key] = Number(sl.value);
+      document.getElementById(valId).textContent = sl.value;
+      S.blobs.forEach(b => { b.r = S.blobMinR + b.t * (S.blobMaxR - S.blobMinR); });
+      render();
+    });
+  });
+  bindSlider('sl-contrast', 'contrast', 'val-contrast');
+  bindSlider('sl-density', 'density', 'val-density', '%');
+  // ── Color swatches ──
+  document.querySelectorAll('#bg-colors .swatch').forEach(sw => {
+    sw.onclick = () => {
+      document.querySelectorAll('#bg-colors .swatch').forEach(s => s.classList.remove('active'));
+      sw.classList.add('active');
+      S.bgColor = sw.dataset.color;
+      render();
+    };
+  });
+  document.querySelectorAll('#blob-colors .swatch').forEach(sw => {
+    sw.onclick = () => {
+      document.querySelectorAll('#blob-colors .swatch').forEach(s => s.classList.remove('active'));
+      sw.classList.add('active');
+      S.blobColor = sw.dataset.color;
+    };
+  });
+  // Membrane slider — updates bridge blob size, auto-generates bridges if none exist
+  document.getElementById('sl-bridge-r').addEventListener('input', function() {
+    S.bridgeR = Number(this.value);
+    document.getElementById('val-bridge-r').textContent = this.value;
+    // If we have dots but no bridges, auto-create bridges between all adjacent pairs
+    if (S.blobs.length >= 2 && S.bridges.length === 0) {
+      for (let i = 0; i < S.blobs.length; i++) {
+        for (let j = i + 1; j < S.blobs.length; j++) {
+          const a = S.blobs[i], b = S.blobs[j];
+          const dc = Math.abs(a.gridCol - b.gridCol);
+          const dr = Math.abs(a.gridRow - b.gridRow);
+          if ((dc === 1 && dr === 0) || (dc === 0 && dr === 1)) {
+            S.bridges.push({ aId: a.id, bId: b.id });
+          }
+        }
+      }
+    }
+    render();
+  });
+  document.getElementById('multi-color').addEventListener('change', e => { S.multiColor = e.target.checked; });
+
+  // ── Mode ──
+  function setMode(mode) { S.mode = mode; }
+
+  // ── Mouse events ──
+  svg.addEventListener('click', e => {
+    const pt = svgPoint(e);
+    const cell = cellFromPoint(pt.x, pt.y);
+    const existing = S.blobs.find(b => b.gridCol === cell.col && b.gridRow === cell.row);
+    if (existing) return;
+
+    const center = cellCenter(cell.col, cell.row);
+    const t = Math.random();
+    const r = S.blobMinR + t * (S.blobMaxR - S.blobMinR);
+    const color = S.multiColor
+      ? PALETTE[Math.floor(Math.random() * PALETTE.length)]
+      : S.blobColor;
+    S.blobs.push({ id: S.nextId++, cx: center.x, cy: center.y, r, t, color, gridCol: cell.col, gridRow: cell.row });
+    render();
+  });
+
+  svg.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    const pt = svgPoint(e);
+    let closest = null, minD = 60;
+    S.blobs.forEach(b => {
+      const d = Math.sqrt((b.cx - pt.x) ** 2 + (b.cy - pt.y) ** 2);
+      if (d < minD) { closest = b; minD = d; }
+    });
+    if (closest) {
+      const idx = PALETTE.indexOf(closest.color);
+      closest.color = PALETTE[(idx + 1) % PALETTE.length];
+      render();
+    }
+  });
+
+  // ── Keyboard ──
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === 'Escape') { setMode('place'); render(); }
+    if ((e.key === 'z' || e.key === 'Z') && e.metaKey) {
+      if (S.bridges.length > 0) { S.bridges.pop(); render(); }
+      else if (S.blobs.length > 0) { S.blobs.pop(); render(); }
+    }
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      if (S.blobs.length > 0) { S.blobs.pop(); render(); }
+    }
+  });
+
+  // ── Randomize ──
+  document.getElementById('btn-rand-blobs').onclick = () => {
+    const theme = THEMES[Math.floor(Math.random() * THEMES.length)];
+    S.bgColor = theme.bg;
+    document.querySelectorAll('#bg-colors .swatch').forEach(s => s.classList.remove('active'));
+    S.blobs = [];
+    S.bridges = [];
+    S.nextId = 0;
+
+    // One color for all blobs so they merge properly
+    const color = theme.blobs[Math.floor(Math.random() * theme.blobs.length)];
+    for (let row = 0; row < S.rows; row++) {
+      for (let col = 0; col < S.cols; col++) {
+        if (Math.random() * 100 > S.density) continue;
+        const center = cellCenter(col, row);
+        const t = Math.random();
+        const radius = S.blobMinR + t * (S.blobMaxR - S.blobMinR);
+        S.blobs.push({ id: S.nextId++, cx: center.x, cy: center.y, r: radius, t, color, gridCol: col, gridRow: row });
+      }
+    }
+    render();
+  };
+
+  document.getElementById('btn-rand-colors').onclick = () => {
+    // Pick two different colors from palette — one for bg, one for blobs
+    const shuffled = [...PALETTE].sort(() => Math.random() - 0.5);
+    S.bgColor = shuffled[0];
+    const color = shuffled[1];
+    document.querySelectorAll('#bg-colors .swatch').forEach(s => s.classList.remove('active'));
+    S.blobs.forEach(b => { b.color = color; });
+    render();
+  };
+
+  document.getElementById('btn-rand-bridges').onclick = () => {
+    S.bridges = [];
+    if (S.blobs.length < 2) { render(); return; }
+    // Find all adjacent pairs (within 1 grid cell: horizontal, vertical, diagonal)
+    const adjacentPairs = [];
+    for (let i = 0; i < S.blobs.length; i++) {
+      for (let j = i + 1; j < S.blobs.length; j++) {
+        const a = S.blobs[i], b = S.blobs[j];
+        const dc = Math.abs(a.gridCol - b.gridCol);
+        const dr = Math.abs(a.gridRow - b.gridRow);
+        if ((dc === 1 && dr === 0) || (dc === 0 && dr === 1)) adjacentPairs.push([a, b]);
+      }
+    }
+    if (adjacentPairs.length === 0) { render(); return; }
+    // Randomly pick 30-70% of adjacent pairs to connect
+    const shuffled = adjacentPairs.sort(() => Math.random() - 0.5);
+    const count = Math.max(1, Math.floor(shuffled.length * (0.3 + Math.random() * 0.4)));
+    for (let i = 0; i < count; i++) {
+      S.bridges.push({ aId: shuffled[i][0].id, bId: shuffled[i][1].id });
+    }
+    render();
+  };
+
+  // ── Actions ──
+  document.getElementById('btn-clear-bridges').onclick = () => { S.bridges = []; render(); };
+  document.getElementById('btn-clear').onclick = () => {
+    if (!confirm('Clear all?')) return;
+    S.blobs = []; S.bridges = []; S.nextId = 0; render();
+  };
+
+  // ── Export ──
+  document.getElementById('btn-export').onclick = () => {
+    const clone = svg.cloneNode(true);
+    clone.querySelectorAll('.grid-line').forEach(e => e.remove());
+    clone.querySelectorAll('g:empty').forEach(e => e.remove());
+    clone.removeAttribute('width');
+    clone.removeAttribute('height');
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    const blob = new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `metaball-${S.w}x${S.h}.svg`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // ── Zoom ──
+  const ZOOM_STEPS = [0.25, 0.33, 0.5, 0.67, 0.75, 1, 1.25, 1.5, 2, 2.5, 3];
+  function setZoom(z) {
+    S.zoomLevel = z;
+    document.getElementById('zoom-label').textContent = Math.round(z * 100) + '%';
+    render();
+  }
+  function stepZoom(dir) {
+    const cur = S.zoomLevel;
+    const idx = ZOOM_STEPS.findIndex(s => s >= cur);
+    const next = dir > 0 ? Math.min(idx + 1, ZOOM_STEPS.length - 1) : Math.max((idx > 0 ? idx : 1) - 1, 0);
+    setZoom(ZOOM_STEPS[next]);
+  }
+  document.getElementById('btn-zoom-in').onclick = () => stepZoom(1);
+  document.getElementById('btn-zoom-out').onclick = () => stepZoom(-1);
+  document.getElementById('btn-zoom-reset').onclick = () => setZoom(1);
+
+  // ── Init ──
+  render();
+})();
+</script>
+</body>
+</html>

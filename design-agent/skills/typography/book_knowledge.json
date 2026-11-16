@@ -1,0 +1,1175 @@
+[
+  {
+    "source": "Grid Systems in Graphic Design",
+    "skill": "typography",
+    "principles": [
+      {
+        "name": "Page Number Position",
+        "description": "Position page numbers for functional and aesthetic satisfaction",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 36,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Position the page number above, below, left, or right of the type area, considering the type area's position and available margin width.",
+        "why": "Ensures page numbers are easily found and contribute to the overall visual harmony.",
+        "visual_example": "N/A (text description only)",
+        "when_to_apply": "In most book and magazine layouts where page numbers are required.",
+        "when_to_break": "In cases where a radical or unconventional design is desired, or when page numbers are deliberately hidden or integrated into a visual element."
+      },
+      {
+        "name": "Page Number in Outer Margin",
+        "description": "When and where to place the page number in the outer margin",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 36,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Only place the page number in the outer margin when the margin is wide enough to prevent the number from being obscured or appearing cramped.",
+        "why": "Ensures the page number remains legible and doesn't look like an afterthought.",
+        "visual_example": "N/A (text description only)",
+        "when_to_apply": "When there's a sufficiently wide margin on the outer edge of the page.",
+        "when_to_break": "When the design intentionally aims for a cluttered or unconventional aesthetic, or when other visual elements dictate a different placement."
+      },
+      {
+        "name": "Page Number Spacing - Top/Bottom",
+        "description": "Spacing for page numbers placed above/below the type area",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 36,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "When placing the page number above or below the type area, use one or more empty lines to separate it from the content, adjusting the spacing based on the margin size.",
+        "why": "Provides visual separation and prevents the page number from feeling cramped or interfering with the main text.",
+        "visual_example": "N/A (text description only)",
+        "when_to_apply": "When page numbers are placed above or below the main body of text.",
+        "when_to_break": "When a very tight, minimalist design requires minimal spacing, or when the page number is deliberately integrated into a headline or other design element."
+      },
+      {
+        "name": "Page Number Spacing - Left/Right",
+        "description": "Spacing for page numbers placed to the left/right of the type area",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 36,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "When placing the page number to the left or right of the type area, the distance between them should generally equal the space separating the columns of text.",
+        "why": "Creates a sense of visual balance and consistency.",
+        "visual_example": "N/A (text description only)",
+        "when_to_apply": "When page numbers are placed to the side of the main text in a multi-column layout.",
+        "when_to_break": "When the page design utilizes different spacing for the columns of text, or when a more unconventional look is desired."
+      },
+      {
+        "name": "Image and Text Alignment",
+        "description": "Aligning text and images to create a cohesive layout.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 98,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Align the top and bottom edges of images with the grid lines and align text accordingly.",
+        "why": "Creates a visually harmonious and organized design, improving readability and aesthetics.",
+        "visual_example": "The page shows examples of layouts where text and images are aligned to the grid lines, specifically at the top and bottom edges of the images.",
+        "when_to_apply": "When you want to create a clean, structured, and professional look, especially in publications with lots of images and text.",
+        "when_to_break": "When you want to create a more dynamic, chaotic, or artistic design that intentionally deviates from strict alignment."
+      },
+      {
+        "name": "Baseline Alignment for Captions",
+        "description": "Aligning captions to the baseline grid.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 98,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Set captions on the baseline of the columns and run upwards.",
+        "why": "Maintains a consistent vertical rhythm and visual order, especially with multiple captions throughout the layout.",
+        "visual_example": "The description explains that the image captions are set on the baseline of the columns and run upwards.",
+        "when_to_apply": "When precise alignment of elements is desired and you want to maintain a structured visual flow.",
+        "when_to_break": "When you want captions to stand out or visually connect more closely with the image, at the expense of rigid alignment with the grid."
+      },
+      {
+        "name": "Eye-Level Placement",
+        "description": "Instruction on text and picture placement considering the viewer's eye level.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 129,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "When arranging texts and pictures in a three-dimensional space, place them at eye level (approximately 170 cm) of the average viewer.",
+        "why": "Placing visuals at eye level minimizes strain and fatigue for the visitor, making it easier for them to engage with the information.",
+        "visual_example": "No specific visual example on this page, but the principle discusses the vertical placement of text and images in a 3D space.",
+        "when_to_apply": "When designing exhibitions, showrooms, or any three-dimensional layout where the visitor will be viewing information.",
+        "when_to_break": "Consider alternative placement if the message is important enough to warrant extra effort, or if the design dictates it."
+      }
+    ],
+    "concepts": [
+      {
+        "name": "Grid as an Ordering System",
+        "explanation": "The grid system reflects a designer's constructive and future-oriented mental attitude, promoting intelligibility, objectivity, functionality, and aesthetic quality in their work, thus contributing to general culture."
+      },
+      {
+        "name": "Constructive Design",
+        "explanation": "Constructive design, capable of analysis and reproduction, influences societal taste and perceptions of form and color. Objective and well-composed design forms the basis of democratic behavior and translates design laws into practical solutions."
+      },
+      {
+        "name": "Universal Validity of Grid Systems",
+        "explanation": "Working with a grid system means submitting to laws of universal validity and implies a commitment to systematization, clarity, objectivity, rationalization, integration of elements, architectural dominance, and a positive, forward-looking attitude."
+      },
+      {
+        "name": "Design as Manifestation of Designer's Character",
+        "explanation": "Visual creative work reflects the designer's character, knowledge, ability, and mentality."
+      },
+      {
+        "name": "Static vs Dynamic Page Numbers",
+        "explanation": "Page numbers on the central axis appear static, while those on the outer margin are dynamic. This is because the placement on the outer edge draws the eye outward and is perceived as an optical weight when turning pages, giving a sense of quicker page transition."
+      },
+      {
+        "name": "8-field Grid Flexibility",
+        "explanation": "An 8-field grid can accommodate illustrations of various sizes, offering a good balance between structure and flexibility for designers. It offers narrow and wide formats."
+      },
+      {
+        "name": "Grid as a Tool, Not a Guarantee",
+        "explanation": "A grid system is a useful instrument for creating interesting layouts, but it does not guarantee success. A good sense of composition and rhythm is still essential."
+      },
+      {
+        "name": "Potential for Restlessness",
+        "explanation": "Using various picture sizes within even a simple 8-field grid can create a restless or chaotic effect if the designer isn't disciplined in their application."
+      },
+      {
+        "name": "12-part Grid",
+        "explanation": "Using a 12-column grid system as the foundation for layout design. This provides flexibility in arranging content."
+      },
+      {
+        "name": "3D Grid Dependency",
+        "explanation": "In 3D design (like exhibitions), the grid structure depends on the size of the room, the amount of textual and visual information, the quantity of products, and the furniture needed."
+      }
+    ]
+  },
+  {
+    "source": "Grid Systems in Graphic Design",
+    "skill": "typography",
+    "principles": [
+      {
+        "name": "Image Size by Importance",
+        "description": "The size of images should reflect their importance.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 9,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Determine the size of pictures according to their importance for the subject.",
+        "why": "Helps establish visual hierarchy and draws attention to key elements.",
+        "visual_example": "The page discusses how images should be reduced to a few formats of the same size, but their size is dependent on the image's subject matter.",
+        "when_to_apply": "When prioritizing certain visual elements over others is necessary to guide the viewer.",
+        "when_to_break": "When a uniform grid and image size are desired for stylistic reasons."
+      },
+      {
+        "name": "Clarity & Order = Credibility",
+        "description": "Clear, organized information increases credibility and confidence.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 9,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Present information with clear and logical titles, subtitles, texts, illustrations and captions.",
+        "why": "Orderliness creates a sense of trust and professionalism, making the information more believable.",
+        "visual_example": "The whole text discusses how structuring elements according to a grid system helps to create clarity, and that this in turn results in better memorization and faith in the designer.",
+        "when_to_apply": "In any design where conveying trustworthy information is crucial.",
+        "when_to_break": "When aiming for a chaotic or unconventional aesthetic that prioritizes visual impact over absolute clarity."
+      },
+      {
+        "name": "Reduce Visual Elements",
+        "description": "Reducing the number of visual elements creates clarity and order.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 9,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Reduce the number of visual elements and incorporate them into a grid system.",
+        "why": "This creates a sense of compact planning, intelligibility, clarity and orderliness of design.",
+        "visual_example": "The text explains how the reduction of visual elements and their integration into a grid creates a sense of order, intelligibility, and clarity.",
+        "when_to_apply": "When aiming for a clean, organized, and easily understandable design.",
+        "when_to_break": "When a more complex and visually dense design is desired for stylistic or artistic reasons."
+      },
+      {
+        "name": "Column Width and Legibility",
+        "description": "The width of a column should be determined by legibility, not just aesthetics. Reader comfort is paramount.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 25,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Adjust column width to ensure easy and comfortable reading.",
+        "why": "Reduces reader fatigue and enhances communication quality.",
+        "visual_example": "N/A - this page is text-heavy, with no illustrations",
+        "when_to_apply": "When setting the layout for any text-based content, such as books, articles, or websites.",
+        "when_to_break": "Breaking this rule can be acceptable if you are looking to make the design a point of focus or to create a different visual tone, such as making a small blurb stand out from the rest of the context."
+      },
+      {
+        "name": "Words Per Line",
+        "description": "Optimal line length for readability.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 25,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Aim for around 7-10 words per line.",
+        "why": "This range generally makes it easier for the eye to track and reduces strain.",
+        "visual_example": "N/A - this page is text-heavy, with no illustrations",
+        "when_to_apply": "When designing bodies of text.",
+        "when_to_break": "Poetry, captions, call-outs, or when designing specifically for mobile, the word count may need to be broken."
+      },
+      {
+        "name": "Leading",
+        "description": "Vertical spacing between lines should be considered.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 25,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Adjust leading (line-height) to suit the size of the type.",
+        "why": "To keep the type area light and open.",
+        "visual_example": "N/A - this page is text-heavy, with no illustrations",
+        "when_to_apply": "All text-based layouts.",
+        "when_to_break": "Sometimes designers might reduce leading to create a denser visual effect."
+      },
+      {
+        "name": "Letter Spacing",
+        "description": "Pay attention to letter spacing, especially in phototypesetting.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 25,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Insist on normal letter spacing during typesetting.",
+        "why": "Avoids irregular or too-tight letter spacing, which hinders readability.",
+        "visual_example": "N/A - this page is text-heavy, with no illustrations",
+        "when_to_apply": "When working with phototypesetting or digital typography.",
+        "when_to_break": "Letter spacing can be adjusted for stylistic purposes in display typography, but typically not in body text."
+      },
+      {
+        "name": "Leading Impact",
+        "description": "Leading significantly impacts readability.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 29,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Adjust leading to ensure a column's width is pleasant to read.",
+        "why": "Too much or too little leading negatively affects the typography's optical picture, potentially creating psychological barriers for the reader.",
+        "visual_example": "The surrounding text emphasizes the importance of leading.",
+        "when_to_apply": "When setting body text and aiming for optimal reading experience.",
+        "when_to_break": "For stylistic effect, to create a specific mood, or when dealing with very short lines of text."
+      },
+      {
+        "name": "Cohesion and Isolation",
+        "description": "Text cohesion depends on leading. Lines that are too separated appear isolated.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 29,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Avoid leading that is too open, as it disrupts the cohesion of the text, making lines appear isolated and independent.",
+        "why": "Overly open leading results in the print looking less compact, dead, and lacking in design. Reading speed slows down, and the overall impression becomes static and inactive.",
+        "visual_example": "The surrounding text emphasizes the importance of leading.",
+        "when_to_apply": "When aiming for a cohesive and inviting reading experience.",
+        "when_to_break": "For artistic or experimental purposes where the disjointed feel is desired."
+      },
+      {
+        "name": "Density and Readability",
+        "description": "Too-tight leading reduces optical clarity. Text becomes too dark.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 29,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Avoid leading that is too tight. Set the lines too close together",
+        "why": "Tight leading causes the text to appear too dark and the lines lose their optical clarity and restfulness. The eye is overtaxed, struggling to read individual lines effectively.",
+        "visual_example": "The surrounding text emphasizes the importance of leading.",
+        "when_to_apply": "When aiming for clear, easy-to-read typography.",
+        "when_to_break": "Potentially for short bursts of text or small labels where space is extremely limited."
+      },
+      {
+        "name": "Aesthetic Leading Decisions",
+        "description": "In short texts like advertisements, leading (line spacing) is often decided based on aesthetic reasons.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 32,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "For short texts like in advertisements and press notices, decide the leading primarily on aesthetic grounds.",
+        "why": "Aesthetic considerations can enhance the visual impact and readability of shorter texts.",
+        "visual_example": "Examples of different leading values with a sans-serif typeface (20pt) are displayed, with 4, 8, 16, and 32pt leading.",
+        "when_to_apply": "For short texts, advertisements, or when visual appeal is a priority.",
+        "when_to_break": "When readability requirements necessitate specific leading values regardless of aesthetics."
+      },
+      {
+        "name": "Leading in Verse",
+        "description": "In poetry, the leading is crucial to create tension and emphasize the relationship between line length, character size, and page size.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 32,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "In a book of verse, design the leading to contribute to the psychological effect and create tension between line length, font size, leading and page size.",
+        "why": "Leading in poetry is a key element for conveying meaning and creating a visual rhythm.",
+        "visual_example": "Examples of different line heights with a sans-serif typeface (20pt) are displayed, with 4, 8, 16, and 32pt leading.",
+        "when_to_apply": "When designing poetry or verse layouts.",
+        "when_to_break": "When a minimalist or unconventional aesthetic is desired that deliberately reduces or eliminates line spacing."
+      },
+      {
+        "name": "Wider Leading for Prose",
+        "description": "Choose wider leading for text in prose to accentuate each line and enhance its value.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 32,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Choose wider leading than usual when designing prose text.",
+        "why": "It provides emphasis and improves readability",
+        "visual_example": "Examples of different line heights with a sans-serif typeface (20pt) are displayed, with 4, 8, 16, and 32pt leading.",
+        "when_to_apply": "When typesetting prose where emphasis is desired.",
+        "when_to_break": "When space constraints require tighter leading, or when a dense block of text is intended for stylistic reasons."
+      },
+      {
+        "name": "Poem Leading",
+        "description": "A delicate interplay between good typeface, size, spacing between letters and words, and open line height can transform the formal composition of a poem into an artistic experience.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 32,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "A thoughtful combination of font, size, letter/word spacing and leading can make a poem an artistic event.",
+        "why": "Careful execution of these choices can make a work of poetry into art.",
+        "visual_example": "Examples of different line heights with a sans-serif typeface (20pt) are displayed, with 4, 8, 16, and 32pt leading.",
+        "when_to_apply": "When working with poems.",
+        "when_to_break": "When the designer wants to intentionally create a disruptive or unexpected aesthetic."
+      },
+      {
+        "name": "Discipline in Picture Size Usage",
+        "description": "Using different picture sizes can lead to a restless effect if not handled with discipline.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 67,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Maintain discipline in your use of varying picture sizes, otherwise, the final effect will be restless.",
+        "why": "Lack of discipline in picture size usage can lead to a chaotic and visually unpleasant layout.",
+        "visual_example": "The page shows 8 different formats available in an 8-field grid. The diagrams show various heights occupied by the picture area, which is shaded. A diagonal red line shows how a visual element like a picture area might span the grid in the different formats.",
+        "when_to_apply": "When you are using illustrations of various sizes within a grid layout.",
+        "when_to_break": "Break this rule when you intentionally want to create a dynamic and chaotic layout for a specific purpose. But only then."
+      },
+      {
+        "name": "Composition and Rhythm",
+        "description": "A good sense of composition and the rhythmic sequence of pictures and text are needed to create a good layout.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 67,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Develop and apply a good sense of composition and feeling for the rhythmic sequence of pictures and text.",
+        "why": "A grid system provides the structure but doesn't guarantee a successful layout. The designer must still apply their artistic skills.",
+        "visual_example": "Examples show different arrangements of picture areas, with varying sizes in a grid system. The areas intended for images/illustrations are shown with shading.",
+        "when_to_apply": "In all cases when arranging pictures and text, especially within a grid system.",
+        "when_to_break": "Rarely, but sometimes a deliberately jarring or unbalanced composition might be desired for artistic effect."
+      },
+      {
+        "name": "Printer Proofs with Grid",
+        "description": "Advises requesting printer proofs on double sheets with a light gray grid and extra pages for alterations.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 71,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "When preparing a layout, especially for books or catalogs, request printer proofs with the grid printed in a light grey tone on double sheets with at least 25% extra pages.",
+        "why": "Ensures accurate layouts, provides a better idea of the final product, and gives the printer a reliable original to work from, shortening the preparation time and reducing errors.",
+        "visual_example": "Diagrams 3 shows a 20-field grid with a diagonal line as an example of design, and the accompanying text advocates for using such proofs.",
+        "when_to_apply": "When the designer wants to attend to the makeup of pictures and text himself, especially for complex layouts like books or catalogs.",
+        "when_to_break": "For very simple layouts, or when budget/time constraints are severe and the designer is very confident in their digital layout."
+      },
+      {
+        "name": "Coordinate Text with Grid",
+        "description": "Letter sizes and captions should correspond with the grid fields",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 71,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "When designing a layout, ensure that the letter sizes (titles, subtitles, and captions) are coordinated with the grid fields.",
+        "why": "Creates a cohesive and organized design. The grid helps to define the hierarchy and relationships between different elements on the page.",
+        "visual_example": "Diagrams 2-5 show examples of different layouts within the grid, suggesting how text sizes and formats can be coordinated with the grid fields.",
+        "when_to_apply": "Always, the grid is the foundation for the design.",
+        "when_to_break": "When a completely unstructured or free-form layout is desired, which is rare in most professional graphic design contexts."
+      },
+      {
+        "name": "Grid System Self-Discipline",
+        "description": "Using a 32-field grid requires more discipline from the designer to maintain clarity and order.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 79,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "When using a denser grid (32-field), ensure clarity and order to avoid visual confusion.",
+        "why": "Denser grids offer more layout possibilities, but can easily become chaotic if not managed carefully. Self-discipline is crucial for effective use.",
+        "visual_example": "No explicit visual example on this page, but the description indicates a complex layout with many elements.",
+        "when_to_apply": "When using a 32-field or similar dense grid system.",
+        "when_to_break": "This principle is generally hard to break effectively. Only break when intentional disarray creates a desired effect, but be wary of unintentional confusion."
+      },
+      {
+        "name": "Typeface and Leading Suitability",
+        "description": "Choosing the right typeface and leading based on letter size and ensuring picture fields align with the chosen lines.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 83,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Select typefaces and leading that are suitable for the chosen letter size and ensure all picture fields align with the lines set in the various type sizes.",
+        "why": "Ensures visual consistency and readability, creating a harmonious relationship between text and images.",
+        "visual_example": "Diagrams 4 shows a picture field where the base of the image is in line with the baseline of the text, indicating alignment.",
+        "when_to_apply": "When integrating text and images in a layout.",
+        "when_to_break": "When intentionally creating visual dissonance for artistic effect."
+      },
+      {
+        "name": "Image Alignment with Text",
+        "description": "Ensuring picture fields align with lines of text.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 83,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Align the bottom of picture fields to coincide with the baseline of the text, regardless of font size.",
+        "why": "Creates visual harmony, organization, and clarity between text and images.",
+        "visual_example": "Diagram 6 displays the text baseline aligned with the image's lowest point.",
+        "when_to_apply": "Always apply when images and text are in proximity to each other.",
+        "when_to_break": "Break when creating visual chaos for artistic purposes."
+      },
+      {
+        "name": "Illustration Background",
+        "description": "How to create stability for illustrations placed in text fields.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 90,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Place the illustration on a grey or colored area when you are placing it in a field of text to give it stability.",
+        "why": "Without a background, a cut-out illustration risks becoming optically indeterminate in space.",
+        "visual_example": "Diagram showing an illustration with a grey background and an illustration with a colored background, to help to visually separate the illustration.",
+        "when_to_apply": "When the illustration is placed in a field of text and needs more visual grounding.",
+        "when_to_break": "When the desired effect is to have the illustration appear as if it is floating."
+      },
+      {
+        "name": "Illustration Alignment",
+        "description": "How to integrate illustrations into the text.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 90,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Give illustrations the width of the text column for formal integration.",
+        "why": "Aligning with the text column ensures the illustration appears connected and purposeful, making it more harmonious with the text.",
+        "visual_example": "There are no direct examples for this, but can be inferred from the example illustrations in the page.",
+        "when_to_apply": "When the goal is to make the illustration look formally connected to the text.",
+        "when_to_break": "When the illustration is meant to stand out or break the grid structure."
+      },
+      {
+        "name": "Illustration Emphasis",
+        "description": "How to create emphasis of the illustration in relation to its complexity.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 90,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Back the illustration with a grey tone for more compact look, or use a color overlay for stronger optical importance.",
+        "why": "Adding a background tone/color can control the emphasis and visual weight of an illustration.",
+        "visual_example": "There are no direct examples for this, but can be inferred from the example illustrations in the page.",
+        "when_to_apply": "When you want to make the illustration appear more compact or to give it a stronger visual presence.",
+        "when_to_break": "When a minimalist or subtle effect is desired."
+      },
+      {
+        "name": "Grid Conformity",
+        "description": "Adhere strictly to the chosen grid system throughout the design.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 98,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "When designing, align all elements precisely to the grid lines.",
+        "why": "Creates visual consistency and order across all pages, leading to a professional and unified look.",
+        "visual_example": "The page shows how images and text are aligned to the 12-part grid. Even captions are aligned to the baselines.",
+        "when_to_apply": "For any document or publication that benefits from a highly structured and consistent layout.",
+        "when_to_break": "When a more dynamic or expressive layout is desired, or when the grid is too restrictive for the content."
+      },
+      {
+        "name": "Text and Image Alignment",
+        "description": "Align text and images to create visual harmony.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 98,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "Align the top and bottom edges of images with the text lines within the grid.",
+        "why": "Creates visual consistency and a clean, organized appearance. Ensures elements feel connected and not arbitrarily placed.",
+        "visual_example": "The sample page shows illustrations and text aligned within the 12-part grid, with specific alignment of images to text lines.",
+        "when_to_apply": "Whenever a clean and professional look is required, especially in layouts with multiple images and text blocks.",
+        "when_to_break": "When aiming for a chaotic or deliberately unbalanced design, or when the content naturally leads to asymmetry."
+      },
+      {
+        "name": "Caption Baseline Alignment",
+        "description": "Specifically align captions to the baseline of the columns.",
+        "source_book": "Grid Systems in Graphic Design",
+        "source_page": 98,
+        "skills": [
+          "layout",
+          "typography"
+        ],
+        "rule": "When adding captions, set them on the baseline of the columns and run them upwards.",
+        "why": "Creates a clear visual connection between the caption and the image it describes, as well as consistency across the page.",
+        "visual_example": "The example page explains that captions are set on the baseline of columns and run upwards.",
+        "when_to_apply": "Whenever there are captions to add.",
+        "when_to_break": "When a different form of association with images is desired."
+      }
+    ],
+    "concepts": [
+      {
+        "name": "Grid as an Ordering System",
+        "explanation": "The use of a grid reflects a designer's constructive and future-oriented approach to work. It is the expression of a professional ethos, where work is intelligible, objective, functional, and aesthetic based on mathematical thinking."
+      },
+      {
+        "name": "Constructive Design",
+        "explanation": "Design that is capable of analysis and reproduction, which can influence a society's taste and conception of forms and colors. It is objective, committed to the common good, and based on democratic behavior."
+      },
+      {
+        "name": "Constructivist Design",
+        "explanation": "The conversion of design laws into practical solutions. Systematic work in accordance with strict formal principles demands directness, intelligibility, and the integration of all factors, including sociopolitical ones."
+      },
+      {
+        "name": "Universal Validity of Grids",
+        "explanation": "Working with a grid system means submitting to universal laws, implying a will to systematize, clarify, penetrate essentials, cultivate objectivity over subjectivity, rationalize creative processes, integrate elements, achieve architectural dominion, and adopt a positive, forward-looking attitude."
+      },
+      {
+        "name": "Designer's Character",
+        "explanation": "Visual creative work is a manifestation of the designer's character, reflecting their knowledge, ability, and mentality."
+      },
+      {
+        "name": "Grid System Purpose",
+        "explanation": "Grids are used by designers to solve visual problems by arranging elements in a structured manner. This includes two-dimensional layouts (press ads, brochures) and three-dimensional spaces (exhibitions, show windows)."
+      },
+      {
+        "name": "Corporate Identity Application",
+        "explanation": "Grids are useful for establishing and maintaining a consistent corporate identity across various media. This includes everything from business cards to advertising materials."
+      },
+      {
+        "name": "Typographic Measuring System",
+        "explanation": "The page explains the typographic measuring system, relating units like cicero and points to metric units like centimeters and millimeters. It details conversions between these units and explains how type sizes are measured."
+      },
+      {
+        "name": "Type Sizes",
+        "explanation": "Type designs comprise of 12 to 20 different sizes, known as bodies or point sizes. These sizes represent a certain number of points. Standard type sizes for body texts are 8-12 points."
+      },
+      {
+        "name": "Sans-Serif Typeface",
+        "explanation": "A typeface that does not have the small projecting features called 'serifs' at the end of strokes. The name 'sans serif' comes from the omission of these finishing strokes at the top and bottom of a letter."
+      },
+      {
+        "name": "Typeface Revival",
+        "explanation": "Typefaces can experience periods of renewed popularity and use after a period of decline. The Berthold typeface underwent a revival after World War II."
+      },
+      {
+        "name": "Grotesk Typeface",
+        "explanation": "Grotesk is a German term for sans-serif typefaces. The name comes from the fact that, when they first appeared, they were considered unusual and 'grotesque' because they lacked the traditional serifs."
+      },
+      {
+        "name": "Reader Effort",
+        "explanation": "Any difficulty that the reader experiences diminishes the quality of communication and memorability."
+      },
+      {
+        "name": "Column Width Rhythm",
+        "explanation": "The right column width is essential for a pleasant reading rhythm and enables relaxation and concentration."
+      },
+      {
+        "name": "Leading's Psychological Effect",
+        "explanation": "Leading is crucial for the psychological effect and overall design of verse."
+      },
+      {
+        "name": "Type Area Design Considerations",
+        "explanation": "The type area design must consider the kind of information to be accommodated, including annotations, footnotes, pictures, and captions. The number and size of illustrations and the nature of the texts will influence the design."
+      },
+      {
+        "name": "Margins Functionality",
+        "explanation": "The margins can be treated as a way to make maximum use of the printed page, or can have a visual purpose."
+      },
+      {
+        "name": "Column Width and Font Size",
+        "explanation": "The width of a column influences the font size you may use."
+      },
+      {
+        "name": "Grid as a Tool, Not a Guarantee",
+        "explanation": "A grid system is a useful tool for creating layouts, but it doesn't guarantee a successful result. The designer's skill and sense of composition are still crucial."
+      },
+      {
+        "name": "8-field Grid Sufficiency",
+        "explanation": "An 8-field grid can be sufficient for allowing illustrations of various sizes to be accommodated within a layout."
+      },
+      {
+        "name": "Format Variation with Grid",
+        "explanation": "A 20-field grid provides a variety of format sizes and possible variations."
+      },
+      {
+        "name": "Grid Variation & Combination",
+        "explanation": "The designer who is aware of the possibilities of variation and combination afforded by a grid system can achieve richer and more satisfying work."
+      },
+      {
+        "name": "Simplicity in Visual Communication",
+        "explanation": "Many achievements in visual communication stem from simplicity and the reduction of graphic resources to their bare essentials."
+      },
+      {
+        "name": "Grid Application",
+        "explanation": "Satisfactory solutions depend not only on the use of a grid but also on the quality and topicality of the text and pictures. If photomontage, photocollage and cut-out photographs are also used, the choice depending on the nature of the job, it will be seen what a wealth of different design possibilities exists."
+      },
+      {
+        "name": "Gradation Subtlety",
+        "explanation": "Increasing the number of grid fields (e.g., from 20 to 32) allows for more subtle gradations in picture sizes and arrangements."
+      },
+      {
+        "name": "Layout Possibilities",
+        "explanation": "A 32-field grid expands the range of layout options compared to a 20-field grid, enabling more complex and dynamic compositions."
+      },
+      {
+        "name": "Multifold Grid Flexibility",
+        "explanation": "Multifold grids offer a high degree of design flexibility and are particularly useful for publications with many small illustrations or images."
+      },
+      {
+        "name": "Grid Complexity and Time",
+        "explanation": "The larger the number of fields in a grid, the more challenging it becomes to find the right grid and apply it effectively. The process can be time-consuming."
+      },
+      {
+        "name": "Sketch Accuracy",
+        "explanation": "The more accurate the initial sketch, the easier it is to visualize the final printed result. Detailed sketches help test the idea's suitability early in the design process."
+      },
+      {
+        "name": "Grid System Understanding",
+        "explanation": "Designers new to grid systems should study examples and experiment to understand how they function and benefit from thinking in terms of grids and mathematics."
+      },
+      {
+        "name": "Grid System Application",
+        "explanation": "The grid system is useful and widely applicable in graphic design, allowing for practical and aesthetically pleasing presentation of diverse subjects."
+      },
+      {
+        "name": "Limitations of Examples",
+        "explanation": "Examples can only offer an incomplete view of the diversity of subjects and worldwide applications of the grid system."
+      },
+      {
+        "name": "Education in Grid Systems",
+        "explanation": "Many design schools lack the ability to teach the precise application of grid systems, possibly due to lack of interest or misconceptions about their restrictiveness."
+      },
+      {
+        "name": "Grid suitability for square-form characters",
+        "explanation": "Japanese and Chinese characters, being built on a square form, are particularly well-suited for grid layouts."
+      },
+      {
+        "name": "Integration of foreign elements",
+        "explanation": "Grids can be used to integrate elements of different languages/alphabets within the same design, such as Western names and captions within Japanese text."
+      },
+      {
+        "name": "Consistent Layout Application",
+        "explanation": "The designer used a layout form consistently throughout the book."
+      },
+      {
+        "name": "49-part Grid",
+        "explanation": "The page demonstrates an example of using a 49-part grid to arrange photographic elements and text (in 4 columns)."
+      },
+      {
+        "name": "Letterform Construction",
+        "explanation": "Latin letters, like Chinese characters, can be designed based on strict construction principles and grids. This brings a sense of order and visual coherence."
+      },
+      {
+        "name": "Modular Typography",
+        "explanation": "Letterforms can be created using modular units (e.g., circles in a grid). This approach allows for systematization and uniformity in the design of an alphabet, but can also lead to a feeling of anonymity or a departure from traditional letterforms."
+      },
+      {
+        "name": "Order in Art and Music",
+        "explanation": "Music and art are structured by underlying principles similar to mathematics and natural laws. Elements like notes, colors, and proportions are governed by norms and create harmony."
+      },
+      {
+        "name": "Evolution of Musical Systems",
+        "explanation": "Traditional harmonic and tonal systems in music have been challenged and replaced by new systems like the twelve-tone system, which create new forms of musical order."
+      },
+      {
+        "name": "Modulor",
+        "explanation": "A system of proportions discovered by Le Corbusier, based on the Golden Section and found in nature and the human figure, aiming to make good design easy and bad design difficult."
+      },
+      {
+        "name": "Tatami Mat Unit",
+        "explanation": "Traditional Japanese architecture often uses the tatami mat (90:180 cm = 1:2) as a fundamental unit of measure for the plan of buildings, including the height and width of elements like sliding doors."
+      },
+      {
+        "name": "Architecture and Mathematics",
+        "explanation": "Architecture can be seen as mathematics converted into space, with harmonious proportions being key to its aesthetics. Ancient civilizations' structures are cited as examples of highly developed systems of order."
+      }
+    ]
+  },
+  {
+    "source": "Typography With and Without Words",
+    "skill": "typography",
+    "principles": [],
+    "concepts": [
+      {
+        "name": "Footnotes & Endnotes",
+        "explanation": "This page shows how footnotes and endnotes are used. These allow you to provide additional information or cite sources without disrupting the flow of the main text. Superscript numbers or symbols are placed in the text, and corresponding notes are listed at the bottom of the page (footnotes) or the end of a chapter/document (endnotes)."
+      }
+    ]
+  },
+  {
+    "source": "Typography by Emil Ruder",
+    "skill": "typography",
+    "principles": [
+      {
+        "name": "Typography's Primary Duty",
+        "description": "Typography's main purpose is to convey written information effectively.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 6,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Ensure the printed work is readable; otherwise, it's pointless.",
+        "why": "Readability is paramount for communication.",
+        "visual_example": "N/A",
+        "when_to_apply": "Always, in all typographic designs.",
+        "when_to_break": "Never. If it can't be read, it fails."
+      },
+      {
+        "name": "Type Hierarchy & White Space",
+        "description": "Proper division of type, relationship to whitespace, and consideration of the double-spread are crucial.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 6,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Structure type into words, lines, and pages with a clear relationship to blank areas; consider the double-spread as a single unit; maintain unity and limit variety of typefaces.",
+        "why": "Enhances readability and provides visual clarity and harmony.",
+        "visual_example": "N/A",
+        "when_to_apply": "In any layout, especially books and multi-page documents.",
+        "when_to_break": "If aiming for a chaotic or deliberately jarring effect for artistic purposes, but with extreme caution."
+      },
+      {
+        "name": "Typeface and Language Association",
+        "description": "Certain typefaces are closely associated with specific languages and cultures. Using a typeface outside its native language context can diminish its aesthetic impact.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 44,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Avoid using typefaces strongly associated with one language for a language with vastly different visual characteristics or conventions.",
+        "why": "Typefaces are designed with the nuances of specific languages in mind, including letter frequency, word structure, and capitalization patterns. Using them outside this context can lead to disharmony and a loss of aesthetic quality.",
+        "visual_example": "Examples of Garamond, Caslon, and Bodoni set in their native languages and in German, illustrating the potential aesthetic loss.",
+        "when_to_apply": "When selecting a typeface for body text or display text where aesthetic harmony and cultural context are important.",
+        "when_to_break": "If the deliberate intent is to create visual tension or a specific stylistic effect by contrasting a typeface with an unexpected language. If the typeface shares enough visual characteristics with the target language to function well."
+      },
+      {
+        "name": "Typography Consistency",
+        "description": "Typography should maintain a consistent appearance, especially when produced from a mould. Changes to letterforms should be avoided.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 74,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Do maintain the consistent appearance of letterforms in typography, especially when type casting from a mould.",
+        "why": "Consistency is fundamental to typography. Alterations to letterforms can make it resemble handwriting, which defeats the purpose of the clarity and uniformity of typography.",
+        "visual_example": "The right side of the page displays a dense field of the letter 'e' repeated numerous times, demonstrating consistent repetition and pattern.",
+        "when_to_apply": "Whenever consistency and clarity are paramount in typographic communication.",
+        "when_to_break": "When aiming for a handwritten or deliberately unconventional look, where variations in letterforms are intended to convey a specific expressive quality."
+      },
+      {
+        "name": "Content Chunking",
+        "description": "Divide and organize printed matter to improve readability and reader engagement.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 82,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Divide and organize content to help readers find what interests them.",
+        "why": "Readers are overwhelmed by the amount of printed matter available, making it difficult to find what they're looking for. Chunking and organizing helps them navigate content more efficiently.",
+        "visual_example": "The page provides a numbered list of ways to divide up text, including using color, bold fonts, different type sizes, lines, blank lines, and paragraph breaks.",
+        "when_to_apply": "When presenting a large amount of information, such as in newspapers, books, or magazines.",
+        "when_to_break": "When the content is inherently brief and doesn't require extensive organization."
+      },
+      {
+        "name": "Page Text Quantity",
+        "description": "Balance text quantity on a page for comfortable reading.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 82,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Use an appropriate amount of text per page; avoid too much or too little.",
+        "why": "Too much text can tire the reader, while too little requires frequent page turns, interrupting the reading flow.",
+        "visual_example": "N/A",
+        "when_to_apply": "Designing multi-page documents like books and reports.",
+        "when_to_break": "Where content has very strict formatting requirements; where page turning is not a factor."
+      },
+      {
+        "name": "Legibility over Aesthetics",
+        "description": "Prioritize legibility over pure aesthetics.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 82,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Subordinate form to legibility in typography.",
+        "why": "The primary goal of typography is to communicate effectively. Aesthetics should support, not hinder, readability.",
+        "visual_example": "The page suggests using indents and break lines to enhance legibility, avoiding rigid, unrelieved blocks of text.",
+        "when_to_apply": "All typographic design, especially when dealing with long-form content.",
+        "when_to_break": "In purely decorative or artistic typography where communication is not the main goal."
+      },
+      {
+        "name": "Contrast Between Geometric and Organic Forms",
+        "description": "Using the contrast between geometric and organic shapes to create visual interest and balance in typography.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 104,
+        "skills": [
+          "typography"
+        ],
+        "rule": "When designing typography, use contrasting geometric and organic forms to add visual interest and balance.",
+        "why": "This contrast creates a dynamic and engaging composition, where the rigidity of geometric forms is softened by the fluidity of organic forms, and vice-versa.",
+        "visual_example": "The top example uses straight lines for 'l' and 'i' while using more organic and drawn shapes for 'oe' ligature. The right example uses geometric shapes for 'T' and 'F' while the '0' is more organic.",
+        "when_to_apply": "When aiming for a sophisticated or artistic look, where the interplay of different forms enhances the message.",
+        "when_to_break": "When uniformity or simplicity is paramount, and visual complexity is undesirable."
+      },
+      {
+        "name": "Vertical Emphasis with Geometric Forms",
+        "description": "Adding emphasis to geometric forms by extending them vertically.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 104,
+        "skills": [
+          "typography"
+        ],
+        "rule": "When using geometric shapes, consider adding vertical emphasis to enhance their impact.",
+        "why": "Vertical addition enhances the visual impact of constructed forms, making them more pronounced and structured.",
+        "visual_example": "The right example uses vertical emphasis to add to the geometric nature of T and F.",
+        "when_to_apply": "Use when you want to emphasize the structural elements in typography and create a strong visual statement.",
+        "when_to_break": "When you want to create a more subtle look, or when space is limited."
+      },
+      {
+        "name": "Diagonal Emphasis",
+        "description": "Using a diagonal arrangement to create visual emphasis and guide the viewer's eye.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 127,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Emphasize a diagonal line by arranging elements along it.",
+        "why": "Creates a dynamic and engaging composition and highlights key information.",
+        "visual_example": "The word 'BERLIN' is arranged diagonally on the page, creating a visual flow from the top right to the bottom left.",
+        "when_to_apply": "When you want to create a dynamic layout, emphasize direction, or create visual interest.",
+        "when_to_break": "If the diagonal clashes with other visual elements or creates a confusing layout."
+      },
+      {
+        "name": "Linear vs. Solid Contrast",
+        "description": "Contrasting linear elements with solid shapes to create visual interest.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 127,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Create contrast between thin, linear forms and solid, blocky forms.",
+        "why": "This contrast creates visual interest and helps to differentiate elements within the design.",
+        "visual_example": "The letters in \"BERLIN\" are placed so that they create a contrast between linear and solid, creating a visual effect.",
+        "when_to_apply": "When you want to add visual interest and hierarchy to your design.",
+        "when_to_break": "When a more subtle and consistent visual approach is needed."
+      },
+      {
+        "name": "Color Proportion",
+        "description": "The relationship between a bright color and black must be considered in proportion to create visual tension.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 158,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Establish a clear proportion between a bright color (like red) and black so there's visual tension from the beginning.",
+        "why": "This prevents colors from competing and ensures a dominant color tone.",
+        "visual_example": "The page generally refers to the relationship between red and black. The \"Notes on examples on page 159\" section provides specific scenarios for different proportion relationships between red and black, resulting in different visual effects.",
+        "when_to_apply": "When using color in typography alongside black, especially when aiming for a strong visual impact.",
+        "when_to_break": "If aiming for subtle or muted effects where the color blends in rather than creating tension."
+      },
+      {
+        "name": "Red & Black Color Use",
+        "description": "The best use of colour in typography, especially red and black, is as minimal decoration and contrast.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 158,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Use red or other colors sparingly in typography, as initials or markers, against large black or gray areas.",
+        "why": "This can create a powerful, high-impact effect.",
+        "visual_example": "The page refers to \"red of the incunabula\" to describe how it can be implemented. The examples 1-21 describe how these interactions are affected.",
+        "when_to_apply": "When wanting a vibrant and classic typography.",
+        "when_to_break": "When there's a need for many colors in the text body, or a need for different aesthetics."
+      },
+      {
+        "name": "Dominant Color",
+        "description": "Avoid equal amounts of two colors, which can lead to an uncomfortable rivalry.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 158,
+        "skills": [
+          "typography"
+        ],
+        "rule": "When using two colors, ensure that one color dominates and the other supports.",
+        "why": "Equal color quantities create visual conflict and make it difficult to establish a hierarchy.",
+        "visual_example": "The examples 1-21 describe how these interactions are affected.",
+        "when_to_apply": "Whenever needing a clear hierarchy and avoidance of conflict.",
+        "when_to_break": "In certain artistic or abstract cases. To show conflict, tension, and an experimental aesthetic."
+      },
+      {
+        "name": "Rhythm in Design",
+        "description": "Emphasizes the importance of rhythm in design, advocating for the infusion of movement and variation into rigid structures.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 188,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Incorporate rhythm and variations within rigid systems.",
+        "why": "Creates visual interest and dynamism.",
+        "visual_example": "Shows examples of buildings with rhythmic arrangements and variations in their designs.",
+        "when_to_apply": "When a design feels static or monotonous.",
+        "when_to_break": "When a perfectly static, stable feel is crucial."
+      },
+      {
+        "name": "Intuitive Design",
+        "description": "Favors intuitive design over strict adherence to pre-defined rules, particularly in artistic or expressive contexts.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 188,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Design intuitively rather than rigidly adhering to rules.",
+        "why": "Allows for greater creativity and expression.",
+        "visual_example": "Cornices of the capitol of Rome designed intuitively",
+        "when_to_apply": "When aiming for artistic or organic aesthetics.",
+        "when_to_break": "When precision and predictability are paramount, such as in technical documentation."
+      },
+      {
+        "name": "Rhythm with Color",
+        "description": "Utilize color and tonal variation to introduce rhythm within a rigid grid system.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 188,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Introduce rhythm to rigid patterns using color (white, gray, and black).",
+        "why": "Adds visual interest and breaks the monotony of the grid.",
+        "visual_example": "The images show different architectural structures and paintings.",
+        "when_to_apply": "When a grid feels too sterile or static.",
+        "when_to_break": "When uniformity and simplicity are necessary for visual communication."
+      },
+      {
+        "name": "Consistent Typographical Style",
+        "description": "Creating a recognizable series of book covers through consistent design elements.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 218,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Use a consistent typographical style (color, signet, typeface, composition) across all covers in a series.",
+        "why": "Makes a series of publications easily identifiable and strengthens the brand identity.",
+        "visual_example": "The page shows various arrangements of the same text elements (series title, author, publisher) in a consistent style, creating a visually cohesive series of book covers.",
+        "when_to_apply": "When designing a series of book covers or other publications that should be easily recognized as belonging together.",
+        "when_to_break": "When the content of the series dramatically varies and a consistent look might be misleading or restrictive to the individual pieces."
+      },
+      {
+        "name": "Nine-Square Grid for Unity",
+        "description": "Using a nine-square grid to unify varying amounts of text, image sizes, and formats",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 226,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Use a nine-square grid to organize different amounts of text and varying sizes/shapes of images into a formal unity.",
+        "why": "It provides a structured framework to harmoniously combine diverse elements, preventing visual chaos.",
+        "visual_example": "The page shows a blank nine-square grid and an example layout using the same grid with photos.",
+        "when_to_apply": "When you need to combine text and images of different sizes and formats in a unified and structured way.",
+        "when_to_break": "When the visual diversity should explicitly conflict the layout, or you desire a chaotic design."
+      },
+      {
+        "name": "Subtle Grid Visibility",
+        "description": "The grid should not be conspicuous; it should be concealed by diverse content",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 226,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Make sure the underlying grid structure is not the most visually prominent aspect of the design; it should be subtle and unobtrusive.",
+        "why": "The focus should be on the diversity of content and the message conveyed rather than the underlying structure. You want the content to shine, not the framework.",
+        "visual_example": "The page shows a blank nine-square grid and an example layout using the same grid with photos. The instruction indicates that after layouting text and photo, the grid should become less visible.",
+        "when_to_apply": "When you want the content and its variety to be the focal point rather than the grid structure itself. In complex and highly structured layouts where you still want a sense of freeform.",
+        "when_to_break": "When you want to explicitly highlight the grid structure as a design element, or when you want a very minimalist and geometric look."
+      },
+      {
+        "name": "Visual Hierarchy Through Movement",
+        "description": "Guide the viewer's eye using columns for vertical movement and bold elements for horizontal movement, creating a clear path through the information.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 256,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Use vertical text columns to guide the eye from top to bottom, and a strong horizontal element (like a logo) to guide the eye from left to right, to indicate the progression of information.",
+        "why": "This creates a clear visual hierarchy and helps the viewer understand the structure and flow of the information. It emphasizes the completion of the program.",
+        "visual_example": "Text columns are arranged vertically. A 'boldly conceived device' (presumably a logo or visual element) moves horizontally.",
+        "when_to_apply": "When presenting information with a clear beginning and end, and where understanding the sequence of steps is important.",
+        "when_to_break": "When aiming for a more chaotic or less structured visual experience, or when the information doesn't have a clear sequential flow."
+      },
+      {
+        "name": "Dominant Direction",
+        "description": "Emphasize one direction (horizontal or vertical) to create focus and indicate the main flow.",
+        "source_book": "Typography by Emil Ruder",
+        "source_page": 256,
+        "skills": [
+          "typography"
+        ],
+        "rule": "Ensure that either the horizontal or the vertical movement is visually dominant, highlighting which direction is most important for conveying the message.",
+        "why": "Creating a dominant direction guides the viewer through the layout and message. It helps the viewers complete the program.",
+        "visual_example": "The horizontal movement is visually emphasized.",
+        "when_to_apply": "When needing to strongly communicate a starting point, direction, and end.",
+        "when_to_break": "When wanting to create tension or a more dynamic experience by balancing horizontal and vertical movements."
+      }
+    ],
+    "concepts": [
+      {
+        "name": "Evolution of Typography",
+        "explanation": "From the invention of printing to the 20th century, typography focused on the cheapest and fastest dissemination of information. Early limited editions were an exception, but they also led to the recognition of important typographic principles."
+      },
+      {
+        "name": "Typography as Mass Communication",
+        "explanation": "Typography has become a tool for mass communication, available everywhere as a consumer product."
+      },
+      {
+        "name": "Handwriting vs. Typesetting",
+        "explanation": "Handwritten text conveys emotion and personality, while typesetting offers objectivity and clarity. The same text can have a completely different effect based on the medium it is presented in."
+      },
+      {
+        "name": "Form over Function",
+        "explanation": "The page illustrates how design can prioritize form over function (legibility and information). The works shown use expressive and demonstrative forms, sometimes at the expense of clarity and ease of reading."
+      },
+      {
+        "name": "National Typefaces Development",
+        "explanation": "The development of national typefaces is closely related to the separation of European cultural centers and the beginning of printing in various national languages instead of Latin."
+      },
+      {
+        "name": "Form and Counter-Form",
+        "explanation": "The page displays the concept of 'Form und Gegenform' (German), 'Form and counter-form' (English), and 'Forme et contre-forme' (French). This likely refers to the relationship between a shape (the form) and the space around it (the counter-form or negative space). The way these elements interact influences the overall perception and impact of a design."
+      },
+      {
+        "name": "Form and Counter-Form (Positive and Negative Space)",
+        "explanation": "This page focuses on the interplay between the positive shapes (the letters) and the negative shapes (the spaces around and inside the letters, also known as counter-forms). The effective use of counter-forms enhances legibility and visual appeal."
+      },
+      {
+        "name": "Consistent Design of Counterforms",
+        "explanation": "The 'M\u00e9ridien' typeface demonstrates how consistently shaped counterforms contribute to a well-designed and visually pleasing alphabet."
+      },
+      {
+        "name": "Essence of Typography",
+        "explanation": "The unchanging nature of letterforms when printed from a mould is essential to typography. It differentiates printed text from handwritten text."
+      },
+      {
+        "name": "Distinction between Printing and Handwriting",
+        "explanation": "The laws governing handwritten text are fundamentally different from those governing printed text. Attempts to make printed text resemble handwriting are counterproductive."
+      },
+      {
+        "name": "Reader Empathy",
+        "explanation": "A typographer should understand the reader's perspective to design effective and engaging layouts."
+      },
+      {
+        "name": "Geometrical and Optical Aspects of Type",
+        "explanation": "The page demonstrates how letterforms, specifically the letter 'O', are constructed using geometrical shapes (squares and circles) and how these shapes influence the optical appearance of the letter. It highlights the tension between the underlying geometry and the visual perception of curves and forms."
+      },
+      {
+        "name": "Counterpoise",
+        "explanation": "In design, a counterpoise refers to a balancing element that offsets or complements other visual elements. The massing of organic forms serves as a counterweight."
+      },
+      {
+        "name": "Static Proportions",
+        "explanation": "The design is based on fixed and unchanging proportions between its elements, creating a sense of stability and order."
+      },
+      {
+        "name": "Asymmetrical Balance",
+        "explanation": "The design achieves balance not through symmetry, but by arranging elements of differing sizes and weights in a way that feels visually harmonious."
+      },
+      {
+        "name": "Expressiveness of Lines",
+        "explanation": "Lines can convey a wide range of emotions, conditions, and human characteristics. There is no state or human quality that cannot be expressed by lines."
+      },
+      {
+        "name": "Linearity in Nature and Structure",
+        "explanation": "Linear elements are fundamental in nature (e.g., tree branches, leaf veins) and constructed objects (e.g., wooden scaffolding). These linear structures create form and delimit space."
+      },
+      {
+        "name": "Linear Character",
+        "explanation": "Refers to a design characterized by clear, distinct lines, avoiding curves or complex forms. It emphasizes simplicity and clarity."
+      },
+      {
+        "name": "Typographic Contrast",
+        "explanation": "This page visually explores the contrast within a single typeface (Univers) by displaying various weights and widths of the letter 'u'. The juxtaposition of these variations highlights the range and versatility of the typeface and allows for emphasizing hierarchy or creating visual interest."
+      },
+      {
+        "name": "Color Imperiousness",
+        "explanation": "Red is described as a color that doesn't like to be subordinate. This means it can easily dominate other colors if given the chance."
+      },
+      {
+        "name": "Tension in Color",
+        "explanation": "Tension refers to the visual relationship and balance created by contrasting colors, particularly red and black. This tension should be apparent from the start of a design."
+      },
+      {
+        "name": "Rhythm in architecture",
+        "explanation": "Rhythm can be achieved through the organization of elements within a composition, adding interest and avoiding rigid conformity"
+      },
+      {
+        "name": "Rhythm in Typography",
+        "explanation": "Rhythm in typography can be achieved through the arrangement of text elements, variations in letter spacing, and the alternation of contrasting elements such as upright and oblique text."
+      },
+      {
+        "name": "Chance and Spontaneity",
+        "explanation": "Unplanned and unexpected occurrences can lead to aesthetically pleasing outcomes in design, especially when manipulating existing elements or systems. It states that beauty can be found in the discarded, crumpled and distorted."
+      },
+      {
+        "name": "Spontaneity and Fortuity (Zufall)",
+        "explanation": "The page explores the concept of incorporating spontaneity and chance elements into design. This involves embracing unexpected outcomes and allowing for a degree of unpredictability in the creative process. This can result in more dynamic and engaging designs that feel less rigid and more organic."
+      },
+      {
+        "name": "Series Identity",
+        "explanation": "A consistent design across multiple items (e.g., book covers) helps create a recognizable brand or series identity."
+      }
+    ]
+  }
+]

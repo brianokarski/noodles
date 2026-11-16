@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Image Loading Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #0f0;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background: #2a2a2a;
+            border-left: 3px solid #0f0;
+        }
+        .error {
+            border-left-color: #f00;
+            color: #f00;
+        }
+        img {
+            max-width: 400px;
+            margin: 10px;
+            border: 2px solid #0f0;
+        }
+        canvas {
+            border: 2px solid #00f;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug Console</h1>
+    <div id="log"></div>
+    
+    <h2>Images:</h2>
+    <img id="testImg1" src="Image1.jpg" alt="Image 1">
+    <img id="testImg2" src="Image2.jpg" alt="Image 2">
+    
+    <h2>WebGL Canvas:</h2>
+    <canvas id="testCanvas" width="400" height="400"></canvas>
+
+    <script>
+        const log = document.getElementById('log');
+        
+        function logStatus(message, isError = false) {
+            const div = document.createElement('div');
+            div.className = 'status' + (isError ? ' error' : '');
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(div);
+            console.log(message);
+        }
+        
+        logStatus('Starting debug...');
+        
+        // Test WebGL
+        const canvas = document.getElementById('testCanvas');
+        const gl = canvas.getContext('webgl');
+        if (gl) {
+            logStatus('✓ WebGL context created successfully');
+            logStatus(`  Renderer: ${gl.getParameter(gl.RENDERER)}`);
+            logStatus(`  Vendor: ${gl.getParameter(gl.VENDOR)}`);
+        } else {
+            logStatus('✗ WebGL not supported', true);
+        }
+        
+        // Test Image 1
+        const img1 = document.getElementById('testImg1');
+        img1.onload = () => {
+            logStatus(`✓ Image1.jpg loaded: ${img1.width}x${img1.height}`);
+        };
+        img1.onerror = (e) => {
+            logStatus(`✗ Image1.jpg failed to load: ${e}`, true);
+        };
+        
+        // Test Image 2
+        const img2 = document.getElementById('testImg2');
+        img2.onload = () => {
+            logStatus(`✓ Image2.jpg loaded: ${img2.width}x${img2.height}`);
+        };
+        img2.onerror = (e) => {
+            logStatus(`✗ Image2.jpg failed to load: ${e}`, true);
+        };
+        
+        // Test simple WebGL rendering
+        if (gl) {
+            setTimeout(() => {
+                logStatus('Testing WebGL rendering...');
+                gl.clearColor(0, 1, 0, 1);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                logStatus('✓ WebGL rendering test complete (canvas should be green)');
+            }, 500);
+        }
+        
+        // Catch all errors
+        window.onerror = function(msg, url, line, col, error) {
+            logStatus(`✗ JavaScript Error: ${msg} at line ${line}`, true);
+            return false;
+        };
+        
+        logStatus('Debug initialization complete. Check above for any errors.');
+    </script>
+</body>
+</html>

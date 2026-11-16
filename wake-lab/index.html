@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>RIPPLE LAB — wake & ripple lines for the card</title>
+<style>
+  :root{--ink:#f2f2f0;--bg:#0d0d0c;--panel:#141413;--line:#262624;--dim:#78786f;--accent:#d6ff3f}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{background:var(--bg);color:var(--ink);font:400 11px/1.35 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.03em;
+    display:grid;grid-template-columns:252px minmax(0,1fr);width:100vw;user-select:none;-webkit-user-select:none}
+  aside{border-right:1px solid var(--line);background:var(--panel);overflow-y:auto;display:flex;flex-direction:column}
+  .brand{padding:13px 14px 11px;border-bottom:1px solid var(--line)}
+  .brand h1{margin:0;font-size:12px;letter-spacing:.22em;font-weight:500}
+  .brand p{margin:5px 0 0;color:var(--dim);font-size:9.5px}
+  section{padding:12px 14px;border-bottom:1px solid var(--line)}
+  section>h2{margin:0 0 10px;font-size:9px;letter-spacing:.24em;color:var(--dim);font-weight:500;display:flex;justify-content:space-between}
+  section>h2 small{color:#5a5a53;letter-spacing:.05em;font-weight:400}
+  .ctl{margin-bottom:11px}.ctl:last-child{margin-bottom:0}
+  .ctl .top{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+  .ctl .lbl{flex:1;color:var(--dim);font-size:10px;cursor:ew-resize;padding:2px 0}.ctl .lbl:hover{color:var(--ink)}
+  .ctl .box{display:flex;align-items:baseline;gap:2px;border:1px solid var(--line);background:#0d0d0c;padding:3px 5px;min-width:58px;justify-content:flex-end}
+  .ctl .box:focus-within{border-color:var(--accent)}
+  .ctl input{background:none;border:0;color:var(--ink);font:inherit;font-size:10.5px;text-align:right;width:40px;padding:0;font-variant-numeric:tabular-nums;outline:none}
+  .ctl .u{color:var(--dim);font-size:9.5px}
+  .ctl .track{position:relative;height:16px;cursor:ew-resize;touch-action:none}
+  .ctl .track::before{content:'';position:absolute;left:0;right:0;top:7px;height:3px;background:#2c2c28;border-radius:2px}
+  .ctl .fill{position:absolute;left:0;top:7px;height:3px;background:#4d5231;border-radius:2px}
+  .ctl .knob{position:absolute;top:1px;width:12px;height:14px;margin-left:-6px;border-radius:3px;background:var(--ink)}
+  .ctl .track:hover .knob,.ctl.live .knob{background:var(--accent)}
+  .seg{display:grid;grid-auto-flow:column;border:1px solid var(--line);margin-bottom:10px}
+  .seg button{background:none;border:0;border-right:1px solid var(--line);color:var(--dim);font:inherit;font-size:9.5px;letter-spacing:.06em;padding:8px 2px;cursor:pointer;white-space:nowrap}
+  .seg button:last-child{border-right:0}.seg button:hover{color:var(--ink)}.seg button.on{background:var(--ink);color:#0d0d0c}
+  .tog{display:flex;flex-wrap:wrap;gap:5px}
+  .tog button{background:none;border:1px solid var(--line);color:var(--dim);font:inherit;font-size:9px;letter-spacing:.12em;padding:6px 8px;cursor:pointer}
+  .tog button:hover{color:var(--ink)}.tog button.on{border-color:var(--accent);color:var(--accent)}
+  .sw{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+  .sw label{color:var(--dim);font-size:9.5px;width:38px}
+  .sw input[type=color]{-webkit-appearance:none;appearance:none;width:28px;height:22px;border:1px solid var(--line);background:none;padding:0;cursor:pointer;border-radius:2px}
+  .sw input[type=color]::-webkit-color-swatch-wrapper{padding:0}.sw input[type=color]::-webkit-color-swatch{border:0;border-radius:1px}
+  .sw .hex{flex:1;background:#0d0d0c;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:10px;padding:3px 5px;outline:none;text-transform:uppercase}
+  .acts{padding:12px 14px;display:grid;gap:6px}
+  .acts button{background:none;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:9.5px;letter-spacing:.13em;padding:9px;cursor:pointer;text-align:left}
+  .acts button:hover{border-color:var(--ink)}
+  .acts button.pri{background:var(--accent);color:#0d0d0c;border-color:var(--accent);font-weight:500}
+  .acts .k{float:right;color:var(--dim)}.acts .pri .k{color:#0d0d0c;opacity:.55}
+  footer{margin-top:auto;padding:12px 14px;color:var(--dim);font-size:9.5px;line-height:1.7;border-top:1px solid var(--line)}
+  main{position:relative;overflow:hidden;background:#000;cursor:crosshair}
+  svg#stage{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .hud{position:absolute;left:12px;bottom:10px;color:#6b6b62;font-size:9.5px;letter-spacing:.12em;pointer-events:none;line-height:1.7}
+  .toast{position:absolute;right:14px;top:12px;background:var(--accent);color:#0d0d0c;font-size:9.5px;letter-spacing:.14em;padding:7px 10px;opacity:0;transition:opacity .15s;pointer-events:none}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand"><h1>RIPPLE LAB</h1><p>click the card to place the source · space randomizes</p></div>
+
+  <section>
+    <h2>SHAPE</h2>
+    <div class="seg" id="segKind"><button data-v="pull">PULL</button><button data-v="pinch">PINCH</button><button data-v="wake">WAKE</button><button data-v="ripple">RIPPLE</button><button data-v="pass">PASS</button></div>
+    <div class="seg" id="segPinch" style="display:none"><button data-v="funnel">FUNNEL</button><button data-v="waist">WAIST</button><button data-v="flare">FLARE OUT</button></div>
+    <div class="seg" id="segDir"><button data-v="0">LINES ―</button><button data-v="90">LINES |</button></div>
+    <div id="cShape"></div>
+  </section>
+  <section>
+    <h2>LINES</h2>
+    <div id="cLines"></div>
+  </section>
+  <section>
+    <h2>LOOK</h2>
+    <div class="sw"><label>line</label><input type="color" id="cLine"><input class="hex" id="hLine"></div>
+    <div class="sw"><label>ground</label><input type="color" id="cBg"><input class="hex" id="hBg"></div>
+    <div class="tog" id="look" style="margin-bottom:10px">
+      <button data-v="furn">FURNITURE</button><button data-v="clip">CLIP</button><button data-v="source">SHOW SOURCE</button>
+    </div>
+    <div id="cLook"></div>
+  </section>
+
+  <div class="acts">
+    <button class="pri" id="bRand">RANDOMIZE <span class="k">SPACE</span></button>
+    <button id="bBack">◂ PREVIOUS <span class="k">←</span></button>
+    <button id="bCopy">COPY SVG <span class="k">⌘C</span></button>
+    <button id="bDl">DOWNLOAD SVG <span class="k">⌘S</span></button>
+  </div>
+  <footer>
+    drag labels to scrub · click on the card moves the source · ⇧click aims the wake<br>
+    everything is deterministic — same settings, same picture
+  </footer>
+</aside>
+
+<main id="main">
+  <svg id="stage" xmlns="http://www.w3.org/2000/svg">
+    <defs id="defs"></defs>
+    <g id="world">
+      <rect id="cardBg" rx="28" ry="28"/>
+      <g id="lines" fill="none" stroke-linecap="round" stroke-linejoin="round"></g>
+      <g id="furnG"></g>
+      <g id="src" fill="none" stroke="#d6ff3f" stroke-width="1"></g>
+    </g>
+  </svg>
+  <div class="hud" id="hud"></div>
+  <div class="toast" id="toast"></div>
+</main>
+
+<script src="furniture.js"></script>
+<script>
+const CARD = { w: 806, h: 508, r: 28 };
+const LS = 'ripple-lab.v1';
+let P = {
+  kind: 'pull', dir: 0,
+  sx: 0.5, sy: 0.55, aim: 90,                // source position (fraction of card) and heading (deg; 90 = travelling down, through horizontal lines)
+  pinch: 'funnel', tight: 0.7,
+  amp: 1.4, width: 170, reach: 1.0, flare: 0.28, length: 1.4, waves: 0, wavelength: 90, soft: 1.0, lead: 0.5, lean: 0.6,
+  pitch: 10, bleed: 120, stroke: 1.5,
+  line: '#F2F2F0', bg: '#070B11', furn: true, clip: true, source: true,
+};
+try { Object.assign(P, JSON.parse(localStorage.getItem(LS)) || {}); } catch {}
+if (P.tight === undefined) { P.pinch = 'funnel'; P.tight = 0.7; }
+if (P.lean === undefined) { P.kind = 'pull'; P.aim = 90; P.width = 170; P.reach = 1.0; P.lead = 0.5; P.lean = 0.6; P.sx = 0.5; P.sy = 0.55; P.amp = 1.4; P.waves = 0; }
+const save = () => localStorage.setItem(LS, JSON.stringify(P));
+
+// ── Field ──────────────────────────────────────────────────────────────────
+// Lines run along local x; displacement is along local y. Field space is the
+// card rotated by P.dir about its centre.
+const toArt = (x, y) => { const a = P.dir * Math.PI / 180, c = Math.cos(a), s = Math.sin(a); return [CARD.w / 2 + x * c - y * s, CARD.h / 2 + x * s + y * c]; };
+const toField = (ax, ay) => { const a = -P.dir * Math.PI / 180, c = Math.cos(a), s = Math.sin(a), x = ax - CARD.w / 2, y = ay - CARD.h / 2; return [x * c - y * s, x * s + y * c]; };
+const smooth = (t) => t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);
+
+// displacement of a point at (x, y0) in field space
+function disp(x, y0) {
+  const [sx, sy] = toField(P.sx * CARD.w, P.sy * CARD.h);
+  const A = P.amp;
+  if (P.kind === 'ripple') {
+    // concentric rings from a drop: radial wave decaying outward, lines take its y-component
+    const dx = x - sx, dy = y0 - sy, r = Math.hypot(dx, dy) || 1;
+    const env = Math.exp(-r / (P.length * 420)) * smooth(r / (P.width * 0.6));
+    const wave = Math.sin((r - P.width) / P.wavelength * Math.PI * 2);
+    const push = Math.max(0, P.width - r) / P.width;                  // the drop itself parts the lines
+    return A * (dy / r) * (P.waves * 60 * wave * env + push * P.width * 0.9);
+  }
+  if (P.kind === 'pinch') {
+    // SCALE about the axis through the source, varying along the line.
+    //   S(x) < 1 → lines collect toward the axis (slowing down)
+    //   S(x) > 1 → lines spread from it (speeding up)
+    // funnel: S goes 1 → 1-tight across the span, in the aim direction
+    // waist:  S dips to 1-tight at the source and recovers
+    // flare:  S rises to 1+tight at the source (lines fan apart)
+    const span = P.length * 600;
+    const dxl = (x - sx) * (Math.cos(P.aim * Math.PI / 180) >= 0 ? 1 : -1);
+    let t;
+    if (P.pinch === 'funnel') t = smooth(dxl / span + 0.5);
+    else t = Math.exp(-(dxl * dxl) / (2 * (span * 0.33) * (span * 0.33)));
+    const S = P.pinch === 'flare' ? 1 + P.tight * t : 1 - P.tight * t;
+    const dyl = y0 - sy;
+    const across = 1 - smooth((Math.abs(dyl) - P.width * P.reach) / (P.width * 1.6));   // how many lines take part
+    return dyl * (S - 1) * across * P.amp;
+  }
+  // a body travelling along `aim`. u = distance behind the body, v = across its path.
+  const a = P.aim * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
+  const rx = x - sx, ry = y0 - sy;
+  const u = -(rx * c + ry * s), v = -rx * s + ry * c;                 // u > 0 behind
+  const L = P.length * 700;
+  if (P.kind === 'pull') {
+    // SWEEP. One smooth deformation, every line bends the same way.
+    //   across the lines (dy): a plateau of lines that move fully together
+    //     (core), then a smooth falloff (spread). Never changes sign.
+    //   along the lines (dx): one broad bump (width) — the bend — optionally
+    //     skewed so it rises fast and trails off, and leaning so the bend
+    //     travels diagonally across the card.
+    const dxl = (x - sx) - P.lean * (y0 - sy);                        // lean shifts the bend per line → diagonal sweep
+    const dyl = y0 - sy;
+    const core = P.width * P.reach, spread = P.width * 1.6;
+    const across = 1 - smooth((Math.abs(dyl) - core) / spread);        // 1 inside core, → 0 past core+spread
+    const w = P.width * P.length * 2;
+    const t = dxl / w;
+    const along = t < 0 ? Math.exp(-(t * t) / (2 * 0.35 * 0.35 * (1 + P.lead))) : Math.exp(-(t * t) / (2 * 0.35 * 0.35 * (1 + 2 * (1 - P.lead) + 1)));
+    const sign = Math.sign(Math.sin(P.aim * Math.PI / 180) || 1);     // aim: up or down (through horizontal lines)
+    return A * 130 * across * along * sign;
+  }
+  if (P.kind === 'pass') {
+    // a channel along the whole path: constant width, no V, soft shoulders
+    if (Math.abs(v) > P.width * 1.6) return 0;
+    const inside = Math.max(0, 1 - Math.abs(v) / P.width);
+    const span = smooth((u + P.width) / (P.width * 0.8)) * smooth((L - u) / (P.width * 1.5));
+    return A * Math.sign(v || 1) * P.width * Math.pow(inside, 0.8) * span * (P.width / Math.max(P.width, 1)) * s_y(c, s, 1);
+  }
+  // wake: nose ahead of the body, channel that flares behind, trailing waves inside the V
+  let d = 0;
+  if (u < 0) {                                                        // bow
+    const r = Math.hypot(u, v); if (r < P.width) d += Math.sign(v || 1) * (P.width - r) * 0.9;
+  } else {
+    const w = P.width + P.flare * u;                                  // flare → the V
+    const decay = Math.exp(-u / L);
+    if (Math.abs(v) < w) {
+      const inside = 1 - Math.abs(v) / w;
+      d += Math.sign(v || 1) * w * Math.pow(inside, 0.9) * decay;    // channel
+      d += P.waves * 40 * Math.sin(u / P.wavelength * Math.PI * 2 - Math.abs(v) / w * 1.5) * inside * decay * Math.sign(v || 1); // trailing waves
+    } else if (Math.abs(v) < w * 1.8) {
+      // outside the V: faint diverging crests
+      const t = (Math.abs(v) - w) / (w * 0.8);
+      d += P.waves * 18 * Math.sin((Math.abs(v) - w) / P.wavelength * Math.PI * 2 + u / P.wavelength) * (1 - t) * decay * Math.sign(v || 1);
+    }
+  }
+  return A * d * s_y(c, s, 1);
+}
+// how much of a cross-wake displacement lands on the line's local y
+function s_y(c, s, k) { return 1; }
+
+function buildLines() {
+  const diag = Math.hypot(CARD.w, CARD.h) + P.bleed * 2;
+  const n = Math.floor(diag / P.pitch), M = 180;
+  const out = [];
+  const raw = [];
+  for (let i = 0; i < n; i++) {
+    const y0 = -diag / 2 + (i + 0.5) * P.pitch;
+    const d = new Float64Array(M);
+    for (let j = 0; j < M; j++) d[j] = disp(-diag / 2 + j / (M - 1) * diag, y0);
+    raw.push({ y0, d });
+  }
+  // soften along the line (gaussian), then keep lines from crossing: enforce order per column with a minimum gap
+  const k = Math.max(0, Math.round(P.soft * 3));
+  for (const L of raw) if (k) { const s = new Float64Array(M); for (let j = 0; j < M; j++) { let acc = 0, wsum = 0; for (let o = -k; o <= k; o++) { const jj = Math.min(M - 1, Math.max(0, j + o)); const w = Math.exp(-(o * o) / (2 * (k / 2 + 0.5) ** 2)); acc += L.d[jj] * w; wsum += w; } s[j] = acc / wsum; } L.d = s; }
+  const minGap = Math.max(1.2, P.pitch * 0.18);
+  const down = P.kind !== 'pull' || Math.sin(P.aim * Math.PI / 180) >= 0;   // sweep direction: resolve crossings only in that direction
+  for (let j = 0; j < M; j++) {
+    if (down || P.kind !== 'pull') for (let i = 1; i < n; i++) { const yPrev = raw[i - 1].y0 + raw[i - 1].d[j], y = raw[i].y0 + raw[i].d[j]; if (y < yPrev + minGap) raw[i].d[j] = yPrev + minGap - raw[i].y0; }
+    if (!down || P.kind !== 'pull') for (let i = n - 2; i >= 0; i--) { const yNext = raw[i + 1].y0 + raw[i + 1].d[j], y = raw[i].y0 + raw[i].d[j]; if (y > yNext - minGap) raw[i].d[j] = yNext - minGap - raw[i].y0; }
+  }
+  for (const L of raw) {
+    const pts = []; for (let j = 0; j < M; j++) pts.push(toArt(-diag / 2 + j / (M - 1) * diag, L.y0 + L.d[j]));
+    out.push(pts);
+  }
+  return out;
+}
+function cr(pts) {
+  const f = (v) => +v.toFixed(2), n = pts.length; let d = `M${f(pts[0][0])} ${f(pts[0][1])}`;
+  for (let i = 0; i < n - 1; i++) { const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(n - 1, i + 2)];
+    d += `C${f(p1[0] + (p2[0] - p0[0]) / 6)} ${f(p1[1] + (p2[1] - p0[1]) / 6)} ${f(p2[0] - (p3[0] - p1[0]) / 6)} ${f(p2[1] - (p3[1] - p1[1]) / 6)} ${f(p2[0])} ${f(p2[1])}`; }
+  return d;
+}
+const onCard = (pts) => pts.some(([x, y]) => x > -P.stroke && x < CARD.w + P.stroke && y > -P.stroke && y < CARD.h + P.stroke);
+
+// ── Render ─────────────────────────────────────────────────────────────────
+const $ = (id) => document.getElementById(id);
+let cam = { k: 1, x: 0, y: 0 };
+function render() {
+  const lines = buildLines().filter(onCard);
+  $('cardBg').setAttribute('width', CARD.w); $('cardBg').setAttribute('height', CARD.h); $('cardBg').setAttribute('fill', P.bg);
+  $('defs').innerHTML = `<clipPath id="clipCard"><rect width="${CARD.w}" height="${CARD.h}" rx="${CARD.r}" ry="${CARD.r}"/></clipPath>`;
+  const g = $('lines'); g.setAttribute('stroke', P.line); g.setAttribute('stroke-width', P.stroke); g.setAttribute('clip-path', P.clip ? 'url(#clipCard)' : '');
+  g.innerHTML = lines.map((pts) => `<path d="${cr(pts)}"/>`).join('');
+  $('furnG').innerHTML = P.furn ? furnitureSVG('#262626', { chip: true }) : '';
+  const [ax, ay] = [P.sx * CARD.w, P.sy * CARD.h];
+  $('src').innerHTML = P.source ? `<circle cx="${ax}" cy="${ay}" r="${P.width}" opacity=".35"/><circle cx="${ax}" cy="${ay}" r="3" fill="#d6ff3f"/>` +
+    (P.kind !== 'ripple' ? `<line x1="${ax}" y1="${ay}" x2="${ax + Math.cos((P.aim + P.dir) * Math.PI / 180) * 40}" y2="${ay + Math.sin((P.aim + P.dir) * Math.PI / 180) * 40}" opacity=".6"/>` : '') : '';
+  document.querySelectorAll('#segKind button').forEach((b) => b.classList.toggle('on', b.dataset.v === P.kind));
+  document.querySelectorAll('#segDir button').forEach((b) => b.classList.toggle('on', +b.dataset.v === P.dir));
+  document.querySelectorAll('#look button').forEach((b) => b.classList.toggle('on', !!P[b.dataset.v]));
+  $('cShapeWake').style.display = P.kind === 'ripple' ? 'none' : '';
+  $('cShapePull').style.display = P.kind === 'pull' ? '' : 'none';
+  $('cShapeV').style.display = P.kind === 'wake' ? '' : 'none';
+  $('cShapePinch').style.display = P.kind === 'pinch' ? '' : 'none';
+  $('segPinch').style.display = P.kind === 'pinch' ? '' : 'none';
+  $('cShapeWaves').style.display = (P.kind === 'pull' || P.kind === 'pinch') ? 'none' : '';
+  document.querySelectorAll('#segPinch button').forEach((b) => b.classList.toggle('on', b.dataset.v === P.pinch));
+  $('hud').innerHTML = `${P.kind} · ${lines.length} lines · ${P.pitch}px · ${P.stroke}pt · source ${Math.round(P.sx * 100)},${Math.round(P.sy * 100)}${P.kind !== 'ripple' ? ` · aim ${P.aim}°` : ''}`;
+  syncs.forEach((f) => f()); save();
+}
+function fit() {
+  const r = $('main').getBoundingClientRect(), pad = 60;
+  cam.k = Math.min((r.width - pad * 2) / CARD.w, (r.height - pad * 2) / CARD.h) * 0.6;
+  cam.x = (r.width - CARD.w * cam.k) / 2; cam.y = (r.height - CARD.h * cam.k) / 2;
+  $('world').setAttribute('transform', `translate(${cam.x} ${cam.y}) scale(${cam.k})`);
+}
+// click = place source; shift-click = aim the wake at the click
+$('main').addEventListener('pointerdown', (e) => {
+  const r = $('main').getBoundingClientRect(); const ax = (e.clientX - r.left - cam.x) / cam.k, ay = (e.clientY - r.top - cam.y) / cam.k;
+  if (e.shiftKey && P.kind !== 'ripple') { const a = Math.atan2(ay - P.sy * CARD.h, ax - P.sx * CARD.w) * 180 / Math.PI; P.aim = Math.round(a - P.dir); }
+  else { P.sx = +(ax / CARD.w).toFixed(3); P.sy = +(ay / CARD.h).toFixed(3); }
+  render();
+});
+
+// ── Randomize (seeded history) ────────────────────────────────────────────
+let history = [];
+function randomize() {
+  history.push(JSON.stringify(P)); if (history.length > 100) history.shift();
+  const pick = (a) => a[Math.floor(Math.random() * a.length)], rnd = (a, b, s = 1) => Math.round((a + Math.random() * (b - a)) / s) * s;
+  P.kind = pick(['pull', 'pull', 'pinch', 'pinch', 'wake', 'ripple', 'pass']);
+  P.pinch = pick(['funnel', 'funnel', 'waist', 'flare']); P.tight = pick([0.4, 0.55, 0.7, 0.85]);
+  P.dir = pick([0, 0, 0, 90]);
+  P.sx = pick([0.25, 0.35, 0.5, 0.5, 0.65, 0.75]); P.sy = pick([0.3, 0.45, 0.55, 0.6, 0.7]);
+  if (P.kind === 'pull') P.aim = P.dir === 0 ? pick([90, 90, -90, 70, 110, 60]) : pick([0, 0, 180, 20, -20]);
+  else if (P.kind === 'pinch') { P.aim = P.dir === 0 ? pick([0, 180]) : pick([90, -90]); P.sy = pick([0.5, 0.5, 0.4, 0.6]); P.reach = pick([1, 1.5, 2.5, 3]); P.length = pick([0.8, 1.2, 1.6, 2.2]); P.amp = 1; }
+  else P.aim = P.dir === 0 ? pick([0, 0, 0, 180, 12, -12]) : pick([90, 90, -90, 78]);
+  P.amp = pick([0.8, 1, 1.2, 1.5, 1.8]);
+  P.width = P.kind === 'pull' ? pick([110, 140, 170, 220, 280]) : pick([40, 55, 70, 90, 120]);
+  P.reach = pick([0.5, 0.8, 1, 1.4, 2]); P.lead = pick([0.2, 0.5, 0.7]); P.lean = pick([0, 0.3, 0.6, 0.9, -0.5, -0.8]);
+  if (P.kind === 'pull') { P.waves = 0; P.amp = pick([1, 1.4, 1.8, 2.4]); P.length = pick([1, 1.4, 2, 2.8]); }
+  P.flare = pick([0.12, 0.2, 0.28, 0.36]);
+  P.length = pick([0.7, 1, 1.2, 1.6]);
+  P.waves = pick([0, 0.3, 0.5, 0.5, 0.8]);
+  P.wavelength = pick([60, 80, 100, 130]);
+  P.soft = pick([0.7, 1, 1.4]);
+  P.pitch = pick([6, 8, 10, 10, 12, 16]);
+  P.stroke = pick([1, 1.25, 1.5, 1.5, 2]);
+  render(); toast(P.kind.toUpperCase());
+}
+function back() { if (history.length) { P = JSON.parse(history.pop()); render(); } }
+
+// ── Export ────────────────────────────────────────────────────────────────
+function svgOut() {
+  const lines = buildLines().filter(onCard);
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD.w}" height="${CARD.h}" viewBox="0 0 ${CARD.w} ${CARD.h}" fill="none">`,
+    `  <!-- ripple lab · ${P.kind} · src ${P.sx},${P.sy} aim ${P.aim} · width ${P.width} flare ${P.flare} len ${P.length} waves ${P.waves}/${P.wavelength} · pitch ${P.pitch} · ${P.stroke}pt -->`,
+    P.clip ? `  <defs><clipPath id="card"><rect width="${CARD.w}" height="${CARD.h}" rx="${CARD.r}" ry="${CARD.r}"/></clipPath></defs>` : '',
+    `  <g id="ripple" stroke="${P.line}" stroke-width="${P.stroke}" stroke-linecap="round" stroke-linejoin="round"${P.clip ? ' clip-path="url(#card)"' : ''}>`,
+    lines.map((pts) => `    <path d="${cr(pts)}"/>`).join('\n'),
+    `  </g>`,
+    P.furn ? furnitureSVG('#262626', { chip: true }) : '',
+    `</svg>`,
+  ].filter(Boolean).join('\n');
+}
+function toast(s) { const el = $('toast'); el.textContent = s; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 1400); }
+async function copySVG() { try { await navigator.clipboard.writeText(svgOut()); toast('SVG COPIED — ⌘V IN FIGMA / AI'); } catch { toast('COPY FAILED'); } }
+function download() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([svgOut()], { type: 'image/svg+xml' })); a.download = `ripple_${P.kind}_${Date.now().toString(36)}.svg`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 500); toast('DOWNLOADED'); }
+
+// ── Controls ──────────────────────────────────────────────────────────────
+const syncs = [];
+function ctl(host, label, key, min, max, step, unit = '') {
+  const el = document.createElement('div'); el.className = 'ctl';
+  el.innerHTML = `<div class="top"><span class="lbl">${label}</span><span class="box"><input type="text" inputmode="decimal"><span class="u">${unit}</span></span></div><div class="track"><div class="fill"></div><div class="knob"></div></div>`;
+  $(host).appendChild(el);
+  const input = el.querySelector('input'), track = el.querySelector('.track'), fill = el.querySelector('.fill'), knob = el.querySelector('.knob'), lbl = el.querySelector('.lbl');
+  const dec = step < 1 ? String(step).split('.')[1].length : 0;
+  const set = (v) => { v = Math.min(max, Math.max(min, Math.round(v / step) * step)); P[key] = +v.toFixed(6); render(); };
+  const sync = () => { const p = (P[key] - min) / (max - min) * 100; fill.style.width = p + '%'; knob.style.left = p + '%'; if (document.activeElement !== input) input.value = P[key].toFixed(dec); };
+  input.addEventListener('change', () => { const v = parseFloat(input.value); if (!isNaN(v)) set(v); sync(); });
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); e.stopPropagation(); });
+  lbl.addEventListener('pointerdown', (e) => { e.preventDefault(); el.classList.add('live'); const x0 = e.clientX, v0 = P[key]; const mv = (e) => set(v0 + (e.clientX - x0) * (max - min) / 400); const up = () => { el.classList.remove('live'); window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); }; window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up); });
+  track.addEventListener('pointerdown', (e) => { e.preventDefault(); el.classList.add('live'); const r = track.getBoundingClientRect(); const at = (e) => set(min + (max - min) * Math.min(1, Math.max(0, (e.clientX - r.left) / r.width))); at(e); const up = () => { el.classList.remove('live'); window.removeEventListener('pointermove', at); window.removeEventListener('pointerup', up); }; window.addEventListener('pointermove', at); window.addEventListener('pointerup', up); });
+  syncs.push(sync); return el;
+}
+const shapeWake = document.createElement('div'); shapeWake.id = 'cShapeWake'; $('cShape').appendChild(shapeWake);
+ctl('cShape', 'amount', 'amp', 0.2, 3, 0.05);
+ctl('cShape', 'width', 'width', 15, 200, 5, 'px');
+ctl('cShapeWake', 'aim  (direction of travel)', 'aim', -180, 180, 1, '°');
+const shapePull = document.createElement('div'); shapePull.id = 'cShapePull'; $('cShape').appendChild(shapePull);
+ctl('cShapePull', 'core  (lines that move together)', 'reach', 0, 3, 0.05);
+ctl('cShapePull', 'skew  (rise fast · trail off)', 'lead', 0, 1, 0.05);
+ctl('cShapePull', 'lean  (sweep diagonally)', 'lean', -1.5, 1.5, 0.05);
+const shapePinch = document.createElement('div'); shapePinch.id = 'cShapePinch'; $('cShape').appendChild(shapePinch);
+ctl('cShapePinch', 'tight  (how far they collect)', 'tight', 0.05, 0.95, 0.01);
+const shapeV = document.createElement('div'); shapeV.id = 'cShapeV'; $('cShape').appendChild(shapeV);
+ctl('cShapeV', 'flare  (the V)', 'flare', 0, 0.8, 0.02);
+ctl('cShape', 'length  (how long the bend is)', 'length', 0.2, 4, 0.05);
+const shapeWaves = document.createElement('div'); shapeWaves.id = 'cShapeWaves'; $('cShape').appendChild(shapeWaves);
+ctl('cShapeWaves', 'waves  (trailing crests)', 'waves', 0, 1.5, 0.05);
+ctl('cShapeWaves', 'wavelength', 'wavelength', 30, 240, 5, 'px');
+ctl('cShape', 'soft', 'soft', 0, 3, 0.1);
+ctl('cLines', 'pitch', 'pitch', 4, 30, 1, 'px');
+ctl('cLines', 'bleed', 'bleed', 0, 300, 10, 'px');
+ctl('cLook', 'stroke', 'stroke', 0.5, 5, 0.25, 'pt');
+function swatch(cid, hid, key) {
+  const c = $(cid), h = $(hid);
+  const sync = () => { c.value = P[key]; if (document.activeElement !== h) h.value = P[key]; };
+  c.addEventListener('input', () => { P[key] = c.value.toUpperCase(); render(); });
+  h.addEventListener('change', () => { let v = h.value.trim(); if (!v.startsWith('#')) v = '#' + v; if (/^#[0-9a-f]{6}$/i.test(v)) { P[key] = v.toUpperCase(); render(); } sync(); });
+  h.addEventListener('keydown', (e) => e.stopPropagation());
+  syncs.push(sync);
+}
+swatch('cLine', 'hLine', 'line'); swatch('cBg', 'hBg', 'bg');
+$('segKind').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { P.kind = b.dataset.v; render(); } });
+$('segPinch').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { P.pinch = b.dataset.v; render(); } });
+$('segDir').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { P.dir = +b.dataset.v; render(); } });
+$('look').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { P[b.dataset.v] = !P[b.dataset.v]; render(); } });
+$('bRand').onclick = randomize; $('bBack').onclick = back; $('bCopy').onclick = copySVG; $('bDl').onclick = download;
+window.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  const meta = e.metaKey || e.ctrlKey;
+  if (meta && e.key.toLowerCase() === 'c') { e.preventDefault(); copySVG(); }
+  else if (meta && e.key.toLowerCase() === 's') { e.preventDefault(); download(); }
+  else if (e.key === ' ' || e.key.toLowerCase() === 'r') { e.preventDefault(); randomize(); }
+  else if (e.key === 'ArrowLeft') back();
+  else if (e.key.toLowerCase() === 'f') fit();
+});
+window.addEventListener('resize', fit);
+fit(); render();
+</script>
+</body>
+</html>

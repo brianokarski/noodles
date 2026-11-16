@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GL Transitions Example</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        h1 { font-size: 2em; }
+        canvas {
+            max-width: 90vw;
+            max-height: 70vh;
+            border: 2px solid #444;
+            border-radius: 8px;
+            background: #000;
+        }
+        .controls {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        label { min-width: 100px; font-size: 0.9em; }
+        input[type="range"] {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            background: #444;
+            border-radius: 2px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #4a9eff;
+            cursor: pointer;
+        }
+        select {
+            flex: 1;
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 4px;
+        }
+        button {
+            padding: 12px 24px;
+            background: #4a9eff;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 1em;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover { background: #3a8eef; }
+        .value {
+            color: #4a9eff;
+            min-width: 50px;
+            text-align: right;
+            font-weight: bold;
+        }
+        #status { font-size: 0.85em; color: #888; text-align: center; }
+        .info {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #4a9eff;
+            max-width: 600px;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+        .info code {
+            background: #333;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>GL Transitions - Pre-made Shaders</h1>
+    
+    <div class="info">
+        <strong>Using gl-transitions library shaders</strong><br>
+        These are production-ready transition effects from the gl-transitions collection.
+        To install: <code>npm install gl-transitions</code>
+    </div>
+    
+    <canvas id="canvas" width="800" height="600"></canvas>
+    
+    <div class="controls">
+        <div class="control-row">
+            <label>Transition:</label>
+            <select id="transitionType">
+                <option value="pixelize">Pixelize (Dissolve)</option>
+                <option value="mosaic">Mosaic</option>
+                <option value="randomsquares">Random Squares</option>
+                <option value="simplezoom">Simple Zoom</option>
+                <option value="crosswarp">Cross Warp</option>
+            </select>
+        </div>
+        
+        <div class="control-row">
+            <label>Progress:</label>
+            <input type="range" id="progress" min="0" max="100" value="0">
+            <span class="value" id="progressValue">0%</span>
+        </div>
+        
+        <button id="animate">Animate Transition</button>
+        
+        <div id="status">Loading...</div>
+    </div>
+
+    <script>
+        // These are popular gl-transitions shaders adapted here
+        // In production, you'd import them from 'gl-transitions' npm package
+        
+        const canvas = document.getElementById('canvas');
+        const gl = canvas.getContext('webgl');
+        
+        if (!gl) {
+            document.getElementById('status').textContent = 'WebGL not supported!';
+            throw new Error('WebGL not supported');
+        }
+        
+        const progressSlider = document.getElementById('progress');
+        const progressValue = document.getElementById('progressValue');
+        const transitionSelect = document.getElementById('transitionType');
+        const animateBtn = document.getElementById('animate');
+        const status = document.getElementById('status');
+        
+        // Vertex shader
+        const vertexShaderSource = `
+            attribute vec2 a_position;
+            attribute vec2 a_texCoord;
+            varying vec2 v_texCoord;
+            void main() {
+                gl_Position = vec4(a_position, 0.0, 1.0);
+                v_texCoord = a_texCoord;
+            }
+        `;
+        
+        // GL Transitions style fragment shaders
+        const transitions = {
+            pixelize: `
+                precision highp float;
+                uniform sampler2D from;
+                uniform sampler2D to;
+                uniform float progress;
+                uniform vec2 resolution;
+                varying vec2 v_texCoord;
+                
+                // Pixelize transition - similar to dithered dissolve
+                float squareSize = 0.04;
+                float steps = 50.0;
+                
+                vec4 transition(vec2 uv) {
+                    float dist = progress * distance(vec2(0.5), uv);
+                    float r = progress * steps;
+                    vec2 squarePos = vec2(floor(uv.x / squareSize), floor(uv.y / squareSize));
+                    float hash = fract(sin(dot(squarePos, vec2(12.9898, 78.233))) * 43758.5453);
+                    
+                    float mixer = step(hash, progress);
+                    return mix(texture2D(from, uv), texture2D(to, uv), mixer);
+                }
+                
+                void main() {
+                    gl_FragColor = transition(v_texCoord);
+                }
+            `,
+            
+            mosaic: `
+                precision highp float;
+                uniform sampler2D from;
+                uniform sampler2D to;
+                uniform float progress;
+                varying vec2 v_texCoord;
+                
+                // Mosaic transition - blocks dissolve
+                int endx = 2;
+                int endy = -1;
+                
+                vec4 transition(vec2 uv) {
+                    float Prog = progress * 2.0;
+                    float intProgress = floor(Prog);
+                    float az = fract(Prog);
+                    
+                    vec2 divSize = vec2(1.0 / 8.0);
+                    vec2 divPos = floor(uv / divSize);
+                    float hash = fract(sin(dot(divPos, vec2(12.9898, 78.233))) * 43758.5453);
+                    
+                    if (az > hash) {
+                        return texture2D(to, uv);
+                    } else {
+                        return texture2D(from, uv);
+                    }
+                }
+                
+                void main() {
+                    gl_FragColor = transition(v_texCoord);
+                }
+            `,
+            
+            randomsquares: `
+                precision highp float;
+                uniform sampler2D from;
+                uniform sampler2D to;
+                uniform float progress;
+                uniform vec2 resolution;
+                varying vec2 v_texCoord;
+                
+                // Random squares - block-based dither transition
+                float size = 0.05;
+                float smoothness = 0.1;
+                
+                float rand(vec2 co){
+                    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+                }
+                
+                vec4 transition(vec2 p) {
+                    float r = rand(floor(p / size));
+                    float m = smoothstep(0.0, -smoothness, r - (progress * (1.0 + smoothness)));
+                    return mix(texture2D(from, p), texture2D(to, p), m);
+                }
+                
+                void main() {
+                    gl_FragColor = transition(v_texCoord);
+                }
+            `,
+            
+            simplezoom: `
+                precision highp float;
+                uniform sampler2D from;
+                uniform sampler2D to;
+                uniform float progress;
+                varying vec2 v_texCoord;
+                
+                float zoom_quickness = 0.8;
+                float nquick = clamp(zoom_quickness, 0.2, 1.0);
+                
+                vec4 transition(vec2 uv) {
+                    vec2 center = vec2(0.5, 0.5);
+                    float prog = progress;
+                    
+                    float dist = distance(center, uv) / 0.707;
+                    float mixer = smoothstep(dist - 0.1, dist + 0.1, prog);
+                    
+                    return mix(texture2D(from, uv), texture2D(to, uv), mixer);
+                }
+                
+                void main() {
+                    gl_FragColor = transition(v_texCoord);
+                }
+            `,
+            
+            crosswarp: `
+                precision highp float;
+                uniform sampler2D from;
+                uniform sampler2D to;
+                uniform float progress;
+                varying vec2 v_texCoord;
+                
+                // Cross warp with some distortion
+                vec4 transition(vec2 p) {
+                    float x = progress;
+                    vec2 pfr = p + (vec2(-x, x) * 0.1);
+                    vec2 pto = p + (vec2(x, -x) * 0.1);
+                    
+                    vec4 a = texture2D(from, pfr);
+                    vec4 b = texture2D(to, pto);
+                    
+                    return mix(a, b, x);
+                }
+                
+                void main() {
+                    gl_FragColor = transition(v_texCoord);
+                }
+            `
+        };
+        
+        let program, textureA, textureB;
+        let isAnimating = false;
+        
+        function compileShader(type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error('Shader error:', gl.getShaderInfoLog(shader));
+                return null;
+            }
+            return shader;
+        }
+        
+        function createProgram(fragmentSource) {
+            const vertexShader = compileShader(gl.VERTEX_SHADER, vertexShaderSource);
+            const fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragmentSource);
+            const prog = gl.createProgram();
+            gl.attachShader(prog, vertexShader);
+            gl.attachShader(prog, fragmentShader);
+            gl.linkProgram(prog);
+            if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+                console.error('Program error:', gl.getProgramInfoLog(prog));
+                return null;
+            }
+            return prog;
+        }
+        
+        function setupGeometry(prog) {
+            const positions = new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]);
+            const texCoords = new Float32Array([0,1, 1,1, 0,0, 0,0, 1,1, 1,0]);
+            
+            const posBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+            const posLoc = gl.getAttribLocation(prog, 'a_position');
+            gl.enableVertexAttribArray(posLoc);
+            gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+            
+            const texBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, texBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STATIC_DRAW);
+            const texLoc = gl.getAttribLocation(prog, 'a_texCoord');
+            gl.enableVertexAttribArray(texLoc);
+            gl.vertexAttribPointer(texLoc, 2, gl.FLOAT, false, 0, 0);
+        }
+        
+        function createTexture(image) {
+            const texture = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+            return texture;
+        }
+        
+        function render() {
+            const progress = progressSlider.value / 100;
+            const transType = transitionSelect.value;
+            
+            if (!program || program.transType !== transType) {
+                program = createProgram(transitions[transType]);
+                program.transType = transType;
+                setupGeometry(program);
+            }
+            
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            gl.clearColor(0, 0, 0, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.useProgram(program);
+            
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, textureA);
+            gl.uniform1i(gl.getUniformLocation(program, 'from'), 0);
+            
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, textureB);
+            gl.uniform1i(gl.getUniformLocation(program, 'to'), 1);
+            
+            gl.uniform1f(gl.getUniformLocation(program, 'progress'), progress);
+            gl.uniform2f(gl.getUniformLocation(program, 'resolution'), canvas.width, canvas.height);
+            
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+        }
+        
+        // Load images
+        let img1, img2, loaded = 0;
+        
+        function onLoad() {
+            loaded++;
+            if (loaded === 2) {
+                canvas.width = img1.width;
+                canvas.height = img1.height;
+                textureA = createTexture(img1);
+                textureB = createTexture(img2);
+                status.textContent = 'Ready!';
+                status.style.color = '#0f0';
+                render();
+            }
+        }
+        
+        img1 = new Image();
+        img1.onload = onLoad;
+        img1.onerror = () => status.textContent = 'Error loading Image1.jpg';
+        img1.src = 'Image1.jpg';
+        
+        img2 = new Image();
+        img2.onload = onLoad;
+        img2.onerror = () => status.textContent = 'Error loading Image2.jpg';
+        img2.src = 'Image2.jpg';
+        
+        // Controls
+        progressSlider.addEventListener('input', (e) => {
+            progressValue.textContent = e.target.value + '%';
+            if (!isAnimating) render();
+        });
+        
+        transitionSelect.addEventListener('change', () => {
+            if (!isAnimating) render();
+        });
+        
+        animateBtn.addEventListener('click', () => {
+            if (isAnimating) return;
+            isAnimating = true;
+            progressSlider.value = 0;
+            
+            const start = Date.now();
+            const duration = 2500;
+            
+            function animate() {
+                const elapsed = Date.now() - start;
+                const prog = Math.min(elapsed / duration, 1);
+                progressSlider.value = prog * 100;
+                progressValue.textContent = Math.round(prog * 100) + '%';
+                render();
+                
+                if (prog < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    isAnimating = false;
+                }
+            }
+            animate();
+        });
+    </script>
+</body>
+</html>

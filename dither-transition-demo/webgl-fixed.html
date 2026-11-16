@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dithered Transition - WebGL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        h1 {
+            font-size: 2em;
+        }
+        
+        canvas {
+            max-width: 90vw;
+            max-height: 70vh;
+            border: 2px solid #444;
+            border-radius: 8px;
+            background: #000;
+            display: block;
+        }
+        
+        .controls {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        label {
+            min-width: 100px;
+            font-size: 0.9em;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            height: 4px;
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+            background: #444;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #4a9eff;
+            cursor: pointer;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #4a9eff;
+            cursor: pointer;
+            border: none;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: #4a9eff;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 1em;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #3a8eef;
+        }
+        
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .value {
+            color: #4a9eff;
+            min-width: 50px;
+            text-align: right;
+            font-weight: bold;
+        }
+        
+        select {
+            flex: 1;
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        
+        #status {
+            font-size: 0.85em;
+            color: #888;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dithered Image Transition (WebGL)</h1>
+    
+    <canvas id="canvas" width="800" height="600"></canvas>
+    
+    <div class="controls">
+        <div class="control-row">
+            <label>Dither Type:</label>
+            <select id="ditherType">
+                <option value="ordered">Ordered Dither (Bayer)</option>
+                <option value="random">Random Noise</option>
+                <option value="blue">Blue Noise</option>
+            </select>
+        </div>
+        
+        <div class="control-row">
+            <label>Progress:</label>
+            <input type="range" id="progress" min="0" max="100" value="0">
+            <span class="value" id="progressValue">0%</span>
+        </div>
+        
+        <button id="animate" disabled>Loading...</button>
+        
+        <div id="status">Loading images...</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const gl = canvas.getContext('webgl');
+        
+        if (!gl) {
+            document.getElementById('status').textContent = 'WebGL not supported!';
+            document.getElementById('status').style.color = '#f00';
+            throw new Error('WebGL not supported');
+        }
+        
+        const progressSlider = document.getElementById('progress');
+        const progressValue = document.getElementById('progressValue');
+        const ditherTypeSelect = document.getElementById('ditherType');
+        const animateBtn = document.getElementById('animate');
+        const status = document.getElementById('status');
+        
+        let program, textureA, textureB, noiseTexture;
+        let isAnimating = false;
+        
+        // Vertex shader
+        const vertexShaderSource = `
+            attribute vec2 a_position;
+            attribute vec2 a_texCoord;
+            varying vec2 v_texCoord;
+            
+            void main() {
+                gl_Position = vec4(a_position, 0.0, 1.0);
+                v_texCoord = a_texCoord;
+            }
+        `;
+        
+        // Fragment shaders for each type
+        const fragmentShaders = {
+            ordered: `
+                precision highp float;
+                uniform sampler2D u_imageA;
+                uniform sampler2D u_imageB;
+                uniform float u_progress;
+                uniform vec2 u_resolution;
+                varying vec2 v_texCoord;
+                
+                float bayer8(vec2 coord) {
+                    ivec2 p = ivec2(mod(coord * u_resolution, 8.0));
+                    int x = p.x;
+                    int y = p.y;
+                    
+                    int index = y * 8 + x;
+                    int bayerValues[64];
+                    bayerValues[0] = 0; bayerValues[1] = 32; bayerValues[2] = 8; bayerValues[3] = 40;
+                    bayerValues[4] = 2; bayerValues[5] = 34; bayerValues[6] = 10; bayerValues[7] = 42;
+                    bayerValues[8] = 48; bayerValues[9] = 16; bayerValues[10] = 56; bayerValues[11] = 24;
+                    bayerValues[12] = 50; bayerValues[13] = 18; bayerValues[14] = 58; bayerValues[15] = 26;
+                    bayerValues[16] = 12; bayerValues[17] = 44; bayerValues[18] = 4; bayerValues[19] = 36;
+                    bayerValues[20] = 14; bayerValues[21] = 46; bayerValues[22] = 6; bayerValues[23] = 38;
+                    bayerValues[24] = 60; bayerValues[25] = 28; bayerValues[26] = 52; bayerValues[27] = 20;
+                    bayerValues[28] = 62; bayerValues[29] = 30; bayerValues[30] = 54; bayerValues[31] = 22;
+                    bayerValues[32] = 3; bayerValues[33] = 35; bayerValues[34] = 11; bayerValues[35] = 43;
+                    bayerValues[36] = 1; bayerValues[37] = 33; bayerValues[38] = 9; bayerValues[39] = 41;
+                    bayerValues[40] = 51; bayerValues[41] = 19; bayerValues[42] = 59; bayerValues[43] = 27;
+                    bayerValues[44] = 49; bayerValues[45] = 17; bayerValues[46] = 57; bayerValues[47] = 25;
+                    bayerValues[48] = 15; bayerValues[49] = 47; bayerValues[50] = 7; bayerValues[51] = 39;
+                    bayerValues[52] = 13; bayerValues[53] = 45; bayerValues[54] = 5; bayerValues[55] = 37;
+                    bayerValues[56] = 63; bayerValues[57] = 31; bayerValues[58] = 55; bayerValues[59] = 23;
+                    bayerValues[60] = 61; bayerValues[61] = 29; bayerValues[62] = 53; bayerValues[63] = 21;
+                    
+                    return float(bayerValues[index]) / 64.0;
+                }
+                
+                void main() {
+                    float threshold = bayer8(v_texCoord);
+                    float mix_value = step(threshold, u_progress);
+                    
+                    vec4 colorA = texture2D(u_imageA, v_texCoord);
+                    vec4 colorB = texture2D(u_imageB, v_texCoord);
+                    
+                    gl_FragColor = mix(colorA, colorB, mix_value);
+                }
+            `,
+            
+            random: `
+                precision highp float;
+                uniform sampler2D u_imageA;
+                uniform sampler2D u_imageB;
+                uniform sampler2D u_noiseTexture;
+                uniform float u_progress;
+                varying vec2 v_texCoord;
+                
+                void main() {
+                    float noise = texture2D(u_noiseTexture, v_texCoord).r;
+                    float mix_value = step(noise, u_progress);
+                    
+                    vec4 colorA = texture2D(u_imageA, v_texCoord);
+                    vec4 colorB = texture2D(u_imageB, v_texCoord);
+                    
+                    gl_FragColor = mix(colorA, colorB, mix_value);
+                }
+            `,
+            
+            blue: `
+                precision highp float;
+                uniform sampler2D u_imageA;
+                uniform sampler2D u_imageB;
+                uniform sampler2D u_noiseTexture;
+                uniform float u_progress;
+                varying vec2 v_texCoord;
+                
+                float blueNoise(vec2 coord) {
+                    vec2 uv1 = coord * 1.0;
+                    vec2 uv2 = coord * 2.7;
+                    vec2 uv3 = coord * 7.3;
+                    
+                    float n1 = texture2D(u_noiseTexture, uv1).r;
+                    float n2 = texture2D(u_noiseTexture, uv2).g;
+                    float n3 = texture2D(u_noiseTexture, uv3).b;
+                    
+                    return fract(n1 + n2 * 0.5 + n3 * 0.25);
+                }
+                
+                void main() {
+                    float noise = blueNoise(v_texCoord);
+                    
+                    // Smooth threshold
+                    float edge = 0.02;
+                    float mix_value = smoothstep(noise - edge, noise + edge, u_progress);
+                    
+                    vec4 colorA = texture2D(u_imageA, v_texCoord);
+                    vec4 colorB = texture2D(u_imageB, v_texCoord);
+                    
+                    gl_FragColor = mix(colorA, colorB, mix_value);
+                }
+            `
+        };
+        
+        function compileShader(type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+            
+            return shader;
+        }
+        
+        function createProgram(vertexSource, fragmentSource) {
+            const vertexShader = compileShader(gl.VERTEX_SHADER, vertexSource);
+            const fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragmentSource);
+            
+            const prog = gl.createProgram();
+            gl.attachShader(prog, vertexShader);
+            gl.attachShader(prog, fragmentShader);
+            gl.linkProgram(prog);
+            
+            if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+                console.error('Program link error:', gl.getProgramInfoLog(prog));
+                return null;
+            }
+            
+            return prog;
+        }
+        
+        function createTexture(image) {
+            const texture = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+            
+            return texture;
+        }
+        
+        function createNoiseTexture() {
+            const size = 512;
+            const data = new Uint8Array(size * size * 4);
+            
+            for (let i = 0; i < size * size; i++) {
+                const idx = i * 4;
+                data[idx] = Math.random() * 255;
+                data[idx + 1] = Math.random() * 255;
+                data[idx + 2] = Math.random() * 255;
+                data[idx + 3] = 255;
+            }
+            
+            const texture = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size, size, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+            
+            return texture;
+        }
+        
+        function setupGeometry(prog) {
+            const positions = new Float32Array([
+                -1, -1,  1, -1,  -1, 1,
+                -1, 1,   1, -1,   1, 1
+            ]);
+            
+            const texCoords = new Float32Array([
+                0, 1,  1, 1,  0, 0,
+                0, 0,  1, 1,  1, 0
+            ]);
+            
+            const positionBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+            
+            const positionLocation = gl.getAttribLocation(prog, 'a_position');
+            gl.enableVertexAttribArray(positionLocation);
+            gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+            
+            const texCoordBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STATIC_DRAW);
+            
+            const texCoordLocation = gl.getAttribLocation(prog, 'a_texCoord');
+            gl.enableVertexAttribArray(texCoordLocation);
+            gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
+        }
+        
+        function render() {
+            const progress = progressSlider.value / 100;
+            const ditherType = ditherTypeSelect.value;
+            
+            // Recreate program if shader type changed
+            if (!program || program.ditherType !== ditherType) {
+                program = createProgram(vertexShaderSource, fragmentShaders[ditherType]);
+                program.ditherType = ditherType;
+                setupGeometry(program);
+            }
+            
+            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+            gl.clearColor(0, 0, 0, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            
+            gl.useProgram(program);
+            
+            // Bind textures
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, textureA);
+            gl.uniform1i(gl.getUniformLocation(program, 'u_imageA'), 0);
+            
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, textureB);
+            gl.uniform1i(gl.getUniformLocation(program, 'u_imageB'), 1);
+            
+            if (ditherType !== 'ordered') {
+                gl.activeTexture(gl.TEXTURE2);
+                gl.bindTexture(gl.TEXTURE_2D, noiseTexture);
+                gl.uniform1i(gl.getUniformLocation(program, 'u_noiseTexture'), 2);
+            }
+            
+            // Set uniforms
+            gl.uniform1f(gl.getUniformLocation(program, 'u_progress'), progress);
+            gl.uniform2f(gl.getUniformLocation(program, 'u_resolution'), canvas.width, canvas.height);
+            
+            // Draw
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+        }
+        
+        // Load images
+        let img1, img2;
+        let loaded = 0;
+        
+        function onImageLoad() {
+            loaded++;
+            if (loaded === 2) {
+                status.textContent = 'Ready!';
+                status.style.color = '#0f0';
+                animateBtn.disabled = false;
+                animateBtn.textContent = 'Animate Transition';
+                
+                // Set canvas size based on first image
+                canvas.width = img1.width;
+                canvas.height = img1.height;
+                
+                // Create textures
+                textureA = createTexture(img1);
+                textureB = createTexture(img2);
+                noiseTexture = createNoiseTexture();
+                
+                // Initial render
+                render();
+            }
+        }
+        
+        img1 = new Image();
+        img1.crossOrigin = 'anonymous';
+        img1.onload = onImageLoad;
+        img1.onerror = () => {
+            status.textContent = 'Error loading Image1.jpg';
+            status.style.color = '#f00';
+        };
+        img1.src = 'Image1.jpg';
+        
+        img2 = new Image();
+        img2.crossOrigin = 'anonymous';
+        img2.onload = onImageLoad;
+        img2.onerror = () => {
+            status.textContent = 'Error loading Image2.jpg';
+            status.style.color = '#f00';
+        };
+        img2.src = 'Image2.jpg';
+        
+        // Event listeners
+        progressSlider.addEventListener('input', (e) => {
+            progressValue.textContent = e.target.value + '%';
+            if (!isAnimating) {
+                render();
+            }
+        });
+        
+        ditherTypeSelect.addEventListener('change', () => {
+            if (!isAnimating) {
+                render();
+            }
+        });
+        
+        animateBtn.addEventListener('click', () => {
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            animateBtn.textContent = 'Animating...';
+            animateBtn.disabled = true;
+            progressSlider.value = 0;
+            
+            const startTime = Date.now();
+            const duration = 3000;
+            
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                progressSlider.value = progress * 100;
+                progressValue.textContent = Math.round(progress * 100) + '%';
+                render();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    isAnimating = false;
+                    animateBtn.textContent = 'Animate Transition';
+                    animateBtn.disabled = false;
+                }
+            }
+            
+            animate();
+        });
+    </script>
+</body>
+</html>

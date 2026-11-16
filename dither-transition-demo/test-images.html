@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Loading Test</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: white;
+            font-family: monospace;
+            padding: 20px;
+        }
+        img {
+            max-width: 45%;
+            margin: 10px;
+            border: 2px solid lime;
+        }
+        .info {
+            background: #2a2a2a;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 3px solid lime;
+        }
+        .error {
+            border-left-color: red;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Loading Test</h1>
+    <div id="log"></div>
+    
+    <h2>Image 1:</h2>
+    <img id="img1" src="Image1.jpg">
+    <div id="info1" class="info">Loading...</div>
+    
+    <h2>Image 2:</h2>
+    <img id="img2" src="Image2.jpg">
+    <div id="info2" class="info">Loading...</div>
+
+    <script>
+        const img1 = document.getElementById('img1');
+        const img2 = document.getElementById('img2');
+        const info1 = document.getElementById('info1');
+        const info2 = document.getElementById('info2');
+        
+        img1.onload = function() {
+            info1.textContent = `✓ Loaded: ${this.naturalWidth} × ${this.naturalHeight}px`;
+            console.log('Image1 loaded:', this.naturalWidth, this.naturalHeight);
+        };
+        
+        img1.onerror = function(e) {
+            info1.textContent = '✗ Failed to load Image1.jpg';
+            info1.className = 'info error';
+            console.error('Image1 error:', e);
+        };
+        
+        img2.onload = function() {
+            info2.textContent = `✓ Loaded: ${this.naturalWidth} × ${this.naturalHeight}px`;
+            console.log('Image2 loaded:', this.naturalWidth, this.naturalHeight);
+        };
+        
+        img2.onerror = function(e) {
+            info2.textContent = '✗ Failed to load Image2.jpg';
+            info2.className = 'info error';
+            console.error('Image2 error:', e);
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Dither Transition (Canvas 2D)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        
+        #canvas {
+            max-width: 90vw;
+            max-height: 70vh;
+            border: 2px solid #444;
+            border-radius: 8px;
+            background: #000;
+        }
+        
+        .controls {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        label {
+            min-width: 100px;
+            font-size: 0.9em;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            height: 4px;
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+            background: #444;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #4a9eff;
+            cursor: pointer;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #4a9eff;
+            cursor: pointer;
+            border: none;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: #4a9eff;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 1em;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #3a8eef;
+        }
+        
+        .value {
+            color: #4a9eff;
+            min-width: 50px;
+            text-align: right;
+            font-weight: bold;
+        }
+        
+        select {
+            flex: 1;
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        
+        #status {
+            font-size: 0.85em;
+            color: #888;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dithered Image Transition</h1>
+    
+    <canvas id="canvas"></canvas>
+    
+    <div class="controls">
+        <div class="control-row">
+            <label>Dither Type:</label>
+            <select id="ditherType">
+                <option value="random">Random Noise</option>
+                <option value="ordered" selected>Ordered Dither (Bayer)</option>
+                <option value="blue">Blue Noise (Approximation)</option>
+            </select>
+        </div>
+        
+        <div class="control-row">
+            <label>Progress:</label>
+            <input type="range" id="progress" min="0" max="100" value="0">
+            <span class="value" id="progressValue">0%</span>
+        </div>
+        
+        <button id="animate">Animate Transition</button>
+        
+        <div id="status">Loading images...</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const progressSlider = document.getElementById('progress');
+        const progressValue = document.getElementById('progressValue');
+        const ditherTypeSelect = document.getElementById('ditherType');
+        const animateBtn = document.getElementById('animate');
+        const status = document.getElementById('status');
+        
+        let img1, img2;
+        let isAnimating = false;
+        
+        // Bayer matrix 8x8
+        const bayerMatrix = [
+            [ 0, 32,  8, 40,  2, 34, 10, 42],
+            [48, 16, 56, 24, 50, 18, 58, 26],
+            [12, 44,  4, 36, 14, 46,  6, 38],
+            [60, 28, 52, 20, 62, 30, 54, 22],
+            [ 3, 35, 11, 43,  1, 33,  9, 41],
+            [51, 19, 59, 27, 49, 17, 57, 25],
+            [15, 47,  7, 39, 13, 45,  5, 37],
+            [63, 31, 55, 23, 61, 29, 53, 21]
+        ];
+        
+        // Load images
+        function loadImages() {
+            let loaded = 0;
+            
+            img1 = new Image();
+            img1.onload = () => {
+                loaded++;
+                if (loaded === 2) onImagesLoaded();
+            };
+            img1.onerror = () => {
+                status.textContent = 'Error loading Image1.jpg';
+                status.style.color = '#f00';
+            };
+            img1.src = 'Image1.jpg';
+            
+            img2 = new Image();
+            img2.onload = () => {
+                loaded++;
+                if (loaded === 2) onImagesLoaded();
+            };
+            img2.onerror = () => {
+                status.textContent = 'Error loading Image2.jpg';
+                status.style.color = '#f00';
+            };
+            img2.src = 'Image2.jpg';
+        }
+        
+        function onImagesLoaded() {
+            status.textContent = 'Ready! Use slider or click Animate';
+            status.style.color = '#0f0';
+            
+            // Set canvas size
+            canvas.width = img1.width;
+            canvas.height = img1.height;
+            
+            // Initial render
+            render();
+        }
+        
+        function getBayerThreshold(x, y) {
+            return bayerMatrix[y % 8][x % 8] / 64.0;
+        }
+        
+        function getRandomThreshold() {
+            return Math.random();
+        }
+        
+        function getBlueNoiseThreshold(x, y) {
+            // Simple multi-scale approximation
+            const s1 = Math.sin(x * 0.1 + y * 0.1) * 0.5 + 0.5;
+            const s2 = Math.sin(x * 0.3 - y * 0.2) * 0.5 + 0.5;
+            const s3 = Math.sin(x * 0.7 + y * 0.5) * 0.5 + 0.5;
+            return (s1 + s2 * 0.5 + s3 * 0.25) / 1.75;
+        }
+        
+        function render() {
+            if (!img1 || !img2) return;
+            
+            const progress = progressSlider.value / 100;
+            const ditherType = ditherTypeSelect.value;
+            
+            // Draw first image
+            ctx.drawImage(img1, 0, 0);
+            
+            // Get image data
+            const imageData1 = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+            // Draw second image
+            ctx.drawImage(img2, 0, 0);
+            const imageData2 = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+            // Create output
+            const output = ctx.createImageData(canvas.width, canvas.height);
+            
+            // Process pixels
+            for (let y = 0; y < canvas.height; y++) {
+                for (let x = 0; x < canvas.width; x++) {
+                    const idx = (y * canvas.width + x) * 4;
+                    
+                    // Get threshold based on dither type
+                    let threshold;
+                    if (ditherType === 'ordered') {
+                        threshold = getBayerThreshold(x, y);
+                    } else if (ditherType === 'blue') {
+                        threshold = getBlueNoiseThreshold(x, y);
+                    } else {
+                        threshold = getRandomThreshold();
+                    }
+                    
+                    // Choose which image to use for this pixel
+                    const useImg2 = progress > threshold;
+                    const sourceData = useImg2 ? imageData2.data : imageData1.data;
+                    
+                    output.data[idx] = sourceData[idx];         // R
+                    output.data[idx + 1] = sourceData[idx + 1]; // G
+                    output.data[idx + 2] = sourceData[idx + 2]; // B
+                    output.data[idx + 3] = 255;                 // A
+                }
+            }
+            
+            ctx.putImageData(output, 0, 0);
+        }
+        
+        // Event listeners
+        progressSlider.addEventListener('input', (e) => {
+            progressValue.textContent = e.target.value + '%';
+            if (!isAnimating) {
+                render();
+            }
+        });
+        
+        ditherTypeSelect.addEventListener('change', () => {
+            if (!isAnimating) {
+                render();
+            }
+        });
+        
+        animateBtn.addEventListener('click', () => {
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            animateBtn.textContent = 'Animating...';
+            progressSlider.value = 0;
+            
+            const startTime = Date.now();
+            const duration = 3000; // 3 seconds
+            
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                progressSlider.value = progress * 100;
+                progressValue.textContent = Math.round(progress * 100) + '%';
+                render();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    isAnimating = false;
+                    animateBtn.textContent = 'Animate Transition';
+                }
+            }
+            
+            animate();
+        });
+        
+        // Start loading
+        loadImages();
+    </script>
+</body>
+</html>

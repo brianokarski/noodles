@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>GUILLOCHÉ LAB — security engraving</title>
+<style>
+  :root{
+    --ink:#f2f2f0; --bg:#0d0d0c; --panel:#141413; --line:#262624;
+    --dim:#78786f; --accent:#d6ff3f; --hot:#ff5c3a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{
+    background:var(--bg);color:var(--ink);
+    font:400 11px/1.35 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.03em;
+    display:grid;grid-template-columns:262px 1fr;
+    user-select:none;-webkit-user-select:none;
+  }
+  aside{border-right:1px solid var(--line);background:var(--panel);overflow-y:auto;display:flex;flex-direction:column}
+  .brand{padding:13px 14px 11px;border-bottom:1px solid var(--line)}
+  .brand h1{margin:0;font-size:12px;letter-spacing:.22em;font-weight:500}
+  .brand p{margin:5px 0 0;color:var(--dim);font-size:9.5px}
+  section{padding:12px 14px;border-bottom:1px solid var(--line)}
+  section>h2{margin:0 0 10px;font-size:9px;letter-spacing:.24em;color:var(--dim);font-weight:500}
+
+  .ctl{margin-bottom:12px}
+  .ctl:last-child{margin-bottom:0}
+  .ctl .top{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+  .ctl .chk{flex:none;width:12px;height:12px;border:1px solid #3a3a35;background:none;
+    cursor:pointer;padding:0;border-radius:2px}
+  .ctl .chk:hover{border-color:var(--dim)}
+  .ctl .chk.on{background:var(--accent);border-color:var(--accent);
+    box-shadow:0 0 6px rgba(214,255,63,.5)}
+  .ctl .lbl{flex:1;color:var(--dim);font-size:10px;cursor:ew-resize;padding:2px 0;
+    border-bottom:1px dotted transparent}
+  .ctl .lbl:hover{color:var(--ink);border-bottom-color:#4a4a44}
+  .ctl .box{display:flex;align-items:baseline;gap:2px;border:1px solid var(--line);
+    background:#0d0d0c;padding:3px 5px;min-width:62px;justify-content:flex-end}
+  .ctl .box:focus-within{border-color:var(--accent)}
+  .ctl input{background:none;border:0;color:var(--ink);font:inherit;font-size:10.5px;
+    text-align:right;width:42px;padding:0;font-variant-numeric:tabular-nums;outline:none}
+  .ctl .u{color:var(--dim);font-size:9.5px}
+  .ctl .track{position:relative;height:18px;cursor:ew-resize;touch-action:none}
+  .ctl .track::before{content:'';position:absolute;left:0;right:0;top:8px;height:3px;
+    background:#2c2c28;border-radius:2px}
+  .ctl .fill{position:absolute;left:0;top:8px;height:3px;background:#4d5231;border-radius:2px}
+  .ctl .knob{position:absolute;top:2px;width:12px;height:14px;margin-left:-6px;border-radius:3px;
+    background:var(--ink)}
+  .ctl .track:hover .knob,.ctl.live .knob{background:var(--accent)}
+
+  .seg{display:grid;grid-auto-flow:column;border:1px solid var(--line)}
+  .seg button{background:none;border:0;border-right:1px solid var(--line);color:var(--dim);
+    font:inherit;font-size:9.5px;letter-spacing:.06em;padding:8px 2px;cursor:pointer;white-space:nowrap}
+  .seg button:last-child{border-right:0}
+  .seg button:hover{color:var(--ink)}
+  .seg button.on{background:var(--ink);color:#0d0d0c}
+
+  .cline{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .cline:last-child{margin-bottom:0}
+  .cline b{font-weight:400;color:var(--dim);font-size:10px;width:30px}
+  .sw{display:flex;gap:5px;flex-wrap:wrap;flex:1}
+  .sw button{width:22px;height:22px;border-radius:50%;border:1px solid #33332f;padding:0;cursor:pointer}
+  .sw button.on{box-shadow:0 0 0 1px var(--panel),0 0 0 2px var(--accent)}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .num{display:flex;flex-direction:column;gap:4px}
+  .num b{font-weight:400;color:var(--dim);font-size:10px}
+  .num input{background:#0d0d0c;border:1px solid var(--line);color:var(--ink);font:inherit;padding:6px;width:100%;outline:none}
+  .num input:focus{border-color:var(--accent)}
+
+  .acts{padding:12px 14px;display:grid;gap:6px}
+  .acts button{background:none;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:9.5px;
+    letter-spacing:.13em;padding:9px;cursor:pointer;text-align:left}
+  .acts button:hover{border-color:var(--ink)}
+  .acts button.pri{background:var(--accent);color:#0d0d0c;border-color:var(--accent);font-weight:500}
+  .acts .k{float:right;color:var(--dim)}
+  .acts .pri .k{color:#0d0d0c;opacity:.55}
+  footer{margin-top:auto;padding:12px 14px;color:var(--dim);font-size:9.5px;line-height:1.75;border-top:1px solid var(--line)}
+
+  main{position:relative;overflow:hidden;background:#000}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+  .hud{position:absolute;left:12px;bottom:10px;color:#5e5e57;font-size:9.5px;letter-spacing:.12em;
+    pointer-events:none;font-variant-numeric:tabular-nums}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand">
+    <h1>GUILLOCHÉ LAB</h1>
+    <p>security engraving — weave, offset, blend</p>
+  </div>
+
+  <section>
+    <h2>ENGINE</h2>
+    <div class="seg" id="mode" style="margin-bottom:6px">
+      <button data-m="rosette" class="on">ROSETTE</button>
+      <button data-m="band">BAND</button>
+    </div>
+    <div class="seg" id="mode2">
+      <button data-m="weave">WEAVE</button>
+      <button data-m="blend">BLEND</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>PRESETS</h2>
+    <div class="seg" id="presets" style="margin-bottom:6px">
+      <button data-p="note">NOTE</button>
+      <button data-p="envelope">ENVELOPE</button>
+      <button data-p="basket">BASKET</button>
+    </div>
+    <div class="seg" id="presets2">
+      <button data-p="moire">MOIRE</button>
+      <button data-p="ribbon">RIBBON</button>
+      <button data-p="morph">MORPH</button>
+      <button data-p="seal">SEAL</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>STRANDS</h2>
+    <div class="ctls" data-keys="lines,spread,swell,swf,phd,nrm"></div>
+  </section>
+
+  <section>
+    <h2>WAVE</h2>
+    <div class="ctls" data-keys="wf,wa,wph,wf2,wa2,atap"></div>
+  </section>
+
+  <section data-md="rosette blend">
+    <h2>ROSETTE</h2>
+    <div class="ctls" data-keys="petals,rad,rmod,turns,twist,ecc"></div>
+  </section>
+
+  <section data-md="band weave">
+    <h2>BAND</h2>
+    <div class="ctls" data-keys="len,rot"></div>
+  </section>
+
+  <section data-md="weave">
+    <h2>WEAVE</h2>
+    <div class="ctls" data-keys="angle,lines2,spread2,cellp,gap"></div>
+  </section>
+
+  <section data-md="blend">
+    <h2>BLEND</h2>
+    <div class="ctls" data-keys="steps,petalsB,rmodB,browt,bscl,ease"></div>
+  </section>
+
+  <section>
+    <h2>INK</h2>
+    <div class="ctls" data-keys="w1,w2,a1,a2,jit,jitf,detail"></div>
+  </section>
+
+  <section>
+    <h2>ANIMATE</h2>
+    <div class="ctls" data-keys="aspeed"></div>
+  </section>
+
+  <section>
+    <h2>INK COLOR</h2>
+    <div class="cline"><b>WARP</b><div class="sw" data-slot="a"></div></div>
+    <div class="cline"><b>WEFT</b><div class="sw" data-slot="b"></div></div>
+    <div class="cline"><b>PAPER</b><div class="sw" data-slot="bg"></div></div>
+  </section>
+
+  <section>
+    <h2>BOARD</h2>
+    <div class="two">
+      <div class="num"><b>W</b><input id="bw" type="number" value="1200" min="16"></div>
+      <div class="num"><b>H</b><input id="bh" type="number" value="1200" min="16"></div>
+    </div>
+  </section>
+
+  <div class="acts">
+    <button id="rand">RANDOMIZE <span class="k">R</span></button>
+    <button id="fill">FILL BOARD <span class="k">F</span></button>
+    <button id="reset">RESET DIALS</button>
+    <button id="stopAnim">STOP ANIMATION</button>
+    <button id="expsvg">EXPORT SVG <span class="k">S</span></button>
+    <button id="exppng" class="pri">EXPORT PNG <span class="k">E</span></button>
+  </div>
+
+  <footer>
+    OFFSET PATH 0% = parallel hatch,<br>
+    100% = true offset (it will cusp).<br>
+    WEAVE interlaces warp over weft.<br>
+    CROSSING BREAK punches the overs.<br>
+    animate WAVE PHASE to make it breathe.<br>
+    drag canvas: angle + phase.
+  </footer>
+</aside>
+
+<main>
+  <canvas id="c"></canvas>
+  <div class="hud" id="hud"></div>
+</main>
+
+<script>
+(function(){
+"use strict";
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),hud=document.getElementById('hud');
+const SWATCH=['#0b2f6b','#1d7a5f','#8b1d3f','#c9a227','#111111','#6f7cd8','#e8e2d0','#ffffff'];
+const TAU=Math.PI*2;
+
+const SPEC={
+  lines:['strands',1,400,1,'',0],
+  spread:['strand gap',0.25,80,0.25,'px',2],
+  swell:['gap swell',0,100,1,'%',0],
+  swf:['swell freq',0,16,0.05,'',2],
+  phd:['phase drift',-30,30,0.05,'\u00b0',2],
+  nrm:['offset path',0,100,1,'%',0],
+
+  wf:['wave freq',0,32,0.01,'',2],
+  wa:['wave amp',0,500,1,'px',0],
+  wph:['wave phase',0,360,0.5,'\u00b0',1],
+  wf2:['harmonic freq',0,64,0.01,'',2],
+  wa2:['harmonic amp',0,400,1,'px',0],
+  atap:['amp taper',-100,100,1,'%',0],
+
+  petals:['petals',1,60,0.05,'',2],
+  rad:['radius',5,150,1,'%',0],
+  rmod:['petal depth',0,95,0.5,'%',1],
+  turns:['turns',1,80,0.5,'\u00d7',1],
+  twist:['twist',-360,360,1,'\u00b0',0],
+  ecc:['squash',15,200,1,'%',0],
+
+  len:['band length',20,260,1,'%',0],
+  rot:['band angle',-180,180,0.5,'\u00b0',1],
+
+  angle:['cross angle',1,179,0.5,'\u00b0',1],
+  lines2:['weft strands',1,400,1,'',0],
+  spread2:['weft gap',0.25,80,0.25,'px',2],
+  cellp:['weave period',1,32,1,'',0],
+  gap:['crossing break',0,14,0.25,'px',2],
+
+  steps:['blend steps',2,240,1,'',0],
+  petalsB:['petals to',1,60,0.05,'',2],
+  rmodB:['depth to',0,95,0.5,'%',1],
+  browt:['rotate to',-360,360,1,'\u00b0',0],
+  bscl:['scale to',5,300,1,'%',0],
+  ease:['blend ease',-100,100,1,'%',0],
+
+  w1:['ink first',0.1,10,0.05,'px',2],
+  w2:['ink last',0.1,10,0.05,'px',2],
+  a1:['alpha first',2,100,1,'%',0],
+  a2:['alpha last',2,100,1,'%',0],
+  jit:['engrave wobble',0,100,0.5,'%',1],
+  jitf:['wobble grain',0.5,60,0.5,'',1],
+  detail:['smoothness',200,8000,50,'pts',0],
+  aspeed:['speed',5,400,1,'%',0]
+};
+const DEF={
+  lines:26,spread:5,swell:0,swf:2,phd:0,nrm:0,
+  wf:3,wa:0,wph:0,wf2:0,wa2:0,atap:0,
+  petals:9,rad:72,rmod:34,turns:1,twist:0,ecc:100,
+  len:120,rot:0,
+  angle:90,lines2:26,spread2:5,cellp:2,gap:2,
+  steps:40,petalsB:14,rmodB:52,browt:90,bscl:60,ease:0,
+  w1:0.9,w2:0.9,a1:90,a2:90,jit:0,jitf:8,detail:1600,
+  aspeed:100
+};
+const P=Object.assign({},DEF);
+let colors={a:'#0b2f6b',b:'#6f7cd8',bg:'#e8e2d0'};
+let board={w:1200,h:1200};
+let mode='rosette';
+let view={s:1,ox:0,oy:0},dpr=1,hist=[];
+
+const state=()=>JSON.stringify({P:P,colors:colors,mode:mode});
+function snap(){hist.push(state());if(hist.length>80)hist.shift();}
+function undo(){const h=hist.pop();if(!h)return;const o=JSON.parse(h);
+  Object.assign(P,o.P);colors=o.colors;mode=o.mode;
+  segOn('mode','m',mode);segOn('mode2','m',mode);applyMode();syncAll();draw();}
+
+/* ================= dials ================= */
+const UI={};
+function fmt(k,v){const d=SPEC[k][5];return d?v.toFixed(d):String(Math.round(v));}
+function clampStep(k,v){
+  const [,mn,mx,st]=SPEC[k];
+  v=Math.max(mn,Math.min(mx,v));
+  return +(Math.round(v/st)*st).toFixed(4);
+}
+function setVal(k,v,opts){
+  const o=opts||{};
+  const nv=clampStep(k,v);
+  if(nv===P[k]&&!o.force) return;
+  P[k]=nv;paintCtl(k);
+  if(!o.silent) draw();
+}
+function paintCtl(k){
+  const u=UI[k];if(!u)return;
+  const [,mn,mx]=SPEC[k];
+  const t=(P[k]-mn)/(mx-mn);
+  u.fill.style.width=(t*100)+'%';
+  u.knob.style.left=(t*100)+'%';
+  if(document.activeElement!==u.input) u.input.value=fmt(k,P[k]);
+}
+let armed=true;
+function snapOnce(){if(armed){snap();armed=false;}}
+function buildCtl(k){
+  const [label,mn,mx,st]=SPEC[k];
+  const el=document.createElement('div');
+  el.className='ctl';
+  el.innerHTML=
+    '<div class="top">'+(k==='aspeed'?'':'<button class="chk" title="animate"></button>')+
+    '<div class="lbl">'+label+'</div>'+
+    '<div class="box"><input inputmode="decimal" spellcheck="false"><span class="u">'+SPEC[k][4]+'</span></div></div>'+
+    '<div class="track"><div class="fill"></div><div class="knob"></div></div>';
+  const input=el.querySelector('input'),track=el.querySelector('.track'),
+        lbl=el.querySelector('.lbl');
+  UI[k]={el:el,input:input,fill:el.querySelector('.fill'),knob:el.querySelector('.knob')};
+  const factor=e=>e.shiftKey?0.1:(e.altKey?10:1);
+  const commit=()=>{const n=parseFloat(input.value);
+    if(isFinite(n)) setVal(k,n,{force:true}); paintCtl(k);};
+  input.addEventListener('focus',()=>input.select());
+  input.addEventListener('change',commit);
+  input.addEventListener('blur',commit);
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){commit();input.blur();e.preventDefault();}
+    else if(e.key==='ArrowUp'||e.key==='ArrowDown'){
+      e.preventDefault();
+      const d=(e.key==='ArrowUp'?1:-1)*st*(e.shiftKey?10:1);
+      snapOnce();setVal(k,P[k]+d,{force:true});
+    }else if(e.key==='Escape'){input.value=fmt(k,P[k]);input.blur();}
+    e.stopPropagation();
+  });
+  track.addEventListener('pointerdown',e=>{
+    e.preventDefault();track.setPointerCapture(e.pointerId);
+    snapOnce();el.classList.add('live');
+    const r=track.getBoundingClientRect();
+    const fromX=x=>mn+((x-r.left)/r.width)*(mx-mn);
+    let last=fromX(e.clientX);
+    setVal(k,last,{force:true});
+    const move=ev=>{
+      const rawv=fromX(ev.clientX),f=factor(ev);
+      if(f===1){setVal(k,rawv);last=rawv;}
+      else{setVal(k,P[k]+(rawv-last)*f);last=rawv;}
+    };
+    const up=()=>{track.removeEventListener('pointermove',move);
+      track.removeEventListener('pointerup',up);
+      el.classList.remove('live');armed=true;};
+    track.addEventListener('pointermove',move);
+    track.addEventListener('pointerup',up);
+  });
+  lbl.addEventListener('pointerdown',e=>{
+    e.preventDefault();lbl.setPointerCapture(e.pointerId);
+    snapOnce();el.classList.add('live');
+    let px=e.clientX,start=P[k],acc=0;
+    const move=ev=>{acc+=(ev.clientX-px)*st*factor(ev);px=ev.clientX;setVal(k,start+acc);};
+    const up=()=>{lbl.removeEventListener('pointermove',move);
+      lbl.removeEventListener('pointerup',up);
+      el.classList.remove('live');armed=true;};
+    lbl.addEventListener('pointermove',move);
+    lbl.addEventListener('pointerup',up);
+  });
+  el.addEventListener('wheel',e=>{
+    e.preventDefault();snapOnce();
+    setVal(k,P[k]+(e.deltaY<0?1:-1)*st*(e.shiftKey?10:1));
+  },{passive:false});
+  const chk=el.querySelector('.chk');
+  if(chk) chk.onclick=()=>{
+    if(anim[k]){delete anim[k];chk.classList.remove('on');}
+    else{
+      const [,mn2,mx2]=SPEC[k];
+      anim[k]={u:(P[k]-mn2)/(mx2-mn2),dir:1};
+      chk.classList.add('on');startAnim();
+    }
+  };
+  paintCtl(k);
+  return el;
+}
+const anim={};
+let rafId=null,lastTs=0;
+function startAnim(){if(rafId==null){lastTs=0;rafId=requestAnimationFrame(tick);}}
+function tick(ts){
+  if(!lastTs) lastTs=ts;
+  const dt=Math.min(.1,(ts-lastTs)/1000);lastTs=ts;
+  const speed=P.aspeed/100,keys=Object.keys(anim);
+  if(!keys.length){rafId=null;return;}
+  keys.forEach(k=>{
+    const a=anim[k],[,mn,mx]=SPEC[k];
+    a.u+=(dt/4)*speed*a.dir;
+    if(a.u>1){a.u=2-a.u;a.dir=-1;}
+    if(a.u<0){a.u=-a.u;a.dir=1;}
+    setVal(k,mn+a.u*(mx-mn),{force:true,silent:true});
+  });
+  draw();
+  rafId=requestAnimationFrame(tick);
+}
+function stopAnim(){
+  Object.keys(anim).forEach(k=>delete anim[k]);
+  document.querySelectorAll('.ctl .chk.on').forEach(c=>c.classList.remove('on'));
+}
+document.querySelectorAll('.ctls').forEach(host=>{
+  host.dataset.keys.split(',').forEach(k=>host.appendChild(buildCtl(k.trim())));
+});
+function syncAll(){Object.keys(SPEC).forEach(paintCtl);
+  document.querySelectorAll('.sw').forEach(g=>{
+    [...g.children].forEach(b=>b.classList.toggle('on',b.dataset.c===colors[g.dataset.slot]));});}
+
+/* ================= math ================= */
+function hash1(i,seed){
+  let h=(i|0)*374761393+(seed|0)*668265263;
+  h=(h^(h>>>13))>>>0;h=Math.imul(h,1274126177)>>>0;
+  return ((h^(h>>>16))>>>0)/4294967296;
+}
+function noise1(x,seed){
+  const i=Math.floor(x),f=x-i;
+  const a=hash1(i,seed),b=hash1(i+1,seed);
+  const u=f*f*(3-2*f);
+  return (a+(b-a)*u)*2-1;
+}
+function lerp(a,b,t){return a+(b-a)*t;}
+function hexRGBc(h){return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+function mixColor(t){
+  const A=hexRGBc(colors.a),B=hexRGBc(colors.b);
+  return 'rgb('+Math.round(lerp(A[0],B[0],t))+','+Math.round(lerp(A[1],B[1],t))+','
+    +Math.round(lerp(A[2],B[2],t))+')';
+}
+function easeT(t){
+  const e=P.ease/100;
+  if(e===0) return t;
+  return e>0 ? Math.pow(t,1+e*2.5) : 1-Math.pow(1-t,1+(-e)*2.5);
+}
+
+/* ================= generators =================
+   every generator returns [{pts:[{x,y}], t, grp}]
+   t = 0..1 across the family (drives ink width / alpha / color mix) */
+
+/* a band of offset-path hairlines along a harmonic skeleton */
+function makeBand(o){
+  const N=Math.max(48,Math.round(P.detail/2));
+  const L=Math.max(board.w,board.h)*(P.len/100);
+  const n=Math.max(1,Math.round(o.n));
+  const rot=o.rot*Math.PI/180,cr=Math.cos(rot),sr=Math.sin(rot);
+  const cx=board.w/2,cy=board.h/2;
+  const jw=P.jit*0.14;
+  const out=[];
+  for(let i=0;i<n;i++){
+    const t=n>1?i/(n-1):0;
+    const off=(i-(n-1)/2)*o.spread;
+    const phi=(o.phase+i*P.phd)*Math.PI/180;
+    const as=1+(P.atap/100)*(t*2-1);   /* wave amp taper across the family */
+    const nb=P.nrm/100;
+    const pts=new Array(N);
+    for(let j=0;j<N;j++){
+      const u=j/(N-1),x=(u-0.5)*L;
+      const th1=P.wf*u*TAU+phi,th2=P.wf2*u*TAU+phi*1.5;
+      const y=as*(P.wa*Math.sin(th1)+P.wa2*Math.sin(th2));
+      /* analytic slope -> true normal. blend translation (no cusps) -> offset path */
+      const dy=(TAU/L)*as*(P.wa*P.wf*Math.cos(th1)+P.wa2*P.wf2*Math.cos(th2));
+      const m=Math.hypot(1,dy);
+      const ux=(-dy/m)*nb,uy=1+(1/m-1)*nb;
+      const sw=1+(P.swell/100)*Math.sin(P.swf*u*TAU+phi*0.5);
+      let d=off*sw;
+      if(jw>0) d+=noise1(u*P.jitf*6+i*3.17,91)*jw;
+      const px=x+ux*d,py=y+uy*d;
+      pts[j]={x:cx+px*cr-py*sr,y:cy+px*sr+py*cr};
+    }
+    out.push({pts:pts,t:t,grp:o.grp||'warp'});
+  }
+  return out;
+}
+
+/* polar rosette — engine turning. blend=true morphs A->B across steps */
+function makeRosette(blend){
+  const N=Math.max(120,Math.round(P.detail));
+  const n=Math.max(1,Math.round(blend?P.steps:P.lines));
+  const S=Math.min(board.w,board.h)/2;
+  const cx=board.w/2,cy=board.h/2;
+  const R0=S*(P.rad/100);
+  const ec=P.ecc/100;
+  const jw=P.jit*0.14;
+  const out=[];
+  for(let i=0;i<n;i++){
+    const t=n>1?i/(n-1):0,te=easeT(t);
+    const petals=blend?lerp(P.petals,P.petalsB,te):P.petals;
+    const rmod=(blend?lerp(P.rmod,P.rmodB,te):P.rmod)/100;
+    const spin=blend?te*P.browt*Math.PI/180:0;
+    const sc=blend?lerp(1,P.bscl/100,te):1;
+    const off=blend?0:(i-(n-1)/2)*P.spread;
+    const phi=(P.wph+i*P.phd)*Math.PI/180;
+    const R=R0*sc;
+    const pts=new Array(N);
+    for(let j=0;j<N;j++){
+      const u=j/(N-1),th=u*TAU*P.turns;
+      const sw=1+(P.swell/100)*Math.sin(P.swf*th+phi*0.5);
+      const as=1+(P.atap/100)*(t*2-1);
+      let rr=R*(1+rmod*Math.sin(petals*th+phi))
+             +as*((P.wa2/4)*Math.sin(P.wf2*th+phi*1.5)
+                 +(P.wa/6)*Math.sin(P.wf*th*petals+phi));
+      let r=rr+off*sw;
+      if(jw>0) r+=noise1(u*P.jitf*10+i*5.11,73)*jw;
+      const thh=th+P.twist*Math.PI/180*(rr/(R||1))+spin;
+      pts[j]={x:cx+r*Math.cos(thh),y:cy+r*Math.sin(thh)*ec};
+    }
+    out.push({pts:pts,t:t,grp:'warp'});
+  }
+  return out;
+}
+
+function buildLines(){
+  if(mode==='rosette') return makeRosette(false);
+  if(mode==='blend') return makeRosette(true);
+  if(mode==='band') return makeBand({n:P.lines,spread:P.spread,phase:P.wph,rot:P.rot,grp:'warp'});
+  /* weave: two crossed bands */
+  return makeBand({n:P.lines,spread:P.spread,phase:P.wph,rot:P.rot,grp:'warp'})
+    .concat(makeBand({n:P.lines2,spread:P.spread2,phase:P.wph+90,
+                      rot:P.rot+P.angle,grp:'weft'}));
+}
+
+/* interlace cells: the lattice where warp strand i crosses weft strand j.
+   over/under = (i+j) parity, so the cells are parallelograms in the two
+   strand frames — not a square checkerboard. */
+let cellCache={key:'',quads:null,path:null,count:0};
+function weaveCells(){
+  const key=[P.rot,P.angle,P.spread,P.spread2,P.cellp,P.lines,P.lines2,board.w,board.h].join('|');
+  if(cellCache.key===key) return cellCache;
+  const r1=P.rot*Math.PI/180,r2=(P.rot+P.angle)*Math.PI/180;
+  const n1=[-Math.sin(r1),Math.cos(r1)],n2=[-Math.sin(r2),Math.cos(r2)];
+  const det=n1[0]*n2[1]-n1[1]*n2[0];
+  const quads=[];
+  if(Math.abs(det)>1e-4){
+    const inv=(s,t)=>[(s*n2[1]-n1[1]*t)/det,(n1[0]*t-s*n2[0])/det];
+    const p1=Math.max(0.5,P.spread*P.cellp),p2=Math.max(0.5,P.spread2*P.cellp);
+    const cx=board.w/2,cy=board.h/2;
+    let s0=Infinity,s1=-Infinity,t0=Infinity,t1=-Infinity;
+    [[0,0],[board.w,0],[0,board.h],[board.w,board.h]].forEach(c=>{
+      const dx=c[0]-cx,dy=c[1]-cy;
+      const s=dx*n1[0]+dy*n1[1],t=dx*n2[0]+dy*n2[1];
+      s0=Math.min(s0,s);s1=Math.max(s1,s);t0=Math.min(t0,t);t1=Math.max(t1,t);
+    });
+    /* align cell centres to strand centres */
+    const off1=-(Math.max(1,Math.round(P.lines))-1)/2*P.spread;
+    const off2=-(Math.max(1,Math.round(P.lines2))-1)/2*P.spread2;
+    const i0=Math.floor((s0-off1)/p1)-1,i1=Math.ceil((s1-off1)/p1)+1;
+    const j0=Math.floor((t0-off2)/p2)-1,j1=Math.ceil((t1-off2)/p2)+1;
+    const MAX=24000;
+    outer:
+    for(let i=i0;i<=i1;i++){
+      for(let j=j0;j<=j1;j++){
+        if((((i+j)%2)+2)%2!==1) continue;
+        const sa=off1+(i-0.5)*p1,sb=sa+p1,ta=off2+(j-0.5)*p2,tb=ta+p2;
+        const A=inv(sa,ta),B=inv(sb,ta),C=inv(sb,tb),D=inv(sa,tb);
+        quads.push([cx+A[0],cy+A[1],cx+B[0],cy+B[1],cx+C[0],cy+C[1],cx+D[0],cy+D[1]]);
+        if(quads.length>=MAX) break outer;
+      }
+    }
+  }
+  const path=new Path2D();
+  for(let q=0;q<quads.length;q++){
+    const v=quads[q];
+    path.moveTo(v[0],v[1]);path.lineTo(v[2],v[3]);
+    path.lineTo(v[4],v[5]);path.lineTo(v[6],v[7]);path.closePath();
+  }
+  cellCache={key:key,quads:quads,path:path,count:quads.length};
+  return cellCache;
+}
+
+/* ================= render ================= */
+function inkOf(l){
+  const col=(mode==='weave')?(l.grp==='warp'?colors.a:colors.b):mixColor(l.t);
+  return {col:col,w:Math.max(0.05,lerp(P.w1,P.w2,l.t)),a:lerp(P.a1,P.a2,l.t)/100};
+}
+function tracePath(g,pts){
+  g.beginPath();g.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++) g.lineTo(pts[i].x,pts[i].y);
+}
+function strokeFamily(g,lines,casing){
+  for(let i=0;i<lines.length;i++){
+    const l=lines[i],ink=inkOf(l);
+    tracePath(g,l.pts);
+    if(casing>0){
+      g.globalAlpha=1;g.strokeStyle=colors.bg;g.lineWidth=ink.w+casing*2;g.stroke();
+    }
+    g.globalAlpha=ink.a;g.strokeStyle=ink.col;g.lineWidth=ink.w;g.stroke();
+  }
+}
+function fit(){
+  dpr=Math.min(window.devicePixelRatio||1,2);
+  const r=cv.parentElement.getBoundingClientRect();
+  cv.width=Math.round(r.width*dpr);cv.height=Math.round(r.height*dpr);
+  const pad=30;
+  view.s=Math.min((r.width-pad*2)/board.w,(r.height-pad*2)/board.h);
+  view.ox=(r.width-board.w*view.s)/2;view.oy=(r.height-board.h*view.s)/2;
+  draw();
+}
+new ResizeObserver(fit).observe(document.querySelector('main'));
+
+let lastCount=0,lastCells=0;
+function renderContent(g){
+  g.fillStyle=colors.bg;g.fillRect(0,0,board.w,board.h);
+  g.save();g.beginPath();g.rect(0,0,board.w,board.h);g.clip();
+  g.lineJoin='round';g.lineCap='round';
+  const lines=buildLines();
+  lastCount=lines.length;lastCells=0;
+  if(mode==='weave'){
+    const warp=lines.filter(l=>l.grp==='warp'),weft=lines.filter(l=>l.grp==='weft');
+    strokeFamily(g,weft,0);            /* under */
+    strokeFamily(g,warp,P.gap);        /* over everywhere */
+    const cc=weaveCells();             /* ...except in these cells */
+    lastCells=cc.count;
+    g.save();g.clip(cc.path);
+    strokeFamily(g,weft,P.gap);
+    g.restore();
+  }else{
+    strokeFamily(g,lines,0);
+  }
+  g.globalAlpha=1;g.restore();
+  return lines.length;
+}
+function draw(){
+  const W=cv.width/dpr,H=cv.height/dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.translate(view.ox,view.oy);ctx.scale(view.s,view.s);
+  renderContent(ctx);
+  ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=1/view.s;
+  ctx.strokeRect(0,0,board.w,board.h);
+  ctx.restore();
+  hud.textContent=mode.toUpperCase()+' · '+lastCount+' strands · '
+    +(mode==='rosette'||mode==='blend'
+        ? P.petals.toFixed(2)+' petals \u00d7 '+P.turns.toFixed(1)+' turns'
+        : P.wf.toFixed(2)+':'+P.wf2.toFixed(2)+' wave')
+    +(mode==='weave'?' · '+lastCells+' cells':'')
+    +' · '+board.w+'\u00d7'+board.h;
+}
+
+/* drag canvas: x = angle/rotate, y = wave phase */
+let dragging=null;
+cv.addEventListener('pointerdown',e=>{
+  cv.setPointerCapture(e.pointerId);snapOnce();
+  dragging={x:e.clientX,y:e.clientY,
+            r:(mode==='weave'?P.angle:(mode==='band'?P.rot:P.twist)),ph:P.wph};
+});
+cv.addEventListener('pointermove',e=>{
+  if(!dragging)return;
+  const dx=(e.clientX-dragging.x)*0.3,dy=-(e.clientY-dragging.y)*0.6;
+  const rk=(mode==='weave'?'angle':(mode==='band'?'rot':'twist'));
+  setVal(rk,dragging.r+dx,{force:true,silent:true});
+  setVal('wph',(((dragging.ph+dy)%360)+360)%360,{force:true,silent:true});
+  draw();
+});
+cv.addEventListener('pointerup',()=>{dragging=null;armed=true;});
+cv.addEventListener('pointercancel',()=>{dragging=null;armed=true;});
+
+/* ================= chrome ================= */
+const segOn=(id,attr,val)=>document.querySelectorAll('#'+id+' button')
+  .forEach(b=>b.classList.toggle('on',b.dataset[attr]===val));
+function applyMode(){
+  document.querySelectorAll('[data-md]').forEach(el=>{
+    el.hidden=el.dataset.md.split(' ').indexOf(mode)<0;
+  });
+}
+['mode','mode2'].forEach(id=>{
+  document.getElementById(id).onclick=e=>{
+    const b=e.target.closest('button');if(!b)return;
+    snap();mode=b.dataset.m;
+    segOn('mode','m',mode);segOn('mode2','m',mode);
+    applyMode();draw();
+  };
+});
+document.querySelectorAll('.sw').forEach(g=>{
+  SWATCH.forEach(c=>{
+    const b=document.createElement('button');
+    b.style.background=c;b.dataset.c=c;
+    if(colors[g.dataset.slot]===c)b.classList.add('on');
+    b.onclick=()=>{snap();colors[g.dataset.slot]=c;
+      [...g.children].forEach(x=>x.classList.toggle('on',x===b));draw();};
+    g.appendChild(b);
+  });
+});
+const bw=document.getElementById('bw'),bh=document.getElementById('bh');
+[bw,bh].forEach(el=>{
+  el.addEventListener('change',()=>{
+    board={w:Math.max(16,+bw.value||1200),h:Math.max(16,+bh.value||1200)};
+    cellCache.key='';fit();
+  });
+  el.addEventListener('keydown',e=>e.stopPropagation());
+});
+document.getElementById('reset').onclick=()=>{snap();Object.assign(P,DEF);syncAll();draw();};
+/* pack enough strands to cover the board at the current gap */
+function fillBoard(){
+  snap();
+  const D=Math.hypot(board.w,board.h);
+  P.lines=clampStep('lines',Math.ceil(D/P.spread)+2);
+  if(mode==='weave') P.lines2=clampStep('lines2',Math.ceil(D/P.spread2)+2);
+  if(mode==='band'||mode==='weave') P.len=Math.max(P.len,160);
+  cellCache.key='';syncAll();draw();
+}
+document.getElementById('fill').onclick=fillBoard;
+
+/* ================= presets ================= */
+const PRESETS={
+  /* banknote rosette: dense engine turning, hairline, tone on tone */
+  note:{m:'rosette',c:{a:'#0b2f6b',b:'#6f7cd8',bg:'#e8e2d0'},
+    p:{lines:6,spread:9,swell:0,swf:3,phd:0,
+       wf:0,wa:0,wph:0,wf2:0,wa2:0,
+       petals:11.31,rad:70,rmod:28,turns:26,twist:0,ecc:100,
+       w1:0.5,w2:0.5,a1:70,a2:70,jit:0,detail:7000}},
+  /* security envelope: tight parallel hatch, swelling, tilted */
+  envelope:{m:'band',c:{a:'#1d7a5f',b:'#1d7a5f',bg:'#e8e2d0'},
+    p:{lines:260,spread:7,swell:24,swf:1.6,phd:0,nrm:0,
+       wf:3.2,wa:26,wph:0,wf2:9,wa2:7,
+       len:180,rot:-20,
+       w1:0.7,w2:0.7,a1:95,a2:95,jit:2,jitf:16,detail:2000}},
+  /* basketweave: square interlace, fat strands, clear breaks */
+  basket:{m:'weave',c:{a:'#8b1d3f',b:'#c9a227',bg:'#e8e2d0'},
+    p:{lines:70,spread:26,swell:0,phd:0,
+       wf:0,wa:0,wf2:0,wa2:0,
+       len:200,rot:0,angle:90,lines2:70,spread2:26,cellp:1,gap:3,
+       w1:17,w2:17,a1:100,a2:100,jit:0,detail:600}},
+  /* moire: hairline weave at a shallow angle */
+  moire:{m:'weave',c:{a:'#0b2f6b',b:'#8b1d3f',bg:'#e8e2d0'},
+    p:{lines:200,spread:9,swell:16,swf:1.2,phd:0,
+       wf:2.2,wa:30,wph:0,wf2:6,wa2:8,
+       len:200,rot:0,angle:6,lines2:200,spread2:9,cellp:3,gap:1.2,
+       w1:1,w2:1,a1:100,a2:100,jit:0,detail:1400}},
+  /* ribbon: a wide swelling guilloche band, the wordmark underline */
+  ribbon:{m:'band',c:{a:'#0b2f6b',b:'#6f7cd8',bg:'#e8e2d0'},
+    p:{lines:56,spread:5.5,swell:60,swf:1.5,phd:0,nrm:0,atap:-70,
+       wf:1.6,wa:170,wph:0,wf2:4.8,wa2:26,
+       len:150,rot:0,
+       w1:1.1,w2:0.5,a1:95,a2:35,jit:0,detail:2400}},
+  /* morph: shape blend between two rosettes */
+  morph:{m:'blend',c:{a:'#0b2f6b',b:'#c9a227',bg:'#e8e2d0'},
+    p:{steps:56,petals:5,rmod:16,petalsB:17,rmodB:58,browt:150,bscl:42,ease:-30,
+       rad:88,turns:2,twist:0,ecc:100,
+       wf:0,wa:0,wf2:0,wa2:0,
+       w1:0.8,w2:0.8,a1:85,a2:85,jit:0,detail:2200}},
+  /* seal: tight concentric lathe rosette, the stamp in the corner */
+  seal:{m:'rosette',c:{a:'#111111',b:'#8b1d3f',bg:'#e8e2d0'},
+    p:{lines:3,spread:16,swell:0,phd:0,
+       wf:0,wa:0,wph:0,wf2:3,wa2:22,
+       petals:7.14,rad:54,rmod:44,turns:44,twist:0,ecc:100,
+       w1:0.4,w2:0.4,a1:65,a2:65,jit:0,detail:8000}}
+};
+function applyPreset(name){
+  const pr=PRESETS[name];if(!pr)return;
+  snap();
+  Object.assign(P,DEF,pr.p);
+  if(pr.c) colors=Object.assign({},pr.c);
+  mode=pr.m;segOn('mode','m',mode);segOn('mode2','m',mode);
+  applyMode();cellCache.key='';syncAll();draw();
+}
+['presets','presets2'].forEach(id=>{
+  document.getElementById(id).onclick=e=>{
+    const b=e.target.closest('button');if(!b)return;
+    applyPreset(b.dataset.p);
+  };
+});
+document.getElementById('stopAnim').onclick=stopAnim;
+
+function randomize(){
+  snap();
+  const rr=(mn,mx)=>mn+Math.random()*(mx-mn);
+  const ri=(mn,mx)=>Math.round(rr(mn,mx));
+  if(mode==='rosette'||mode==='blend'){
+    P.petals=+rr(3,26).toFixed(2);
+    P.rmod=+rr(6,56).toFixed(1);
+    P.turns=Math.random()<0.5?1:ri(2,14);
+    P.twist=Math.random()<0.5?0:ri(-160,160);
+    P.ecc=Math.random()<0.7?100:ri(45,150);
+    P.wf2=+rr(0,28).toFixed(2);P.wa2=ri(0,90);
+    P.wf=+rr(0,6).toFixed(2);P.wa=ri(0,80);
+    if(mode==='blend'){
+      P.petalsB=+rr(3,26).toFixed(2);P.rmodB=+rr(6,70).toFixed(1);
+      P.browt=ri(-200,200);P.bscl=ri(20,140);P.ease=ri(-60,60);
+      P.steps=ri(24,90);
+    }else{
+      P.lines=ri(18,110);P.spread=+rr(1.2,7).toFixed(2);P.phd=+rr(-1.5,1.5).toFixed(2);
+    }
+  }else{
+    P.wf=+rr(0.5,7).toFixed(2);P.wa=ri(10,140);
+    P.wf2=+rr(0,18).toFixed(2);P.wa2=ri(0,44);
+    P.swell=ri(0,70);P.swf=+rr(0.5,5).toFixed(2);
+    P.phd=Math.random()<0.5?0:+rr(-3,3).toFixed(2);
+    P.len=ri(140,220);P.rot=Math.random()<0.5?0:ri(-45,45);
+    P.nrm=Math.random()<0.25?ri(10,60):0;
+    P.atap=Math.random()<0.4?ri(-80,80):0;
+    P.spread=+rr(3,12).toFixed(2);
+    P.lines=Math.min(400,Math.ceil(Math.hypot(board.w,board.h)/P.spread)+2);
+    if(mode==='weave'){
+      P.angle=Math.random()<0.4?ri(4,20):ri(60,120);
+      P.lines2=P.lines;P.spread2=P.spread;
+      P.cellp=ri(1,6);P.gap=+rr(0.5,4).toFixed(2);
+    }
+  }
+  P.w1=+rr(0.35,1.6).toFixed(2);P.w2=Math.random()<0.5?P.w1:+rr(0.3,1.4).toFixed(2);
+  cellCache.key='';syncAll();draw();
+}
+document.getElementById('rand').onclick=randomize;
+
+/* ================= export ================= */
+function download(url,name){
+  const a=document.createElement('a');a.href=url;a.download=name;
+  document.body.appendChild(a);a.click();a.remove();
+}
+function exportPNG(){
+  const sc=2;
+  const oc=document.createElement('canvas');
+  oc.width=board.w*sc;oc.height=board.h*sc;
+  const g=oc.getContext('2d');
+  g.scale(sc,sc);
+  renderContent(g);
+  download(oc.toDataURL('image/png'),'guilloche-'+mode+'.png');
+}
+function svgFamily(lines,casing,gid){
+  let s='<g'+(gid?' clip-path="url(#'+gid+')"':'')+'>';
+  for(let i=0;i<lines.length;i++){
+    const l=lines[i],ink=inkOf(l);
+    let d='M '+l.pts[0].x.toFixed(2)+' '+l.pts[0].y.toFixed(2);
+    for(let j=1;j<l.pts.length;j++) d+=' L '+l.pts[j].x.toFixed(2)+' '+l.pts[j].y.toFixed(2);
+    if(casing>0)
+      s+='<path d="'+d+'" stroke="'+colors.bg+'" stroke-width="'+(ink.w+casing*2).toFixed(2)+'"/>';
+    s+='<path d="'+d+'" stroke="'+ink.col+'" stroke-width="'+ink.w.toFixed(2)+
+       '" stroke-opacity="'+ink.a.toFixed(2)+'"/>';
+  }
+  return s+'</g>';
+}
+function exportSVG(){
+  const lines=buildLines();
+  let defs='<clipPath id="bd"><rect width="'+board.w+'" height="'+board.h+'"/></clipPath>';
+  let body='';
+  if(mode==='weave'){
+    const warp=lines.filter(l=>l.grp==='warp'),weft=lines.filter(l=>l.grp==='weft');
+    const cc=weaveCells();
+    let cells='';
+    for(let q=0;q<cc.quads.length;q++){
+      const v=cc.quads[q],pt=[];
+      for(let i=0;i<8;i+=2) pt.push(v[i].toFixed(1)+','+v[i+1].toFixed(1));
+      cells+='<polygon points="'+pt.join(' ')+'"/>';
+    }
+    defs+='<clipPath id="cells">'+cells+'</clipPath>';
+    body=svgFamily(weft,0)+svgFamily(warp,P.gap)+svgFamily(weft,P.gap,'cells');
+  }else{
+    body=svgFamily(lines,0);
+  }
+  const out='<svg xmlns="http://www.w3.org/2000/svg" width="'+board.w+'" height="'+board.h+
+    '" viewBox="0 0 '+board.w+' '+board.h+'">'+
+    '<rect width="'+board.w+'" height="'+board.h+'" fill="'+colors.bg+'"/>'+
+    '<defs>'+defs+'</defs>'+
+    '<g clip-path="url(#bd)" fill="none" stroke-linecap="round" stroke-linejoin="round">'+
+    body+'</g></svg>';
+  download(URL.createObjectURL(new Blob([out],{type:'image/svg+xml'})),'guilloche-'+mode+'.svg');
+}
+document.getElementById('exppng').onclick=exportPNG;
+document.getElementById('expsvg').onclick=exportSVG;
+
+addEventListener('keydown',e=>{
+  const tag=e.target.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT') return;
+  const k=e.key;
+  if((e.metaKey||e.ctrlKey)&&k.toLowerCase()==='z'){e.preventDefault();undo();return;}
+  if(k.toLowerCase()==='e')exportPNG();
+  else if(k.toLowerCase()==='s')exportSVG();
+  else if(k.toLowerCase()==='r')randomize();
+  else if(k.toLowerCase()==='f')fillBoard();
+});
+addEventListener('pointerup',()=>{armed=true;});
+
+window.addEventListener('error',e=>{
+  hud.textContent='ERROR: '+e.message+' @'+e.lineno;
+  hud.style.color='#ff5c3a';
+});
+
+applyMode();
+syncAll();
+applyPreset('note');
+fit();
+})();
+</script>
+</body>
+</html>

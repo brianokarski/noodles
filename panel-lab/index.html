@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Lab</title>
+  <style>
+    @font-face { font-family: 'Inter'; src: url('fonts/Inter-Thin.ttf') format('truetype'); font-weight: 100; }
+    @font-face { font-family: 'Inter'; src: url('fonts/Inter-ExtraLight.ttf') format('truetype'); font-weight: 200; }
+    @font-face { font-family: 'Inter'; src: url('fonts/Inter-Light.ttf') format('truetype'); font-weight: 300; }
+    @font-face { font-family: 'Inter'; src: url('fonts/Inter-Regular.ttf') format('truetype'); font-weight: 400; }
+    @font-face { font-family: 'Inter'; src: url('fonts/Inter-Medium.ttf') format('truetype'); font-weight: 500; }
+    @font-face { font-family: 'Inter'; src: url('fonts/Inter-SemiBold.ttf') format('truetype'); font-weight: 600; }
+    @font-face { font-family: 'Inter'; src: url('fonts/Inter-Bold.ttf') format('truetype'); font-weight: 700; }
+    @font-face { font-family: 'Inter'; src: url('fonts/Inter-ExtraBold.ttf') format('truetype'); font-weight: 800; }
+    @font-face { font-family: 'Inter'; src: url('fonts/Inter-Black.ttf') format('truetype'); font-weight: 900; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --fg: #0a0a0a;
+      --muted: #737373;
+      --border: #e5e5e5;
+      --font-display: 'Inter', system-ui, sans-serif;
+      --font-mono: 'Inter', sans-serif;
+      --accent: #0a0a0a;
+      --canvas-bg: #111;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-display);
+      font-weight: 400;
+      font-size: 13px;
+      letter-spacing: -0.01em;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    ::selection { background: var(--fg); color: var(--bg); }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      width: 340px;
+      flex-shrink: 0;
+      background: var(--bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .side-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .side-header h1 {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 18px;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .side-header p {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .section {
+      padding: 18px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-label {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      text-transform: none;
+      color: var(--fg);
+      margin-bottom: 6px;
+    }
+
+    #mode-indicator {
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+    }
+
+    #mode-indicator .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--fg);
+    }
+
+    /* Controls */
+    .ctrl {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .ctrl label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      flex: 1;
+      white-space: nowrap;
+    }
+
+    .ctrl .val {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--fg);
+      width: 30px;
+      text-align: right;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--fg);
+      cursor: pointer;
+    }
+
+    /* Toggle buttons (columns, spans, shape type) */
+    .toggle-row {
+      display: flex;
+      gap: 0;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 5px 0;
+      border: 1px solid var(--border);
+      margin-left: -1px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: var(--bg);
+      color: var(--muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+
+    .toggle-btn:first-child { margin-left: 0; }
+    .toggle-btn:hover { color: var(--fg); }
+    .toggle-btn.active { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+    /* Shape type buttons */
+    .shape-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+    }
+
+    .shape-type-btn {
+      padding: 5px 8px;
+      border: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: var(--bg);
+      color: var(--muted);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+    }
+
+    .shape-type-btn:hover { border-color: var(--fg); color: var(--fg); }
+    .shape-type-btn.active { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+    /* Color swatches */
+    .swatch-row { display: flex; gap: 4px; flex-wrap: wrap; }
+
+    .swatch {
+      width: 20px; height: 20px;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      transition: border-color 0.12s;
+    }
+
+    .swatch:hover { border-color: var(--fg); }
+    .swatch.active { border-color: var(--fg); box-shadow: 0 0 0 1px var(--fg); }
+
+    /* Connection style toggles */
+    .conn-toggle-row {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .conn-toggle {
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: var(--bg);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .conn-toggle:hover { border-color: var(--fg); color: var(--fg); }
+    .conn-toggle.active { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+    /* Bottom actions */
+    .side-actions {
+      padding: 10px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: auto;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 7px 0;
+      border: none;
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: var(--fg); color: var(--bg); }
+    .btn-outline { background: transparent; color: var(--fg); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--fg); background: var(--fg); color: var(--bg); }
+    .btn-danger { background: transparent; color: #ff4444; border: 1px solid #e5e5e5; }
+    .btn-danger:hover { border-color: #ff4444; }
+
+    /* ── Canvas Area ── */
+    #canvas-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+      position: relative;
+      background: #222;
+    }
+
+    #canvas-area svg { cursor: crosshair; display: block; }
+
+    #stage-toolbar {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 8px 10px;
+      z-index: 10;
+    }
+    #stage-toolbar .btn {
+      font-size: 11px;
+      padding: 5px 12px;
+      color: rgba(255,255,255,0.85);
+      border-color: rgba(255,255,255,0.25);
+      background: transparent;
+    }
+    #stage-toolbar .btn:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.5);
+      color: #fff;
+    }
+    #stage-toolbar .btn-primary {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      border-color: rgba(255,255,255,0.3);
+    }
+    #stage-toolbar .btn-primary:hover {
+      background: rgba(255,255,255,0.25);
+    }
+    #stage-toolbar .btn-randomize {
+      background: #ff4444;
+      color: #ffcccc;
+      border-color: #ff4444;
+    }
+    #stage-toolbar .btn-randomize:hover {
+      background: #e63c3c;
+      color: #fff;
+      border-color: #e63c3c;
+    }
+    #zoom-controls {
+      position: absolute;
+      bottom: 14px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 4px 6px;
+      z-index: 10;
+    }
+    #zoom-controls button {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.7);
+      font-size: 15px;
+      line-height: 1;
+      width: 22px;
+      height: 22px;
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #zoom-controls button:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    #zoom-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: rgba(255,255,255,0.55);
+      min-width: 36px;
+      text-align: center;
+    }
+
+    .grid-line { stroke: rgba(255,255,255,0.18); stroke-width: 1; }
+    .panel:hover path { filter: brightness(1.1); }
+    .hole-hover { cursor: pointer; }
+    .hole-hover:hover { r: 7; filter: drop-shadow(0 0 4px #00ff41); }
+    .panel.selected path { stroke: #00ff41; stroke-width: 2; stroke-dasharray: 6 3; }
+    .ghost-panel { opacity: 0.3; pointer-events: none; }
+    .touchpoint-btn { opacity: 0.35; cursor: not-allowed; }
+    .touchpoint-btn.ready { opacity: 1; cursor: pointer; }
+
+    #conn-preview { stroke: #00ff41; stroke-width: 1.5; stroke-dasharray: 4 4; pointer-events: none; }
+
+    #hint {
+      position: absolute;
+      bottom: 14px;
+      left: 16px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.04em;
+    }
+
+    #hint kbd {
+      display: inline-block;
+      padding: 1px 5px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      font-family: var(--font-mono);
+      font-size: 8px;
+      color: rgba(255,255,255,0.5);
+    }
+  </style>
+</head>
+<body>
+
+<aside id="sidebar">
+  <div class="side-header">
+    <h1>Panel Lab</h1>
+    <p>Randomized panel layouts for any artboard</p>
+  </div>
+
+  <div id="mode-indicator">
+    <span class="dot"></span>
+    <span id="mode-text">Place mode</span>
+  </div>
+
+  <!-- Artboard -->
+  <div class="section">
+    <div class="section-label">Artboard</div>
+    <div class="toggle-row" id="presets">
+      <button class="toggle-btn active" data-w="900" data-h="600">16:9</button>
+      <button class="toggle-btn" data-w="600" data-h="900">9:16</button>
+      <button class="toggle-btn" data-w="800" data-h="800">1:1</button>
+      <button class="toggle-btn" data-w="1080" data-h="1350">4:5</button>
+    </div>
+    <div style="display:flex; gap:6px; align-items:center; margin-top:8px">
+      <input id="custom-w" type="number" min="100" max="4000" placeholder="W" style="width:72px; font-family:var(--font-mono); font-size:11px; padding:5px 7px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--fg); outline:none;">
+      <span style="font-family:var(--font-mono); font-size:11px; color:var(--muted)">×</span>
+      <input id="custom-h" type="number" min="100" max="4000" placeholder="H" style="width:72px; font-family:var(--font-mono); font-size:11px; padding:5px 7px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--fg); outline:none;">
+      <button id="custom-apply" style="flex:1; font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:0.04em; padding:5px 8px; border:1px solid var(--border); border-radius:6px; background:var(--fg); color:var(--bg); cursor:pointer;">Apply</button>
+    </div>
+    <div style="margin-top:10px">
+      <div class="section-label" style="margin-bottom:5px">Touchpoints</div>
+      <div class="toggle-row" id="touchpoint-presets">
+        <button class="toggle-btn touchpoint-btn ready" id="tp-poster">Poster</button>
+        <button class="toggle-btn touchpoint-btn ready" id="tp-badges">Badges</button>
+        <button class="toggle-btn touchpoint-btn ready" id="tp-email">Email</button>
+        <button class="toggle-btn touchpoint-btn" id="tp-signage" title="Rules TBD">Signage</button>
+      </div>
+    </div>
+    <div style="margin-top:6px">
+      <div class="section-label">Background</div>
+      <div class="swatch-row" id="bg-colors">
+        <div class="swatch active" data-color="#0a0a0a" style="background:#0a0a0a"></div>
+        <div class="swatch" data-color="#ffffff" style="background:#fff"></div>
+        <div class="swatch" data-color="#f0f0f0" style="background:#f0f0f0"></div>
+        <div class="swatch" data-color="#1e1e1e" style="background:#1e1e1e"></div>
+      </div>
+      <div style="margin-top:4px; display:flex; align-items:center; gap:6px;">
+        <label style="font-family:var(--font-mono); font-size:9px; color:var(--muted); letter-spacing:0.04em">CUSTOM</label>
+        <input type="color" id="custom-bg-color" value="#0a0a0a" style="width:24px; height:24px; border:1px solid var(--border); padding:0; background:none; cursor:pointer;" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="section">
+    <div class="section-label">Grid Columns</div>
+    <div class="toggle-row" id="col-select">
+      <button class="toggle-btn" data-cols="2">2</button>
+      <button class="toggle-btn" data-cols="3">3</button>
+      <button class="toggle-btn active" data-cols="4">4</button>
+      <button class="toggle-btn" data-cols="6">6</button>
+      <button class="toggle-btn" data-cols="8">8</button>
+    </div>
+    <div style="margin-top:6px">
+      <div class="ctrl">
+        <label>Gap</label>
+        <input type="range" id="sl-gap" min="0" max="20" value="6" />
+        <span class="val" id="val-gap">6</span>
+      </div>
+      <div class="ctrl">
+        <label>Margin</label>
+        <input type="range" id="sl-margin" min="0" max="40" value="20" />
+        <span class="val" id="val-margin">20</span>
+      </div>
+      <div class="ctrl">
+        <label>Corner radius</label>
+        <input type="range" id="sl-radius" min="0" max="40" value="22" />
+        <span class="val" id="val-radius">22</span>
+      </div>
+      <div class="ctrl">
+        <label>Hole inset</label>
+        <input type="range" id="sl-inset" min="4" max="24" value="17" />
+        <span class="val" id="val-inset">17</span>
+      </div>
+      <div class="ctrl">
+        <label>Hole size</label>
+        <input type="range" id="sl-hole-size" min="2" max="12" value="6" step="0.5" />
+        <span class="val" id="val-hole-size">6</span>
+      </div>
+      <div class="ctrl" style="align-items:flex-start; flex-direction:column; gap:6px;">
+        <label>Hole color</label>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <input type="color" id="hole-color-picker" value="#1a1a1a" style="width:28px; height:28px; border:1px solid var(--border); border-radius:6px; padding:2px; background:var(--bg); cursor:pointer; flex-shrink:0;">
+          <input type="text" id="hole-color-hex" value="#1a1a1a" maxlength="7" placeholder="#1a1a1a" style="width:72px; font-family:var(--font-mono); font-size:11px; padding:5px 7px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--fg); outline:none;">
+        </div>
+        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+          <input type="checkbox" id="hole-match-bg" style="width:14px; height:14px; cursor:pointer;">
+          <span style="font-family:var(--font-mono); font-size:10px; color:var(--muted)">Match background (true hole)</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shape -->
+  <div class="section">
+    <div class="section-label">Shape</div>
+    <div class="shape-grid" id="shape-types"></div>
+    <div style="margin-top:6px">
+      <div class="section-label">Width (columns)</div>
+      <div class="toggle-row" id="col-span-select"></div>
+    </div>
+    <div style="margin-top:6px">
+      <div class="section-label">Height (rows)</div>
+      <div class="toggle-row" id="row-span-select">
+        <button class="toggle-btn active" data-span="1">1</button>
+        <button class="toggle-btn" data-span="2">2</button>
+        <button class="toggle-btn" data-span="3">3</button>
+        <button class="toggle-btn" data-span="4">4</button>
+        <button class="toggle-btn" data-span="5">5</button>
+        <button class="toggle-btn" data-span="6">6</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel Color -->
+  <div class="section">
+    <div class="section-label">Panel Color</div>
+    <div class="swatch-row" id="panel-colors">
+      <div class="swatch" data-color="#232316" style="background:#232316"></div>
+      <div class="swatch" data-color="#182944" style="background:#182944"></div>
+      <div class="swatch" data-color="#323232" style="background:#323232"></div>
+      <div class="swatch" data-color="#2e4418" style="background:#2e4418"></div>
+      <div class="swatch active" data-color="#b9b9b9" style="background:#b9b9b9"></div>
+      <div class="swatch" data-color="#ffffff" style="background:#ffffff"></div>
+      <div class="swatch" data-color="#8eff1d" style="background:#8eff1d"></div>
+      <div class="swatch" data-color="#00cf1f" style="background:#00cf1f"></div>
+      <div class="swatch" data-color="#64ea67" style="background:#64ea67"></div>
+      <div class="swatch" data-color="#00e579" style="background:#00e579"></div>
+      <div class="swatch" data-color="#c4ffcf" style="background:#c4ffcf"></div>
+      <div class="swatch" data-color="#8000ff" style="background:#8000ff"></div>
+      <div class="swatch" data-color="#dbc4ff" style="background:#dbc4ff"></div>
+      <div class="swatch" data-color="#004996" style="background:#004996"></div>
+      <div class="swatch" data-color="#0076d6" style="background:#0076d6"></div>
+      <div class="swatch" data-color="#007fdc" style="background:#007fdc"></div>
+      <div class="swatch" data-color="#ff0000" style="background:#ff0000"></div>
+      <div class="swatch" data-color="#ffc4c4" style="background:#ffc4c4"></div>
+      <div class="swatch" data-color="#ff691d" style="background:#ff691d"></div>
+      <div class="swatch" data-color="#ffd37b" style="background:#ffd37b"></div>
+      <div class="swatch" data-color="none" title="Transparent" style="background: repeating-conic-gradient(#d0d0d0 0% 25%, #fff 0% 50%) 0 0 / 8px 8px;"></div>
+    </div>
+    <div style="margin-top:4px; display:flex; align-items:center; gap:6px;">
+      <label style="font-family:var(--font-mono); font-size:9px; color:var(--muted); letter-spacing:0.04em">CUSTOM</label>
+      <input type="color" id="custom-panel-color" value="#888888" style="width:24px; height:24px; border:1px solid var(--border); padding:0; background:none; cursor:pointer;" />
+    </div>
+  </div>
+
+  <!-- Typography -->
+  <div class="section">
+    <div class="section-label">Typography</div>
+    <textarea id="text-input" rows="2" placeholder="Type here..." style="width:100%; resize:vertical; font-family:var(--font-display); font-size:12px; padding:6px; border:1px solid var(--border); background:var(--bg); color:var(--fg); margin-bottom:6px; outline:none;"></textarea>
+    <div class="toggle-row" style="margin-bottom:4px">
+      <button class="toggle-btn active" data-font="display" id="font-display-btn">Walter</button>
+      <button class="toggle-btn" data-font="mono" id="font-mono-btn">Inter</button>
+    </div>
+    <div class="ctrl" style="margin-bottom:4px">
+      <label>Weight</label>
+      <select id="weight-select" style="flex:1; font-family:var(--font-mono); font-size:11px; padding:4px 6px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--fg); outline:none; cursor:pointer;">
+        <option value="100">Thin</option>
+        <option value="200">Extra Light</option>
+        <option value="300">Light</option>
+        <option value="400" selected>Regular</option>
+        <option value="500">Medium</option>
+        <option value="600">Semi Bold</option>
+        <option value="700">Bold</option>
+        <option value="800">Extra Bold</option>
+        <option value="900">Black</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label>Size</label>
+      <input type="range" id="sl-font-size" min="8" max="300" value="24" />
+      <span class="val" id="val-font-size">24</span>
+    </div>
+    <div class="ctrl">
+      <label>Leading</label>
+      <input type="range" id="sl-line-height" min="0.6" max="2.0" value="1.2" step="0.05" />
+      <span class="val" id="val-line-height">1.2</span>
+    </div>
+    <div class="ctrl">
+      <label>Tracking</label>
+      <input type="range" id="sl-tracking" min="-0.1" max="0.3" value="0" step="0.005" />
+      <span class="val" id="val-tracking">0</span>
+    </div>
+    <div style="margin-top:4px">
+      <div class="section-label">Text Color</div>
+      <div class="swatch-row" id="text-colors">
+        <div class="swatch active" data-color="#ffffff" style="background:#fff"></div>
+        <div class="swatch" data-color="#000000" style="background:#000; border-color:#ccc"></div>
+        <div class="swatch" data-color="#00ff41" style="background:#00ff41"></div>
+        <div class="swatch" data-color="#ff6b00" style="background:#ff6b00"></div>
+        <div class="swatch" data-color="#a8ff3e" style="background:#a8ff3e"></div>
+        <div class="swatch" data-color="#ff4444" style="background:#ff4444"></div>
+      </div>
+      <div style="display:flex; gap:6px; align-items:center; margin-top:6px">
+        <input type="color" id="text-color-picker" value="#ffffff" style="width:28px; height:28px; border:1px solid var(--border); border-radius:6px; padding:2px; background:var(--bg); cursor:pointer; flex-shrink:0;">
+        <input type="text" id="text-color-hex" value="#ffffff" maxlength="7" placeholder="#ffffff" style="flex:1; font-family:var(--font-mono); font-size:11px; padding:5px 7px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--fg); outline:none;">
+      </div>
+    </div>
+    <button class="btn btn-outline" id="btn-clear-text" style="margin-top:6px">Clear Text</button>
+  </div>
+
+  <!-- Connections -->
+  <div class="section">
+    <div class="section-label">Connection Style</div>
+    <div class="conn-toggle-row" id="conn-styles">
+      <button class="conn-toggle active" data-style="solid">Solid</button>
+      <button class="conn-toggle" data-style="double">Double</button>
+      <button class="conn-toggle" data-style="paracord">Paracord</button>
+    </div>
+    <div style="margin-top:6px">
+      <div class="section-label">Connection Color</div>
+      <div class="swatch-row" id="conn-colors">
+        <div class="swatch active" data-color="#00ff41" style="background:#00ff41"></div>
+        <div class="swatch" data-color="#ffffff" style="background:#fff"></div>
+        <div class="swatch" data-color="#ff6b00" style="background:#ff6b00"></div>
+        <div class="swatch" data-color="#a8ff3e" style="background:#a8ff3e"></div>
+        <div class="swatch" data-color="#888888" style="background:#888"></div>
+      </div>
+    </div>
+    <div class="ctrl" style="margin-top:6px">
+      <label>Line weight</label>
+      <input type="range" id="sl-stroke" min="0.5" max="8" value="2" step="0.5" />
+      <span class="val" id="val-stroke">2</span>
+    </div>
+  </div>
+
+  <div class="side-actions">
+    <button class="btn btn-outline" id="btn-connect">Draw Connections (C)</button>
+    <button class="btn btn-outline" id="btn-clear-conns">Clear Connections</button>
+    <button class="btn btn-outline" id="btn-animate">Animate</button>
+    <button class="btn btn-danger" id="btn-clear">Clear All</button>
+  </div>
+</aside>
+
+<div id="canvas-area">
+  <svg id="canvas"></svg>
+  <div id="stage-toolbar">
+    <button class="btn btn-randomize" id="btn-randomize">Randomize Shapes</button>
+    <button class="btn btn-randomize" id="btn-rand-colors">Randomize Colors</button>
+    <button class="btn btn-randomize" id="btn-rand-conns">Randomize Connections</button>
+    <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+      <input type="checkbox" id="rand-match-holes" style="width:13px; height:13px; cursor:pointer;">
+      <span style="font-family:var(--font-mono); font-size:10px; color:rgba(255,255,255,0.55);">Match holes to bg</span>
+    </label>
+    <button class="btn btn-primary" id="btn-export">Export SVG</button>
+  </div>
+  <div id="zoom-controls">
+    <button id="btn-zoom-out">−</button>
+    <span id="zoom-label">100%</span>
+    <button id="btn-zoom-in">+</button>
+    <button id="btn-zoom-reset" title="Reset zoom">⌂</button>
+  </div>
+  <div id="hint">
+    <kbd>Click</kbd> place &nbsp;
+    <kbd>Right-click</kbd> cycle color &nbsp;
+    <kbd>C</kbd> connect &nbsp;
+    <kbd>Del</kbd> delete &nbsp;
+    <kbd>Esc</kbd> deselect &nbsp;
+    <kbd>⌘Z</kbd> undo connection
+  </div>
+</div>
+
+<script src="panels.js"></script>
+<script>
+(() => {
+  const svg = document.getElementById('canvas');
+
+  const S = {
+    w: 900, h: 600,
+    cols: 4,
+    gap: 6, margin: 20,
+    cornerRadius: 22, holeInset: 17, holeSize: 6, strokeWidth: 2,
+    holeColor: '#1a1a1a', holeMatchBg: false,
+    zoomLevel: 1,
+    shapeType: 'rect',
+    colSpan: 1,
+    rowSpan: 1,
+    panelColor: '#888888',
+    bgColor: '#0a0a0a',
+    textFont: 'display',
+    textWeight: 400,
+    fontSize: 24,
+    lineHeight: 1.2,
+    tracking: 0,
+    textRotation: 0,
+    textColor: '#ffffff',
+    connStyle: 'solid',
+    connColor: '#00ff41',
+    mode: 'place',
+    panels: [],
+    connections: [],
+    selectedPanel: null,
+    connStart: null,
+    nextId: 0,
+    presetMode: null,
+  };
+
+  // ── Touchpoint: Badges ──
+  // 4 cols × 6 rows
+  const BADGE = { w: 560, h: 840, cols: 4, rows: 6 };
+  const SHOP_LOGO = null; // add {d, vw, vh} to place a logo in the first panel
+
+  function activateBadgePreset() {
+    S.presetMode = 'badges';
+    S.w = BADGE.w;
+    S.h = BADGE.h;
+    S.cols = BADGE.cols;
+    document.querySelectorAll('#col-select .toggle-btn').forEach(b => {
+      b.classList.toggle('active', Number(b.dataset.cols) === BADGE.cols);
+    });
+    S.colSpan = 2;
+    S.rowSpan = 1;
+    buildColSpanButtons();
+    updateRowSpanButtons();
+    S.panels = [];
+    S.connections = [];
+    S.selectedPanel = null;
+    S.nextId = 0;
+    rebuildOccupancy();
+    const w = cw(), h = rh();
+
+    // All panels are locked with fixed positions
+    const layout = [
+      // Row 0: 1×1 + 3×1
+      { gc: 0, gr: 0, cs: 1, rs: 1 },
+      { gc: 1, gr: 0, cs: 3, rs: 1 },
+      // Row 1-3: 4×3
+      { gc: 0, gr: 1, cs: 4, rs: 3 },
+      // Row 4: 4×1
+      { gc: 0, gr: 4, cs: 4, rs: 1 },
+      // Row 5: 2×1 + 2×1
+      { gc: 0, gr: 5, cs: 2, rs: 1 },
+      { gc: 2, gr: 5, cs: 2, rs: 1 },
+    ];
+    layout.forEach((l, idx) => {
+      const panel = PANELS.createPanel({
+        shapeType: 'rect', gc: l.gc, gr: l.gr, colSpan: l.cs, rowSpan: l.rs,
+        cw: w, rh: h, gap: S.gap, margin: S.margin,
+        cornerRadius: S.cornerRadius, holeInset: S.holeInset, color: '#888888',
+      });
+      panel.id = S.nextId++;
+      panel.locked = true;
+      // First panel can carry a logo
+      if (idx === 0 && SHOP_LOGO) panel.logoSvg = SHOP_LOGO;
+      S.panels.push(panel);
+      markOcc(l.gc, l.gr, l.cs, l.rs, true);
+    });
+    render();
+  }
+
+  // ── Touchpoint: Poster ──
+  // 6 cols × 8 rows, portrait 886×1170
+  const POSTER = { w: 886, h: 1170, cols: 6, rows: 8 };
+
+  function activatePosterPreset() {
+    S.presetMode = 'poster';
+    S.w = POSTER.w;
+    S.h = POSTER.h;
+    S.cols = POSTER.cols;
+    document.querySelectorAll('#col-select .toggle-btn').forEach(b => {
+      b.classList.toggle('active', Number(b.dataset.cols) === POSTER.cols);
+    });
+    S.colSpan = 2;
+    S.rowSpan = 1;
+    buildColSpanButtons();
+    updateRowSpanButtons();
+    S.panels = [];
+    S.connections = [];
+    S.selectedPanel = null;
+    S.nextId = 0;
+    rebuildOccupancy();
+    render();
+  }
+
+  // ── Touchpoint: Email ──
+  // 4 cols × 4 rows, each content row spans full width (4×1)
+  const EMAIL = { w: 620, h: 620, cols: 4, rows: 4 };
+
+  function activateEmailPreset() {
+    S.presetMode = 'email';
+    S.w = EMAIL.w;
+    S.h = EMAIL.h;
+    S.cols = EMAIL.cols;
+    document.querySelectorAll('#col-select .toggle-btn').forEach(b => {
+      b.classList.toggle('active', Number(b.dataset.cols) === EMAIL.cols);
+    });
+    S.colSpan = 2;
+    S.rowSpan = 1;
+    buildColSpanButtons();
+    updateRowSpanButtons();
+    S.panels = [];
+    S.connections = [];
+    S.selectedPanel = null;
+    S.nextId = 0;
+    rebuildOccupancy();
+    render();
+  }
+
+  // Derived grid values
+  function cw() { return PANELS.colWidth(S.w, S.cols, S.gap, S.margin); }
+  function rh() { return cw(); } // square cells
+  function totalRows() { return Math.floor((S.h - S.margin * 2 + S.gap) / (rh() + S.gap)); }
+  function vm() {
+    const rows = totalRows(), cellH = rh();
+    const gridH = rows > 0 ? rows * (cellH + S.gap) - S.gap : 0;
+    return S.margin + Math.floor(Math.max(0, S.h - S.margin * 2 - gridH) / 2);
+  }
+
+  // Occupancy
+  let occupied = [];
+  function rebuildOccupancy() {
+    const rows = totalRows();
+    occupied = Array.from({ length: rows }, () => Array(S.cols).fill(false));
+    S.panels.forEach(p => markOcc(p.gc, p.gr, p.colSpan, p.rowSpan, true));
+  }
+
+  function markOcc(gc, gr, cs, rs, val) {
+    const rows = totalRows();
+    for (let r = gr; r < gr + rs && r < rows; r++)
+      for (let c = gc; c < gc + cs && c < S.cols; c++)
+        occupied[r][c] = val;
+  }
+
+  function canPlace(gc, gr, cs, rs) {
+    const rows = totalRows();
+    if (gc < 0 || gr < 0 || gc + cs > S.cols || gr + rs > rows) return false;
+    for (let r = gr; r < gr + rs; r++)
+      for (let c = gc; c < gc + cs; c++)
+        if (occupied[r][c]) return false;
+    return true;
+  }
+
+  // ── Shape type buttons ──
+  const shapeGrid = document.getElementById('shape-types');
+  PANELS.SHAPE_TYPE_KEYS.forEach(key => {
+    const btn = document.createElement('button');
+    btn.className = 'shape-type-btn' + (key === S.shapeType ? ' active' : '');
+    btn.textContent = PANELS.SHAPE_TYPES[key].label;
+    btn.dataset.type = key;
+    btn.onclick = () => {
+      document.querySelectorAll('.shape-type-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      S.shapeType = key;
+      setMode('place');
+    };
+    shapeGrid.appendChild(btn);
+  });
+
+  // ── Column span buttons (dynamic based on grid cols) ──
+  function buildColSpanButtons() {
+    const wrap = document.getElementById('col-span-select');
+    wrap.innerHTML = '';
+    const spans = (S.presetMode === 'badges' || S.presetMode === 'email')
+      ? [1, 2].filter(i => i <= S.cols)
+      : S.presetMode === 'poster'
+        ? [1, 2, 3, 6].filter(i => i <= S.cols)
+        : Array.from({ length: S.cols }, (_, k) => k + 1);
+    spans.forEach(i => {
+      const btn = document.createElement('button');
+      btn.className = 'toggle-btn' + (i === S.colSpan ? ' active' : '');
+      btn.textContent = i;
+      btn.dataset.span = i;
+      btn.onclick = () => {
+        document.querySelectorAll('#col-span-select .toggle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        S.colSpan = i;
+      };
+      wrap.appendChild(btn);
+    });
+    if (!spans.includes(S.colSpan)) {
+      S.colSpan = spans[0] || 1;
+      wrap.querySelector('.toggle-btn')?.classList.add('active');
+    }
+  }
+
+  // ── Row span buttons (hide 3-6 in badge mode, only 1-2 allowed) ──
+  function updateRowSpanButtons() {
+    document.querySelectorAll('#row-span-select .toggle-btn').forEach(btn => {
+      const span = Number(btn.dataset.span);
+      if (S.presetMode === 'badges' || S.presetMode === 'email') {
+        btn.style.display = span <= 2 ? '' : 'none';
+        if (span > 2 && btn.classList.contains('active')) {
+          btn.classList.remove('active');
+          const first = document.querySelector('#row-span-select .toggle-btn');
+          first.classList.add('active');
+          S.rowSpan = 1;
+        }
+      } else {
+        btn.style.display = '';
+      }
+    });
+  }
+
+  buildColSpanButtons();
+
+  // ── Row span buttons ──
+  document.querySelectorAll('#row-span-select .toggle-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#row-span-select .toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      S.rowSpan = Number(btn.dataset.span);
+    };
+  });
+
+  // ── Grid column select ──
+  document.querySelectorAll('#col-select .toggle-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#col-select .toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      S.cols = Number(btn.dataset.cols);
+      buildColSpanButtons();
+      rebuildAll();
+    };
+  });
+
+  // ── Sliders ──
+  function bindSlider(id, key, valId) {
+    const sl = document.getElementById(id);
+    const vEl = document.getElementById(valId);
+    sl.addEventListener('input', () => {
+      S[key] = Number(sl.value);
+      vEl.textContent = sl.value;
+      rebuildAll();
+    });
+  }
+
+  bindSlider('sl-gap', 'gap', 'val-gap');
+  bindSlider('sl-margin', 'margin', 'val-margin');
+  bindSlider('sl-radius', 'cornerRadius', 'val-radius');
+  bindSlider('sl-inset', 'holeInset', 'val-inset');
+  bindSlider('sl-hole-size', 'holeSize', 'val-hole-size');
+  bindSlider('sl-stroke', 'strokeWidth', 'val-stroke');
+
+  // ── Hole color ──
+  function applyHoleColor(hex) {
+    if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
+    S.holeColor = hex;
+    document.getElementById('hole-color-picker').value = hex;
+    document.getElementById('hole-color-hex').value = hex;
+    render();
+  }
+  document.getElementById('hole-color-picker').addEventListener('input', e => {
+    applyHoleColor(e.target.value);
+    document.getElementById('hole-match-bg').checked = false;
+    S.holeMatchBg = false;
+  });
+  document.getElementById('hole-color-hex').addEventListener('input', e => {
+    applyHoleColor(e.target.value);
+    document.getElementById('hole-match-bg').checked = false;
+    S.holeMatchBg = false;
+  });
+  document.getElementById('hole-match-bg').addEventListener('change', e => {
+    S.holeMatchBg = e.target.checked;
+    render();
+  });
+
+  // ── Zoom ──
+  const ZOOM_STEPS = [0.25, 0.33, 0.5, 0.67, 0.75, 1, 1.25, 1.5, 2, 2.5, 3];
+  function setZoom(z) {
+    S.zoomLevel = Math.max(0.25, Math.min(3, z));
+    const pct = Math.round(S.zoomLevel * 100);
+    document.getElementById('zoom-label').textContent = pct + '%';
+    render();
+  }
+  function stepZoom(dir) {
+    const cur = S.zoomLevel;
+    if (dir > 0) {
+      const next = ZOOM_STEPS.find(z => z > cur + 0.001);
+      setZoom(next || 3);
+    } else {
+      const prev = [...ZOOM_STEPS].reverse().find(z => z < cur - 0.001);
+      setZoom(prev || 0.25);
+    }
+  }
+  document.getElementById('btn-zoom-in').onclick = () => stepZoom(1);
+  document.getElementById('btn-zoom-out').onclick = () => stepZoom(-1);
+  document.getElementById('btn-zoom-reset').onclick = () => setZoom(1);
+
+  // ── Live typography preview ──
+  function pushTextToSelected() {
+    if (S.selectedPanel === null) return;
+    const p = S.panels[S.selectedPanel];
+    const txt = document.getElementById('text-input').value.trim();
+    p.text = txt || null;
+    p.textFont = S.textFont;
+    p.textWeight = S.textWeight;
+    p.fontSize = S.fontSize;
+    p.lineHeight = S.lineHeight;
+    p.tracking = S.tracking;
+    p.textColor = S.textColor;
+    render();
+  }
+
+  function bindTypoSlider(id, key, valId) {
+    const sl = document.getElementById(id);
+    const vEl = document.getElementById(valId);
+    sl.addEventListener('input', () => {
+      S[key] = Number(sl.value);
+      vEl.textContent = sl.value;
+      pushTextToSelected();
+    });
+  }
+  bindTypoSlider('sl-font-size', 'fontSize', 'val-font-size');
+  bindTypoSlider('sl-line-height', 'lineHeight', 'val-line-height');
+  bindTypoSlider('sl-tracking', 'tracking', 'val-tracking');
+
+  document.getElementById('text-input').addEventListener('input', pushTextToSelected);
+
+  // ── Font toggle ──
+  const WALTER_WEIGHTS = [
+    { value: 400, label: 'Regular' },
+    { value: 900, label: 'Black' },
+  ];
+  const INTER_WEIGHTS = [
+    { value: 100, label: 'Thin' },
+    { value: 200, label: 'Extra Light' },
+    { value: 300, label: 'Light' },
+    { value: 400, label: 'Regular' },
+    { value: 500, label: 'Medium' },
+    { value: 600, label: 'Semi Bold' },
+    { value: 700, label: 'Bold' },
+    { value: 800, label: 'Extra Bold' },
+    { value: 900, label: 'Black' },
+  ];
+
+  function updateWeightOptions(font) {
+    const sel = document.getElementById('weight-select');
+    const weights = font === 'display' ? WALTER_WEIGHTS : INTER_WEIGHTS;
+    const current = S.textWeight;
+    sel.innerHTML = '';
+    weights.forEach(w => {
+      const opt = document.createElement('option');
+      opt.value = w.value;
+      opt.textContent = w.label;
+      sel.appendChild(opt);
+    });
+    // Snap to nearest available weight
+    const available = weights.map(w => w.value);
+    const closest = available.reduce((a, b) => Math.abs(b - current) < Math.abs(a - current) ? b : a);
+    sel.value = closest;
+    S.textWeight = closest;
+  }
+
+  document.getElementById('font-display-btn').onclick = () => {
+    S.textFont = 'display';
+    document.getElementById('font-display-btn').classList.add('active');
+    document.getElementById('font-mono-btn').classList.remove('active');
+    updateWeightOptions('display');
+    pushTextToSelected();
+  };
+  document.getElementById('font-mono-btn').onclick = () => {
+    S.textFont = 'mono';
+    document.getElementById('font-mono-btn').classList.add('active');
+    document.getElementById('font-display-btn').classList.remove('active');
+    updateWeightOptions('mono');
+    pushTextToSelected();
+  };
+
+  // ── Weight dropdown ──
+  document.getElementById('weight-select').onchange = () => {
+    S.textWeight = Number(document.getElementById('weight-select').value);
+    pushTextToSelected();
+  };
+
+  // Initialise with Walter weights
+  updateWeightOptions('display');
+
+  // ── Text color swatches ──
+  function applyTextColor(hex) {
+    S.textColor = hex;
+    document.getElementById('text-color-picker').value = hex;
+    document.getElementById('text-color-hex').value = hex;
+    document.querySelectorAll('#text-colors .swatch').forEach(s => {
+      s.classList.toggle('active', s.dataset.color.toLowerCase() === hex.toLowerCase());
+    });
+    pushTextToSelected();
+  }
+  document.querySelectorAll('#text-colors .swatch').forEach(sw => {
+    sw.onclick = () => applyTextColor(sw.dataset.color);
+  });
+  document.getElementById('text-color-picker').oninput = e => applyTextColor(e.target.value);
+  document.getElementById('text-color-hex').addEventListener('input', e => {
+    const v = e.target.value.trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(v)) applyTextColor(v);
+  });
+
+  // ── Clear text from selected panel ──
+  document.getElementById('btn-clear-text').onclick = () => {
+    if (S.selectedPanel === null) return;
+    S.panels[S.selectedPanel].text = null;
+    document.getElementById('text-input').value = '';
+    render();
+  };
+
+  // ── Artboard presets ──
+  function clearTouchpointActive() {
+    document.querySelectorAll('#touchpoint-presets .toggle-btn').forEach(b => b.classList.remove('active'));
+    S.presetMode = null;
+    updateRowSpanButtons();
+    buildColSpanButtons();
+  }
+
+  document.querySelectorAll('#presets .toggle-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#presets .toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      clearTouchpointActive();
+      S.w = Number(btn.dataset.w);
+      S.h = Number(btn.dataset.h);
+      rebuildAll();
+    };
+  });
+
+  document.getElementById('custom-apply').onclick = () => {
+    const wVal = parseInt(document.getElementById('custom-w').value, 10);
+    const hVal = parseInt(document.getElementById('custom-h').value, 10);
+    if (!wVal || !hVal || wVal < 100 || hVal < 100) return;
+    document.querySelectorAll('#presets .toggle-btn').forEach(b => b.classList.remove('active'));
+    clearTouchpointActive();
+    S.w = Math.min(wVal, 4000);
+    S.h = Math.min(hVal, 4000);
+    rebuildAll();
+  };
+
+  // ── Touchpoint presets ──
+  document.getElementById('tp-badges').onclick = () => {
+    document.querySelectorAll('#presets .toggle-btn').forEach(b => b.classList.remove('active'));
+    clearTouchpointActive();
+    document.getElementById('tp-badges').classList.add('active');
+    activateBadgePreset();
+  };
+  document.getElementById('tp-email').onclick = () => {
+    document.querySelectorAll('#presets .toggle-btn').forEach(b => b.classList.remove('active'));
+    clearTouchpointActive();
+    document.getElementById('tp-email').classList.add('active');
+    activateEmailPreset();
+  };
+  document.getElementById('tp-poster').onclick = () => {
+    document.querySelectorAll('#presets .toggle-btn').forEach(b => b.classList.remove('active'));
+    clearTouchpointActive();
+    document.getElementById('tp-poster').classList.add('active');
+    activatePosterPreset();
+  };
+  // Signage is TBD — no handler yet
+
+  // ── Panel color ──
+  document.querySelectorAll('#panel-colors .swatch').forEach(sw => {
+    sw.onclick = () => {
+      document.querySelectorAll('#panel-colors .swatch').forEach(s => s.classList.remove('active'));
+      sw.classList.add('active');
+      S.panelColor = sw.dataset.color;
+      if (S.selectedPanel !== null) {
+        S.panels[S.selectedPanel].color = S.panelColor;
+        render();
+      }
+    };
+  });
+
+  document.getElementById('custom-panel-color').addEventListener('input', e => {
+    document.querySelectorAll('#panel-colors .swatch').forEach(s => s.classList.remove('active'));
+    S.panelColor = e.target.value;
+    if (S.selectedPanel !== null) { S.panels[S.selectedPanel].color = S.panelColor; render(); }
+  });
+
+  // ── Background color ──
+  document.querySelectorAll('#bg-colors .swatch').forEach(sw => {
+    sw.onclick = () => {
+      document.querySelectorAll('#bg-colors .swatch').forEach(s => s.classList.remove('active'));
+      sw.classList.add('active');
+      S.bgColor = sw.dataset.color;
+      render();
+    };
+  });
+  document.getElementById('custom-bg-color').addEventListener('input', e => {
+    document.querySelectorAll('#bg-colors .swatch').forEach(s => s.classList.remove('active'));
+    S.bgColor = e.target.value;
+    render();
+  });
+
+  // ── Connection style ──
+  document.querySelectorAll('#conn-styles .conn-toggle').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#conn-styles .conn-toggle').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      S.connStyle = btn.dataset.style;
+    };
+  });
+
+  // ── Connection color ──
+  document.querySelectorAll('#conn-colors .swatch').forEach(sw => {
+    sw.onclick = () => {
+      document.querySelectorAll('#conn-colors .swatch').forEach(s => s.classList.remove('active'));
+      sw.classList.add('active');
+      S.connColor = sw.dataset.color;
+    };
+  });
+
+  // ── Mode ──
+  function setMode(mode) {
+    S.mode = mode;
+    S.connStart = null;
+    const txt = document.getElementById('mode-text');
+    const dot = document.querySelector('#mode-indicator .dot');
+    if (mode === 'place') {
+      txt.textContent = `Place: ${PANELS.SHAPE_TYPES[S.shapeType]?.label} ${S.colSpan}×${S.rowSpan}`;
+      dot.style.background = 'var(--fg)';
+    } else if (mode === 'connect') {
+      txt.textContent = 'Connect: click a hole';
+      dot.style.background = '#ff6b00';
+    } else if (mode === 'selected') {
+      txt.textContent = 'Selected — Del to delete';
+      dot.style.background = '#00ff41';
+    }
+    render();
+  }
+
+  document.getElementById('btn-connect').onclick = () => setMode(S.mode === 'connect' ? 'place' : 'connect');
+
+  // ── Rebuild ──
+  function rebuildAll() {
+    const w = cw(), h = rh();
+    S.panels.forEach(p => {
+      const size = PANELS.spanToPixel(p.colSpan, p.rowSpan, w, h, S.gap);
+      p.x = S.margin + p.gc * (w + S.gap);
+      p.y = vm() + p.gr * (h + S.gap);
+      p.w = size.w; p.h = size.h;
+      p.d = PANELS.SHAPE_TYPES[p.shapeType].draw(size.w, size.h, S.cornerRadius);
+      p.holes = PANELS.computeShapeHoles(p.shapeType, size.w, size.h, S.holeInset);
+    });
+    S.connections.forEach(c => {
+      const pa = S.panels.find(p => p.id === c.panelA);
+      const pb = S.panels.find(p => p.id === c.panelB);
+      if (!pa || !pb) return;
+      const ha = pa.holes.find(h => h.id === c.holeA);
+      const hb = pb.holes.find(h => h.id === c.holeB);
+      if (!ha || !hb) return;
+      c.x1 = pa.x + ha.x; c.y1 = pa.y + ha.y;
+      c.x2 = pb.x + hb.x; c.y2 = pb.y + hb.y;
+    });
+    rebuildOccupancy();
+    render();
+  }
+
+  // ── Render ──
+  function render() {
+    const w = cw(), h = rh(), rows = totalRows();
+    const vmarg = vm();
+    // Recompute panel positions (ensures vertical centering is always correct)
+    S.panels.forEach(p => {
+      p.x = S.margin + p.gc * (w + S.gap);
+      p.y = vmarg + p.gr * (h + S.gap);
+    });
+    // Recompute connection endpoints from panel/hole IDs
+    S.connections.forEach(c => {
+      const pa = S.panels.find(p => p.id === c.panelA);
+      const pb = S.panels.find(p => p.id === c.panelB);
+      if (!pa || !pb) return;
+      const ha = pa.holes.find(h => h.id === c.holeA);
+      const hb = pb.holes.find(h => h.id === c.holeB);
+      if (!ha || !hb) return;
+      c.x1 = pa.x + ha.x; c.y1 = pa.y + ha.y;
+      c.x2 = pb.x + hb.x; c.y2 = pb.y + hb.y;
+    });
+    svg.setAttribute('viewBox', `0 0 ${S.w} ${S.h}`);
+    svg.setAttribute('width', Math.round(S.w * S.zoomLevel));
+    svg.setAttribute('height', Math.round(S.h * S.zoomLevel));
+    svg.innerHTML = '';
+
+    svg.appendChild(PANELS.el('rect', { x: 0, y: 0, width: S.w, height: S.h, fill: S.bgColor }));
+
+    // Grid
+    const gridG = PANELS.el('g');
+    for (let c = 0; c <= S.cols; c++) {
+      const x = S.margin + c * (w + S.gap) - S.gap / 2;
+      gridG.appendChild(PANELS.el('line', { x1: x, y1: vmarg - S.gap / 2, x2: x, y2: vmarg + rows * (h + S.gap) - S.gap / 2, class: 'grid-line' }));
+    }
+    for (let r = 0; r <= rows; r++) {
+      const y = vmarg + r * (h + S.gap) - S.gap / 2;
+      gridG.appendChild(PANELS.el('line', { x1: S.margin - S.gap / 2, y1: y, x2: S.margin + S.cols * (w + S.gap) - S.gap / 2, y2: y, class: 'grid-line' }));
+    }
+    svg.appendChild(gridG);
+
+    // Panels
+    const panelG = PANELS.el('g', { class: 'panels' });
+    S.panels.forEach((p, idx) => {
+      const g = PANELS.el('g', {
+        transform: `translate(${p.x}, ${p.y})`,
+        class: 'panel' + (S.selectedPanel === idx ? ' selected' : '') + (p.locked ? ' locked-panel' : ''),
+        'data-idx': idx,
+      });
+      g.appendChild(PANELS.el('path', { d: p.d, fill: p.color === 'none' ? 'none' : p.color }));
+      const holeFill = S.holeMatchBg ? S.bgColor : S.holeColor;
+      const holeStroke = S.bgColor;
+      p.holes.forEach(hole => {
+        g.appendChild(PANELS.el('circle', {
+          cx: hole.x, cy: hole.y, r: S.holeSize,
+          fill: holeFill, stroke: holeStroke, 'stroke-width': 1.5,
+          class: 'hole-hover', 'data-panel-idx': idx, 'data-hole-id': hole.id,
+        }));
+      });
+      panelG.appendChild(g);
+    });
+    svg.appendChild(panelG);
+
+    // Text layer (on top of panels, below connections)
+    const textG = PANELS.el('g', { class: 'panel-texts' });
+    S.panels.forEach(p => {
+      if (!p.text) return;
+      const ff = p.textFont === 'mono'
+        ? "'Inter', sans-serif"
+        : "'Inter', system-ui, sans-serif";
+      const cx = p.x + p.w / 2;
+      const cy = p.y + p.h / 2;
+      const lines = p.text.split('\n');
+      const lh = p.fontSize * p.lineHeight;
+      const t = PANELS.el('text', {
+        x: cx, y: cy,
+        'text-anchor': 'middle',
+        'dominant-baseline': 'central',
+        'font-family': ff,
+        'font-size': p.fontSize,
+        'font-weight': p.textWeight,
+        'letter-spacing': p.tracking + 'em',
+        fill: p.textColor,
+        'pointer-events': 'none',
+      });
+      if (lines.length > 1) {
+        const startY = cy - (lines.length - 1) * lh / 2;
+        lines.forEach((line, li) => {
+          const ts = PANELS.el('tspan', { x: cx });
+          ts.textContent = line;
+          if (li === 0) ts.setAttribute('y', startY);
+          else ts.setAttribute('dy', lh);
+          t.appendChild(ts);
+        });
+      } else {
+        t.textContent = p.text;
+      }
+      textG.appendChild(t);
+    });
+    // Render logos on panels that have them
+    S.panels.forEach(p => {
+      if (!p.logoSvg) return;
+      const pad = 16;
+      const availW = p.w - pad * 2, availH = p.h - pad * 2;
+      const logoVW = p.logoSvg.vw, logoVH = p.logoSvg.vh;
+      const scale = Math.min(availW / logoVW, availH / logoVH) * 0.6;
+      const lw = logoVW * scale, lh = logoVH * scale;
+      const lx = p.x + (p.w - lw) / 2, ly = p.y + (p.h - lh) / 2;
+      const g = PANELS.el('g', { transform: `translate(${lx}, ${ly}) scale(${scale})`, 'pointer-events': 'none' });
+      const logoFill = contrastText(p.color);
+      p.logoSvg.paths.forEach(pathData => {
+        g.appendChild(PANELS.el('path', { d: pathData.d, fill: pathData.fill === 'currentColor' ? logoFill : pathData.fill }));
+      });
+      textG.appendChild(g);
+    });
+    svg.appendChild(textG);
+
+    // Connections
+    const connG = PANELS.el('g', { class: 'connections-above' });
+    const connOpts = { strokeWidth: S.strokeWidth, dotRadius: Math.min(S.holeSize, S.strokeWidth + 1) };
+    S.connections.forEach((c, i) => connG.appendChild(PANELS.renderConnection(c, i, connOpts)));
+    svg.appendChild(connG);
+
+    svg.appendChild(PANELS.el('g', { id: 'ghost-group' }));
+    svg.appendChild(PANELS.el('line', { id: 'conn-preview', x1: 0, y1: 0, x2: 0, y2: 0, style: 'display:none' }));
+  }
+
+  // ── Mouse ──
+  svg.addEventListener('mousemove', e => {
+    const pt = svgPoint(e);
+    const w = cw(), h = rh();
+    const cell = {
+      c: Math.max(0, Math.floor((pt.x - S.margin + S.gap / 2) / (w + S.gap))),
+      r: Math.max(0, Math.floor((pt.y - vm() + S.gap / 2) / (h + S.gap))),
+    };
+
+    if (S.mode === 'place') {
+      const ghost = svg.getElementById('ghost-group');
+      if (!ghost) return;
+      ghost.innerHTML = '';
+      if (canPlace(cell.c, cell.r, S.colSpan, S.rowSpan)) {
+        const pos = { x: S.margin + cell.c * (w + S.gap), y: vm() + cell.r * (h + S.gap) };
+        const size = PANELS.spanToPixel(S.colSpan, S.rowSpan, w, h, S.gap);
+        const d = PANELS.SHAPE_TYPES[S.shapeType].draw(size.w, size.h, S.cornerRadius);
+        const g = PANELS.el('g', { transform: `translate(${pos.x}, ${pos.y})`, class: 'ghost-panel' });
+        g.appendChild(PANELS.el('path', { d, fill: S.panelColor }));
+        ghost.appendChild(g);
+      }
+    }
+
+    if (S.mode === 'connect' && S.connStart) {
+      const preview = svg.getElementById('conn-preview');
+      if (preview) {
+        preview.setAttribute('x1', S.connStart.x); preview.setAttribute('y1', S.connStart.y);
+        preview.setAttribute('x2', pt.x); preview.setAttribute('y2', pt.y);
+        preview.style.display = '';
+      }
+    }
+  });
+
+  svg.addEventListener('click', e => {
+    const pt = svgPoint(e);
+    const target = e.target;
+    const w = cw(), h = rh();
+
+    if (S.mode === 'connect') {
+      if (target.classList.contains('hole-hover')) {
+        const pIdx = Number(target.dataset.panelIdx);
+        const hId = target.dataset.holeId;
+        const panel = S.panels[pIdx];
+        const hole = panel.holes.find(x => x.id === hId);
+        if (!hole) return;
+        const absX = panel.x + hole.x, absY = panel.y + hole.y;
+
+        if (!S.connStart) {
+          S.connStart = { panelIdx: pIdx, holeId: hId, x: absX, y: absY };
+          document.getElementById('mode-text').textContent = 'Connect: click another hole';
+        } else {
+          if (S.connStart.panelIdx !== pIdx || S.connStart.holeId !== hId) {
+            S.connections.push({
+              x1: S.connStart.x, y1: S.connStart.y, x2: absX, y2: absY,
+              style: S.connStyle, color: S.connColor,
+              panelA: S.panels[S.connStart.panelIdx].id, panelB: panel.id,
+              holeA: S.connStart.holeId, holeB: hId,
+            });
+          }
+          S.connStart = null;
+          const p = svg.getElementById('conn-preview'); if (p) p.style.display = 'none';
+          document.getElementById('mode-text').textContent = 'Connect: click a hole';
+          render();
+        }
+      }
+      return;
+    }
+
+    const panelEl = target.closest('.panel');
+    if (panelEl && !panelEl.classList.contains('ghost-panel')) {
+      S.selectedPanel = Number(panelEl.dataset.idx);
+      const sp = S.panels[S.selectedPanel];
+      if (sp) {
+        document.getElementById('text-input').value = sp.text || '';
+        if (sp.text) {
+          S.fontSize = sp.fontSize || 24;
+          S.lineHeight = sp.lineHeight || 1.2;
+          S.tracking = sp.tracking || 0;
+          S.textColor = sp.textColor || '#ffffff';
+          S.textFont = sp.textFont || 'display';
+          S.textWeight = sp.textWeight || 400;
+          document.getElementById('sl-font-size').value = S.fontSize;
+          document.getElementById('val-font-size').textContent = S.fontSize;
+          document.getElementById('sl-line-height').value = S.lineHeight;
+          document.getElementById('val-line-height').textContent = S.lineHeight;
+          document.getElementById('sl-tracking').value = S.tracking;
+          document.getElementById('val-tracking').textContent = S.tracking;
+          document.getElementById('weight-select').value = S.textWeight;
+          document.getElementById('text-color-picker').value = S.textColor;
+          document.getElementById('text-color-hex').value = S.textColor;
+          document.querySelectorAll('#text-colors .swatch').forEach(s => {
+            s.classList.toggle('active', s.dataset.color.toLowerCase() === S.textColor.toLowerCase());
+          });
+          document.getElementById('font-display-btn').classList.toggle('active', S.textFont === 'display');
+          document.getElementById('font-mono-btn').classList.toggle('active', S.textFont === 'mono');
+          updateWeightOptions(S.textFont);
+          document.getElementById('weight-select').value = S.textWeight;
+        }
+      }
+      setMode('selected');
+      return;
+    }
+
+    if (S.mode === 'selected') {
+      S.selectedPanel = null;
+      setMode('place');
+      render();
+      return;
+    }
+
+    if (S.mode === 'place') {
+      const cell = {
+        c: Math.max(0, Math.floor((pt.x - S.margin + S.gap / 2) / (w + S.gap))),
+        r: Math.max(0, Math.floor((pt.y - vm() + S.gap / 2) / (h + S.gap))),
+      };
+      if (!canPlace(cell.c, cell.r, S.colSpan, S.rowSpan)) return;
+      const panel = PANELS.createPanel({
+        shapeType: S.shapeType, gc: cell.c, gr: cell.r,
+        colSpan: S.colSpan, rowSpan: S.rowSpan,
+        cw: w, rh: h, gap: S.gap, margin: S.margin,
+        cornerRadius: S.cornerRadius, holeInset: S.holeInset, color: S.panelColor,
+      });
+      panel.id = S.nextId++;
+      S.panels.push(panel);
+      markOcc(cell.c, cell.r, S.colSpan, S.rowSpan, true);
+      render();
+    }
+  });
+
+  // Right-click color cycle
+  const CYCLE = ['#232316','#182944','#323232','#2e4418','#b9b9b9','#ffffff','#8eff1d','#00cf1f','#64ea67','#00e579','#c4ffcf','#8000ff','#dbc4ff','#004996','#0076d6','#007fdc','#ff0000','#ffc4c4','#ff691d','#ffd37b'];
+  svg.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    const el = e.target.closest('.panel');
+    if (!el) return;
+    const p = S.panels[Number(el.dataset.idx)];
+    if (!p) return;
+    p.color = CYCLE[(CYCLE.indexOf(p.color) + 1) % CYCLE.length];
+    render();
+  });
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+    if (e.key === 'c' || e.key === 'C') setMode(S.mode === 'connect' ? 'place' : 'connect');
+    if (e.key === 'Escape') { S.selectedPanel = null; S.connStart = null; setMode('place'); }
+    if ((e.key === 'Delete' || e.key === 'Backspace') && S.selectedPanel !== null) {
+      const p = S.panels[S.selectedPanel];
+      if (p.locked) return; // locked badge panels can't be deleted
+      markOcc(p.gc, p.gr, p.colSpan, p.rowSpan, false);
+      S.connections = S.connections.filter(c => c.panelA !== p.id && c.panelB !== p.id);
+      S.panels.splice(S.selectedPanel, 1);
+      S.selectedPanel = null;
+      setMode('place');
+    }
+    if ((e.key === 'z' || e.key === 'Z') && e.metaKey && S.connections.length > 0) { S.connections.pop(); render(); }
+  });
+
+  function svgPoint(e) {
+    const rect = svg.getBoundingClientRect();
+    const vb = svg.viewBox.baseVal;
+    return { x: (e.clientX - rect.left) / rect.width * vb.width, y: (e.clientY - rect.top) / rect.height * vb.height };
+  }
+
+  // ── Randomize ──
+  // Returns '#ffffff' or '#000000' based on background luminance
+  function contrastText(hex) {
+    const c = hex.replace('#', '');
+    const r = parseInt(c.substr(0, 2), 16);
+    const g = parseInt(c.substr(2, 2), 16);
+    const b = parseInt(c.substr(4, 2), 16);
+    // Relative luminance (perceived brightness)
+    const lum = (r * 299 + g * 587 + b * 114) / 1000;
+    return lum > 140 ? '#000000' : '#ffffff';
+  }
+
+  const THEMES = [
+    // Green on black
+    { bg: '#0a0a0a', panels: ['#232316','#2e4418','#323232','#b9b9b9','#8eff1d','#00cf1f','#64ea67','#c4ffcf'], conns: ['#8eff1d','#00e579','#ffffff'] },
+    // Blue on dark
+    { bg: '#1e1e1e', panels: ['#182944','#323232','#b9b9b9','#004996','#0076d6','#007fdc','#00e579','#ffffff'], conns: ['#0076d6','#00e579','#ffffff'] },
+    // Purple + green on black
+    { bg: '#0a0a0a', panels: ['#232316','#323232','#b9b9b9','#8000ff','#dbc4ff','#64ea67','#c4ffcf','#00cf1f'], conns: ['#8000ff','#64ea67','#dbc4ff'] },
+    // Warm on charcoal
+    { bg: '#323232', panels: ['#232316','#b9b9b9','#ffffff','#ff0000','#ffc4c4','#ff691d','#ffd37b','#182944'], conns: ['#ff0000','#ff691d','#ffd37b'] },
+    // Mixed vibrant on black
+    { bg: '#0a0a0a', panels: ['#182944','#2e4418','#323232','#8eff1d','#0076d6','#8000ff','#ff691d','#b9b9b9'], conns: ['#8eff1d','#0076d6','#ff691d'] },
+    // Cool on white
+    { bg: '#ffffff', panels: ['#182944','#004996','#007fdc','#00e579','#323232','#8000ff','#b9b9b9','#232316'], conns: ['#007fdc','#00e579','#8000ff'] },
+    // Full spectrum on grey
+    { bg: '#b9b9b9', panels: ['#8eff1d','#0076d6','#8000ff','#ff0000','#ff691d','#232316','#323232','#ffffff'], conns: ['#232316','#ff0000','#0076d6'] },
+    // Light on off-white
+    { bg: '#f0f0f0', panels: ['#232316','#182944','#323232','#004996','#0076d6','#64ea67','#ff691d','#8000ff'], conns: ['#323232','#0076d6','#ff691d'] },
+  ];
+
+  function randomize() {
+    // Apply "match holes to background" setting
+    const matchHoles = document.getElementById('rand-match-holes').checked;
+    S.holeMatchBg = matchHoles;
+    document.getElementById('hole-match-bg').checked = matchHoles;
+
+    if (S.presetMode === 'badges') { randomizeBadge(); return; }
+    if (S.presetMode === 'poster') { randomizePoster(); return; }
+    if (S.presetMode === 'email') { randomizeEmail(); return; }
+
+    S.panels = [];
+    S.connections = [];
+    S.selectedPanel = null;
+    S.nextId = 0;
+    rebuildOccupancy();
+
+    const themes = THEMES;
+    const theme = themes[Math.floor(Math.random() * themes.length)];
+    S.bgColor = theme.bg;
+    S.holeColor = theme.bg;
+    document.getElementById('custom-bg-color').value = theme.bg;
+    document.getElementById('hole-color-picker').value = theme.bg;
+    document.getElementById('hole-color-hex').value = theme.bg;
+    document.querySelectorAll('#bg-colors .swatch').forEach(s => s.classList.remove('active'));
+
+    const rows = totalRows();
+    const shapes = PANELS.SHAPE_TYPE_KEYS;
+    const w = cw(), h = rh();
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < S.cols; c++) {
+        if (occupied[r][c]) continue;
+        let cs, rs;
+        const roll = Math.random();
+        if (c === 0 && canPlace(0, r, S.cols, 1)) {
+          // Unblocked row start: 75% full-width, 20% two-col, 5% one-col
+          if (roll < 0.75) {
+            cs = S.cols;
+            rs = Math.random() < 0.65 ? 1 : 2;
+            if (!canPlace(c, r, cs, rs)) rs = 1;
+          } else if (roll < 0.95 && S.cols >= 2) {
+            cs = 2;
+            rs = Math.random() < 0.6 ? 1 : 2;
+            if (!canPlace(c, r, cs, rs)) rs = 1;
+          } else {
+            cs = 1; rs = 1;
+          }
+        } else {
+          // Mid-row or partially blocked: strongly prefer 2-col, rarely 1-col
+          if (S.cols - c >= 2 && roll < 0.8 && canPlace(c, r, 2, 1)) {
+            cs = 2;
+            rs = Math.random() < 0.55 ? 1 : 2;
+            if (!canPlace(c, r, cs, rs)) rs = 1;
+          } else {
+            cs = 1; rs = 1;
+          }
+        }
+        if (!canPlace(c, r, cs, rs)) { cs = 1; rs = 1; }
+        if (!canPlace(c, r, cs, rs)) continue;
+        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+        const color = theme.panels[Math.floor(Math.random() * theme.panels.length)];
+        const panel = PANELS.createPanel({
+          shapeType: shape, gc: c, gr: r, colSpan: cs, rowSpan: rs,
+          cw: w, rh: h, gap: S.gap, margin: S.margin,
+          cornerRadius: S.cornerRadius, holeInset: S.holeInset, color,
+        });
+        panel.id = S.nextId++;
+        if (panel.text) panel.textColor = contrastText(color);
+        S.panels.push(panel);
+        markOcc(c, r, cs, rs, true);
+      }
+    }
+
+    // Auto-fix text color on any existing text panels
+    S.panels.forEach(p => { if (p.text) p.textColor = contrastText(p.color); });
+
+    setMode('place');
+  }
+
+  function randomizeBadge() {
+    const theme = THEMES[Math.floor(Math.random() * THEMES.length)];
+    S.bgColor = theme.bg;
+    S.holeColor = theme.bg;
+    document.getElementById('custom-bg-color').value = theme.bg;
+    document.getElementById('hole-color-picker').value = theme.bg;
+    document.getElementById('hole-color-hex').value = theme.bg;
+    document.querySelectorAll('#bg-colors .swatch').forEach(s => s.classList.remove('active'));
+
+    const shapes = PANELS.SHAPE_TYPE_KEYS;
+    const w = cw(), h = rh();
+
+    // Randomize shape + color of all locked panels (positions/spans stay fixed)
+    S.panels.forEach(p => {
+      // Logo panel stays rect
+      p.shapeType = p.logoSvg ? 'rect' : shapes[Math.floor(Math.random() * shapes.length)];
+      p.color = theme.panels[Math.floor(Math.random() * theme.panels.length)];
+      if (p.text) p.textColor = contrastText(p.color);
+      const size = PANELS.spanToPixel(p.colSpan, p.rowSpan, w, h, S.gap);
+      p.d = PANELS.SHAPE_TYPES[p.shapeType].draw(size.w, size.h, S.cornerRadius);
+      p.holes = PANELS.computeShapeHoles(p.shapeType, size.w, size.h, S.holeInset);
+    });
+
+    S.connections = [];
+    render();
+    setMode('place');
+  }
+
+  function randomizePoster() {
+    const theme = THEMES[Math.floor(Math.random() * THEMES.length)];
+    S.bgColor = theme.bg;
+    S.holeColor = theme.bg;
+    document.getElementById('custom-bg-color').value = theme.bg;
+    document.getElementById('hole-color-picker').value = theme.bg;
+    document.getElementById('hole-color-hex').value = theme.bg;
+    document.querySelectorAll('#bg-colors .swatch').forEach(s => s.classList.remove('active'));
+
+    const shapes = PANELS.SHAPE_TYPE_KEYS;
+    const w = cw(), h = rh();
+
+    S.panels = [];
+    S.connections = [];
+    S.selectedPanel = null;
+    S.nextId = 0;
+    rebuildOccupancy();
+
+    // Poster: 6 cols × 8 rows, dense mix of sizes — weighted toward bigger shapes
+    const POSTER_SPANS = [[3,3],[3,2],[3,2],[2,2],[2,2],[2,1],[2,1],[2,1],[1,1],[1,1],[6,1],[6,2],[3,1]];
+    const rows = POSTER.rows;
+    for (let r = 0; r < rows; r++) {
+      let c = 0;
+      while (c < POSTER.cols) {
+        if (occupied[r] && occupied[r][c]) { c++; continue; }
+        const shuffled = [...POSTER_SPANS].sort(() => Math.random() - 0.5);
+        let placed = false;
+        for (const [cs, rs] of shuffled) {
+          if (cs > POSTER.cols - c) continue;
+          if (rs > rows - r) continue;
+          if (canPlace(c, r, cs, rs)) {
+            const shape = shapes[Math.floor(Math.random() * shapes.length)];
+            const color = theme.panels[Math.floor(Math.random() * theme.panels.length)];
+            const panel = PANELS.createPanel({
+              shapeType: shape, gc: c, gr: r, colSpan: cs, rowSpan: rs,
+              cw: w, rh: h, gap: S.gap, margin: S.margin,
+              cornerRadius: S.cornerRadius, holeInset: S.holeInset, color,
+            });
+            panel.id = S.nextId++;
+            if (panel.text) panel.textColor = contrastText(color);
+            S.panels.push(panel);
+            markOcc(c, r, cs, rs, true);
+            c += cs;
+            placed = true;
+            break;
+          }
+        }
+        if (!placed) c++;
+      }
+    }
+
+    S.panels.forEach(p => { if (p.text) p.textColor = contrastText(p.color); });
+    setMode('place');
+  }
+
+  // Email content map: fixed text + grid position, randomized shape + color
+  // 4 cols × 7 rows = 28 cells, every panel has content
+  const EMAIL_CONTENT = [
+    { text: 'PANEL LAB',              col: 0, row: 0, cs: 4, rs: 1, bold: true, sz: 48 },
+    { text: 'July 21\u201322, 2026', col: 0, row: 1, cs: 4, rs: 1, bold: true, sz: 36 },
+    { text: 'Toronto, ON',          col: 0, row: 2, cs: 4, rs: 1, bold: true, sz: 36 },
+    { text: 'example.com',   col: 0, row: 3, cs: 4, rs: 1, bold: true, sz: 24, isCta: true },
+  ];
+
+  function randomizeEmail() {
+    const theme = THEMES[Math.floor(Math.random() * THEMES.length)];
+    S.bgColor = theme.bg;
+    S.holeColor = theme.bg;
+    document.getElementById('custom-bg-color').value = theme.bg;
+    document.getElementById('hole-color-picker').value = theme.bg;
+    document.getElementById('hole-color-hex').value = theme.bg;
+    document.querySelectorAll('#bg-colors .swatch').forEach(s => s.classList.remove('active'));
+
+    const shapes = PANELS.SHAPE_TYPE_KEYS;
+    const w = cw(), h = rh();
+
+    S.panels = [];
+    S.connections = [];
+    S.selectedPanel = null;
+    S.nextId = 0;
+    rebuildOccupancy();
+
+    const accentColors = ['#8eff1d', '#00cf1f', '#64ea67', '#0076d6', '#ff691d', '#8000ff'];
+
+    EMAIL_CONTENT.forEach(item => {
+      const shape = item.preferPill ? 'pill' : shapes[Math.floor(Math.random() * shapes.length)];
+      const color = item.isCta
+        ? accentColors[Math.floor(Math.random() * accentColors.length)]
+        : theme.panels[Math.floor(Math.random() * theme.panels.length)];
+
+      const panel = PANELS.createPanel({
+        shapeType: shape, gc: item.col, gr: item.row, colSpan: item.cs, rowSpan: item.rs,
+        cw: w, rh: h, gap: S.gap, margin: S.margin,
+        cornerRadius: S.cornerRadius, holeInset: S.holeInset, color,
+      });
+      panel.id = S.nextId++;
+      // Set text using the existing text rendering system
+      panel.text = item.text;
+      panel.textFont = 'display';
+      panel.textWeight = item.bold ? 900 : 400;
+      panel.fontSize = item.sz;
+      panel.lineHeight = 1.2;
+      panel.tracking = item.sz >= 48 ? -0.03 : item.bold ? -0.02 : 0;
+      panel.textColor = contrastText(color);
+      S.panels.push(panel);
+      markOcc(item.col, item.row, item.cs, item.rs, true);
+    });
+
+    render();
+    setMode('place');
+  }
+
+  // Generate random connections for current panels
+  function randomizeConnections() {
+    S.connections = [];
+    const connStyles = ['solid', 'double', 'paracord'];
+    // Pick colors from current theme or defaults
+    const connColors = ['#8eff1d', '#0076d6', '#ff691d', '#8000ff', '#00e579', '#ffffff', '#ff0000'];
+    const numConns = Math.floor(Math.random() * 5) + 3;
+    const usedPairs = new Set();
+    const usedHoles = new Set();
+    for (let attempt = 0; attempt < numConns * 6 && S.connections.length < numConns; attempt++) {
+      if (S.panels.length < 2) break;
+      const paIdx = Math.floor(Math.random() * S.panels.length);
+      let pbIdx = Math.floor(Math.random() * S.panels.length);
+      while (pbIdx === paIdx) pbIdx = Math.floor(Math.random() * S.panels.length);
+      const pa = S.panels[paIdx], pb = S.panels[pbIdx];
+      const pairKey = [Math.min(pa.id, pb.id), Math.max(pa.id, pb.id)].join('-');
+      if (usedPairs.has(pairKey)) continue;
+      const aHoles = pa.holes.filter(hh => !usedHoles.has(`${pa.id}-${hh.id}`));
+      const bHoles = pb.holes.filter(hh => !usedHoles.has(`${pb.id}-${hh.id}`));
+      if (!aHoles.length || !bHoles.length) continue;
+      const holeA = aHoles[Math.floor(Math.random() * aHoles.length)];
+      const holeB = bHoles[Math.floor(Math.random() * bHoles.length)];
+      const style = connStyles[Math.floor(Math.random() * connStyles.length)];
+      const color = connColors[Math.floor(Math.random() * connColors.length)];
+      S.connections.push({
+        x1: pa.x + holeA.x, y1: pa.y + holeA.y,
+        x2: pb.x + holeB.x, y2: pb.y + holeB.y,
+        style, color, panelA: pa.id, panelB: pb.id, holeA: holeA.id, holeB: holeB.id,
+      });
+      usedPairs.add(pairKey);
+      usedHoles.add(`${pa.id}-${holeA.id}`);
+      usedHoles.add(`${pb.id}-${holeB.id}`);
+    }
+    render();
+  }
+
+  // Randomize just the colors (bg, panels, text contrast, holes) — keep shapes + connections
+  function randomizeColors() {
+    const theme = THEMES[Math.floor(Math.random() * THEMES.length)];
+    S.bgColor = theme.bg;
+    S.holeColor = theme.bg;
+    document.getElementById('custom-bg-color').value = theme.bg;
+    document.getElementById('hole-color-picker').value = theme.bg;
+    document.getElementById('hole-color-hex').value = theme.bg;
+    document.querySelectorAll('#bg-colors .swatch').forEach(s => s.classList.remove('active'));
+    S.panels.forEach(p => {
+      p.color = theme.panels[Math.floor(Math.random() * theme.panels.length)];
+      if (p.text) p.textColor = contrastText(p.color);
+    });
+    // Recolor existing connections too
+    S.connections.forEach(c => {
+      c.color = theme.conns[Math.floor(Math.random() * theme.conns.length)];
+    });
+    render();
+  }
+
+  document.getElementById('btn-randomize').onclick = randomize;
+  document.getElementById('btn-rand-colors').onclick = randomizeColors;
+  document.getElementById('btn-rand-conns').onclick = randomizeConnections;
+
+  // Actions
+  document.getElementById('btn-clear-conns').onclick = () => {
+    S.connections = [];
+    render();
+  };
+  document.getElementById('btn-animate').onclick = () => PANELS.animateConnections(svg, 1400);
+  document.getElementById('btn-export').onclick = () => {
+    const clone = svg.cloneNode(true);
+    clone.querySelectorAll('.ghost-panel, #conn-preview, .grid-line').forEach(e => e.remove());
+    clone.querySelectorAll('g:empty').forEach(e => e.remove());
+    clone.removeAttribute('width');
+    clone.removeAttribute('height');
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    style.textContent = `
+      @font-face { font-family: 'Inter'; src: url('fonts/Inter-Thin.ttf') format('truetype'); font-weight: 100; }
+      @font-face { font-family: 'Inter'; src: url('fonts/Inter-ExtraLight.ttf') format('truetype'); font-weight: 200; }
+      @font-face { font-family: 'Inter'; src: url('fonts/Inter-Light.ttf') format('truetype'); font-weight: 300; }
+      @font-face { font-family: 'Inter'; src: url('fonts/Inter-Regular.ttf') format('truetype'); font-weight: 400; }
+      @font-face { font-family: 'Inter'; src: url('fonts/Inter-Medium.ttf') format('truetype'); font-weight: 500; }
+      @font-face { font-family: 'Inter'; src: url('fonts/Inter-SemiBold.ttf') format('truetype'); font-weight: 600; }
+      @font-face { font-family: 'Inter'; src: url('fonts/Inter-Bold.ttf') format('truetype'); font-weight: 700; }
+      @font-face { font-family: 'Inter'; src: url('fonts/Inter-ExtraBold.ttf') format('truetype'); font-weight: 800; }
+      @font-face { font-family: 'Inter'; src: url('fonts/Inter-Black.ttf') format('truetype'); font-weight: 900; }
+    `;
+    clone.insertBefore(style, clone.firstChild);
+    PANELS.exportSVG(clone, `panels-${S.w}x${S.h}.svg`);
+  };
+  document.getElementById('btn-clear').onclick = () => {
+    if (!confirm('Clear all?')) return;
+    S.panels = []; S.connections = []; S.selectedPanel = null; S.nextId = 0;
+    rebuildOccupancy(); setMode('place');
+  };
+
+  // Init
+  rebuildOccupancy();
+  setMode('place');
+})();
+</script>
+</body>
+</html>

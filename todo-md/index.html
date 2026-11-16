@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>to-do</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #111111;
+    --mute: #b4b4b4;
+    --hair: #e4e4e4;
+    --red: #ff2b12;
+  }
+  * { box-sizing: border-box; border-radius: 0 !important; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 400 13px/1.5 ui-monospace, "SF Mono", Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 460px; margin: 0 auto; padding: 72px 24px 120px; }
+
+  /* header: one line */
+  header { display: flex; align-items: baseline; margin-bottom: 56px; }
+  .dot { width: 7px; height: 7px; background: var(--red); margin-right: 10px; align-self: center; }
+  h1 { font-size: 11px; font-weight: 400; letter-spacing: .3em; text-transform: uppercase; margin: 0; }
+  .nav { margin-left: auto; display: flex; gap: 16px; }
+  .nav button {
+    border: 0; background: none; padding: 0; cursor: pointer;
+    font: inherit; font-size: 10px; letter-spacing: .25em; text-transform: uppercase; color: var(--mute);
+  }
+  .nav button.on { color: var(--ink); }
+  .nav button.on::after { content: ""; display: block; height: 2px; background: var(--red); margin-top: 3px; }
+
+  /* project */
+  section { margin-bottom: 48px; }
+  .pname {
+    display: flex; align-items: baseline; gap: 10px;
+    font-size: 10px; letter-spacing: .25em; text-transform: uppercase;
+    padding-bottom: 8px; border-bottom: 1px solid var(--ink); margin-bottom: 4px;
+  }
+  .pname .nm { outline: none; min-width: 20px; }
+  .pname .nm:focus { color: var(--red); }
+  .pname .ct { color: var(--mute); }
+  .pname .kill {
+    margin-left: auto; border: 0; background: none; padding: 0; cursor: pointer;
+    color: var(--mute); font: inherit; font-size: 11px; opacity: 0;
+  }
+  section:hover .kill { opacity: 1; }
+  .pname .kill:hover { color: var(--red); }
+
+  ul { list-style: none; margin: 0; padding: 0; }
+  li {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 8px 0; border-bottom: 1px solid var(--hair);
+  }
+  li.dragging { opacity: .25; }
+  li.over { border-top: 2px solid var(--red); }
+  .box {
+    width: 11px; height: 11px; flex: none; margin-top: 4px;
+    border: 1.5px solid var(--ink); background: none; cursor: pointer; padding: 0;
+  }
+  .box:hover { background: var(--red); border-color: var(--red); }
+  .txt { flex: 1; outline: none; min-width: 0; word-break: break-word; cursor: text; }
+  .txt:focus { color: var(--red); }
+  li:not(.arch) .txt { cursor: grab; }
+  li:not(.arch) .txt:focus { cursor: text; }
+  .x {
+    border: 0; background: none; padding: 0; cursor: pointer;
+    color: var(--mute); font: inherit; font-size: 12px; opacity: 0; line-height: 1.5;
+  }
+  li:hover .x { opacity: 1; }
+  .x:hover { color: var(--red); }
+
+  /* add row: just a blinking spot */
+  .add { display: flex; gap: 12px; padding: 8px 0; }
+  .add .plus { color: var(--mute); width: 11px; flex: none; text-align: center; font-size: 12px; }
+  .add input {
+    flex: 1; border: 0; background: none; padding: 0; outline: none;
+    font: inherit; color: var(--ink); caret-color: var(--red);
+  }
+  .add input::placeholder { color: transparent; }
+  .add input:hover::placeholder, .add input:focus::placeholder { color: var(--mute); }
+
+  .newproj {
+    border: 0; background: none; padding: 0; cursor: pointer;
+    font: inherit; font-size: 10px; letter-spacing: .25em; text-transform: uppercase; color: var(--mute);
+  }
+  .newproj:hover { color: var(--red); }
+
+  /* archive */
+  li.arch { color: var(--mute); }
+  li.arch .txt { text-decoration: line-through; }
+  .date { color: var(--mute); font-size: 10px; margin-top: 2px; flex: none; }
+  .undo {
+    border: 0; background: none; padding: 0; cursor: pointer;
+    color: var(--mute); font: inherit; font-size: 11px; opacity: 0; line-height: 1.5;
+  }
+  li:hover .undo { opacity: 1; }
+  .undo:hover { color: var(--ink); }
+  .none { color: var(--mute); font-size: 10px; letter-spacing: .25em; text-transform: uppercase; }
+
+  footer { margin-top: 72px; font-size: 9px; letter-spacing: .25em; text-transform: uppercase; color: var(--mute); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="dot"></span>
+    <h1>to&#8209;do</h1>
+    <nav class="nav">
+      <button id="vT">list</button>
+      <button id="vA">archive</button>
+    </nav>
+  </header>
+  <main id="main"></main>
+  <footer id="foot"></footer>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+let state = { projects: [], archive: [] };
+let view = 'list';
+let saveTimer = null;
+const today = () => new Date().toISOString().slice(0, 10);
+
+async function boot() {
+  state = await (await fetch('/api/data')).json();
+  $('#vT').onclick = () => { view = 'list'; render(); };
+  $('#vA').onclick = () => { view = 'arch'; render(); };
+  render();
+}
+
+function queueSave() {
+  clearTimeout(saveTimer);
+  $('#foot').textContent = '···';
+  saveTimer = setTimeout(async () => {
+    await fetch('/api/data', {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projects: state.projects, archive: state.archive }),
+    });
+    footer();
+  }, 250);
+}
+
+function footer() {
+  const open = state.projects.reduce((n, p) => n + p.todos.length, 0);
+  $('#foot').textContent = `${open} open · ${state.archive.length} done`;
+}
+
+function render() {
+  $('#vT').className = view === 'list' ? 'on' : '';
+  $('#vA').className = view === 'arch' ? 'on' : '';
+  const main = $('#main');
+  main.innerHTML = '';
+  main.append(view === 'list' ? listView() : archView());
+  footer();
+}
+
+/* ---------- list ---------- */
+
+function listView() {
+  const frag = document.createDocumentFragment();
+
+  state.projects.forEach((proj, pi) => {
+    const sec = el('section');
+
+    const pn = el('div', 'pname');
+    const nm = el('span', 'nm');
+    nm.contentEditable = 'plaintext-only';
+    nm.textContent = proj.name;
+    nm.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); nm.blur(); } };
+    nm.onblur = () => {
+      const v = nm.textContent.trim().replace(/\s+/g, ' ');
+      if (!v || v === proj.name) { nm.textContent = proj.name; return; }
+      state.archive.forEach((a) => { if (a.project === proj.name) a.project = v; });
+      proj.name = v; queueSave(); render();
+    };
+    const ct = el('span', 'ct'); ct.textContent = proj.todos.length || '';
+    const kill = el('button', 'kill'); kill.textContent = '×';
+    kill.onclick = () => {
+      if (state.projects.length < 2) return;
+      if (proj.todos.length && !confirm(`delete "${proj.name}"?`)) return;
+      state.projects.splice(pi, 1); queueSave(); render();
+    };
+    pn.append(nm, ct, kill);
+    sec.append(pn);
+
+    const ul = el('ul');
+    proj.todos.forEach((t, i) => ul.append(row(proj, pi, t, i)));
+    sec.append(ul);
+
+    const add = el('div', 'add');
+    const plus = el('span', 'plus'); plus.textContent = '+';
+    const input = el('input');
+    input.placeholder = 'add';
+    input.onkeydown = (e) => {
+      if (e.key !== 'Enter' || !input.value.trim()) return;
+      proj.todos.push({ text: input.value.trim(), done: false });
+      queueSave(); render();
+      document.querySelectorAll('.add input')[pi]?.focus();
+    };
+    add.append(plus, input);
+    sec.append(add);
+
+    dropZone(sec, pi);
+    frag.append(sec);
+  });
+
+  const np = el('button', 'newproj');
+  np.textContent = '+ project';
+  np.onclick = () => {
+    const name = prompt('project name');
+    if (!name) return;
+    state.projects.push({ name: name.trim(), todos: [] });
+    queueSave(); render();
+  };
+  frag.append(np);
+  return frag;
+}
+
+function row(proj, pi, t, i) {
+  const li = el('li');
+
+  const box = el('button', 'box');
+  box.onclick = () => {
+    proj.todos.splice(i, 1);
+    state.archive.unshift({ text: t.text, project: proj.name, date: today() });
+    queueSave(); render();
+  };
+
+  const txt = el('div', 'txt');
+  txt.contentEditable = 'plaintext-only';
+  txt.textContent = t.text;
+  txt.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); txt.blur(); } };
+  txt.onblur = () => {
+    li.draggable = false;
+    const v = txt.textContent.trim();
+    if (!v) { proj.todos.splice(i, 1); queueSave(); return render(); }
+    if (v !== t.text) { t.text = v; queueSave(); }
+  };
+
+  const x = el('button', 'x'); x.textContent = '×';
+  x.onclick = () => { proj.todos.splice(i, 1); queueSave(); render(); };
+
+  li.append(box, txt, x);
+
+  // whole row is draggable, but typing wins: disable while text focused
+  li.draggable = true;
+  txt.onfocus = () => (li.draggable = false);
+  wireDrag(li, pi, i);
+  return li;
+}
+
+/* ---------- archive ---------- */
+
+function archView() {
+  const frag = document.createDocumentFragment();
+  if (!state.archive.length) {
+    const n = el('div', 'none'); n.textContent = 'nothing yet';
+    frag.append(n); return frag;
+  }
+
+  const order = state.projects.map((p) => p.name);
+  const groups = new Map();
+  state.archive.forEach((a, idx) => {
+    if (!groups.has(a.project)) groups.set(a.project, []);
+    groups.get(a.project).push({ a, idx });
+  });
+  const names = [...groups.keys()].sort(
+    (x, y) => (order.indexOf(x) + 1 || 99) - (order.indexOf(y) + 1 || 99)
+  );
+
+  for (const name of names) {
+    const sec = el('section');
+    const pn = el('div', 'pname');
+    const nm = el('span', 'nm'); nm.textContent = name;
+    const ct = el('span', 'ct'); ct.textContent = groups.get(name).length;
+    pn.append(nm, ct);
+    sec.append(pn);
+
+    const ul = el('ul');
+    for (const { a, idx } of groups.get(name)) {
+      const li = el('li', 'arch');
+      const undo = el('button', 'undo'); undo.textContent = '↩';
+      undo.onclick = () => {
+        state.archive.splice(idx, 1);
+        let p = state.projects.find((x) => x.name === a.project);
+        if (!p) { p = { name: a.project, todos: [] }; state.projects.push(p); }
+        p.todos.push({ text: a.text, done: false });
+        queueSave(); render();
+      };
+      const txt = el('div', 'txt'); txt.textContent = a.text;
+      const d = el('span', 'date'); d.textContent = (a.date || '').slice(5).replace('-', '.');
+      const x = el('button', 'x'); x.textContent = '×';
+      x.onclick = () => { state.archive.splice(idx, 1); queueSave(); render(); };
+      li.append(undo, txt, d, x);
+      ul.append(li);
+    }
+    sec.append(ul);
+    frag.append(sec);
+  }
+  return frag;
+}
+
+/* ---------- drag ---------- */
+
+let drag = null;
+
+function wireDrag(li, p, i) {
+  li.ondragstart = (e) => {
+    drag = { p, i };
+    li.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(i));
+  };
+  li.ondragend = () => { li.classList.remove('dragging'); drag = null; };
+  li.ondragover = (e) => { if (drag) { e.preventDefault(); e.stopPropagation(); li.classList.add('over'); } };
+  li.ondragleave = () => li.classList.remove('over');
+  li.ondrop = (e) => {
+    e.preventDefault(); e.stopPropagation(); li.classList.remove('over');
+    if (!drag) return;
+    const [t] = state.projects[drag.p].todos.splice(drag.i, 1);
+    let target = i;
+    if (drag.p === p && drag.i < i) target -= 1;
+    state.projects[p].todos.splice(target, 0, t);
+    drag = null; queueSave(); render();
+  };
+}
+
+function dropZone(node, p) {
+  node.ondragover = (e) => { if (drag) e.preventDefault(); };
+  node.ondrop = (e) => {
+    e.preventDefault();
+    if (!drag) return;
+    const [t] = state.projects[drag.p].todos.splice(drag.i, 1);
+    state.projects[p].todos.push(t);
+    drag = null; queueSave(); render();
+  };
+}
+
+function el(tag, cls) { const n = document.createElement(tag); if (cls) n.className = cls; return n; }
+boot();
+</script>
+</body>
+</html>

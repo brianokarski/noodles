@@ -1,0 +1,131 @@
+{
+  "$meta": {
+    "name": "Moth Motion Durations",
+    "description": "Timing scales that define the pace of movement",
+    "version": "1.0.0"
+  },
+
+  "durations": {
+    "$description": "Duration scale in milliseconds",
+    
+    "instant":  { "value": 0,    "css": "0ms",    "description": "No animation" },
+    "fastest":  { "value": 50,   "css": "50ms",   "description": "Micro-interactions" },
+    "faster":   { "value": 100,  "css": "100ms",  "description": "Quick feedback" },
+    "fast":     { "value": 150,  "css": "150ms",  "description": "Snappy transitions" },
+    "normal":   { "value": 200,  "css": "200ms",  "description": "Standard transitions" },
+    "slow":     { "value": 300,  "css": "300ms",  "description": "Deliberate movement" },
+    "slower":   { "value": 400,  "css": "400ms",  "description": "Noticeable transitions" },
+    "slowest":  { "value": 500,  "css": "500ms",  "description": "Dramatic reveals" },
+    "lazy":     { "value": 700,  "css": "700ms",  "description": "Slow, atmospheric" },
+    "glacial":  { "value": 1000, "css": "1000ms", "description": "Very slow, rare use" }
+  },
+
+  "byAction": {
+    "$description": "Recommended durations by action type",
+    
+    "fade": {
+      "in":  "fast",
+      "out": "faster"
+    },
+    "scale": {
+      "up":   "normal",
+      "down": "fast"
+    },
+    "slide": {
+      "in":  "normal",
+      "out": "fast"
+    },
+    "expand": {
+      "open":  "slow",
+      "close": "normal"
+    },
+    "color": {
+      "hover":  "faster",
+      "focus":  "fast",
+      "active": "fastest"
+    }
+  },
+
+  "byComponent": {
+    "$description": "Component-specific durations",
+    
+    "modal": {
+      "enter": "slow",
+      "exit":  "normal"
+    },
+    "drawer": {
+      "enter": "slower",
+      "exit":  "slow"
+    },
+    "toast": {
+      "enter": "normal",
+      "exit":  "fast",
+      "autoHide": 5000
+    },
+    "tooltip": {
+      "delay": 500,
+      "enter": "fast",
+      "exit":  "faster"
+    },
+    "dropdown": {
+      "enter": "fast",
+      "exit":  "faster"
+    },
+    "skeleton": {
+      "shimmer": 1500
+    },
+    "spinner": {
+      "rotation": 1000
+    },
+    "progress": {
+      "indeterminate": 2000
+    }
+  },
+
+  "stagger": {
+    "$description": "Stagger delays for list/grid animations",
+    
+    "micro":  { "value": 20,  "css": "20ms",  "description": "Very tight stagger" },
+    "tiny":   { "value": 30,  "css": "30ms",  "description": "Quick succession" },
+    "small":  { "value": 50,  "css": "50ms",  "description": "Standard list stagger" },
+    "medium": { "value": 75,  "css": "75ms",  "description": "Noticeable rhythm" },
+    "large":  { "value": 100, "css": "100ms", "description": "Deliberate cascade" },
+    "hero":   { "value": 150, "css": "150ms", "description": "Dramatic reveal" }
+  },
+
+  "orchestration": {
+    "$description": "Timing for multi-step animations",
+    
+    "pageEnter": {
+      "background": 0,
+      "header": 100,
+      "hero": 200,
+      "content": 350,
+      "footer": 500
+    },
+    
+    "modalEnter": {
+      "backdrop": 0,
+      "container": 50,
+      "header": 150,
+      "body": 200,
+      "actions": 250
+    },
+    
+    "cardEnter": {
+      "container": 0,
+      "image": 100,
+      "title": 150,
+      "description": 200,
+      "actions": 250
+    }
+  },
+
+  "reducedMotion": {
+    "$description": "Durations when prefers-reduced-motion is active",
+    "maxDuration": 0,
+    "instantTransitions": true,
+    "allowFlash": false
+  }
+}
+

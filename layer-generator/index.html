@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Layer Generator</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #151515;
+      color: #1f1f1f;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system;
+    }
+
+    canvas { display: block; margin: 0 auto; }
+
+    /* OP-1 inspired control surface */
+    #ui {
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      z-index: 10;
+      width: 372px;
+      max-height: calc(100vh - 28px);
+      overflow-y: scroll;
+      overflow-x: hidden;
+      scrollbar-gutter: stable;
+      background: linear-gradient(180deg, #ecebe8 0%, #d8d6d2 100%);
+      border: 1px solid #bdbab4;
+      border-radius: 14px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.7);
+      padding: 12px;
+      color: #2a2a2a;
+      box-sizing: border-box;
+    }
+
+    #ui .head {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    #ui h1 {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #3d3d3d;
+    }
+
+    #ui .seed {
+      margin-top: 6px;
+      font-variant-numeric: tabular-nums;
+      font-size: 10px;
+      color: #595959;
+      background: #efefef;
+      border: 1px solid #c8c8c8;
+      border-radius: 8px;
+      padding: 4px 6px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,.06);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #ui .surface {
+      background: #dbd9d5;
+      border: 1px solid #c0bdb7;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
+      margin-bottom: 10px;
+    }
+
+    #ui .surface h2 {
+      margin: 0 0 8px;
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #616161;
+    }
+
+    #ui .row {
+      margin: 7px 0;
+      display: grid;
+      grid-template-columns: 108px 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+
+    #ui .lbl {
+      font-size: 11px;
+      font-weight: 600;
+      color: #4f4f4f;
+      letter-spacing: .01em;
+    }
+
+    #ui select,
+    #ui input[type=number],
+    #ui input[type=text],
+    #ui input[type=color],
+    #ui button {
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 10px;
+      border: 1px solid #b9b6b0;
+      background: #f5f4f1;
+      color: #222;
+      padding: 7px 9px;
+      font-size: 11px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1px 2px rgba(0,0,0,.06);
+    }
+
+    #ui input[type=text] { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    #ui input[type=color] { padding: 2px; height: 30px; }
+
+    #ui input[type=range] {
+      width: 100%;
+      appearance: none;
+      height: 8px;
+      border-radius: 99px;
+      background: #cbcbc8;
+      border: 1px solid #b8b5b0;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,.12);
+    }
+    #ui input[type=range]::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #1f1f1f;
+      border: 2px solid #f5f4f1;
+      box-shadow: 0 1px 3px rgba(0,0,0,.35);
+      cursor: pointer;
+    }
+
+    #ui input[type=checkbox] {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 5px;
+      border: 1px solid #b9b6b0;
+      background: #f5f4f1;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1px 2px rgba(0,0,0,.06);
+      display: inline-grid;
+      place-items: center;
+      margin: 0;
+      cursor: pointer;
+    }
+    #ui input[type=checkbox]::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      transform: scale(0);
+      transition: transform 100ms ease;
+      background: #1f1f1f;
+    }
+    #ui input[type=checkbox]:checked::after {
+      transform: scale(1);
+    }
+
+    #ui .checks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    #ui .check {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #efeeea;
+      border: 1px solid #c2bfb9;
+      border-radius: 9px;
+      padding: 5px 7px;
+      font-size: 10px;
+      color: #4a4a4a;
+    }
+
+    #ui .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    #ui .actions .full { grid-column: 1 / -1; }
+
+    #layerList { display: grid; gap: 8px; margin-bottom: 8px; }
+    .layer-item {
+      border: 1px solid #c2bfb9;
+      border-radius: 9px;
+      background: #efeeea;
+      font-size: 10px;
+      overflow: hidden;
+    }
+    .layer-item.active { outline: none; background: #efeeea; }
+    .layer-head {
+      width: 100%;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .layer-item .meta { opacity: .7; font-size: 9px; text-transform: uppercase; }
+    .layer-details { border-top: 1px solid #cfcac3; padding: 8px; }
+    .composer-grid {
+      display: grid;
+      grid-template-columns: 108px 1fr;
+      gap: 8px;
+      align-items: center;
+      margin: 6px 0;
+    }
+
+    #ui button {
+      cursor: pointer;
+      font-weight: 600;
+    }
+    #ui button:hover { filter: brightness(.98); }
+
+    /* minimal scrollbar */
+    #ui::-webkit-scrollbar { width: 8px; }
+    #ui::-webkit-scrollbar-track {
+      background: transparent;
+      margin: 8px;
+    }
+    #ui::-webkit-scrollbar-thumb {
+      background: rgba(70, 70, 70, 0.28);
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.35);
+    }
+    #ui::-webkit-scrollbar-thumb:hover {
+      background: rgba(70, 70, 70, 0.42);
+    }
+    #ui { scrollbar-width: thin; scrollbar-color: rgba(70,70,70,.35) transparent; }
+  </style>
+</head>
+<body>
+  <div id="ui">
+    <div class="head">
+      <h1>Layer Generator</h1>
+      <div class="seed" id="statusLabel">palette: —</div>
+    </div>
+
+    <div class="surface">
+      <h2>System</h2>
+      <div class="row"><div class="lbl">Mode</div><select id="mode"><option value="dots">Dots</option><option value="totem">Totem</option><option value="composer">Composer</option></select></div>
+      <div class="row"><div class="lbl">Palette</div><select id="palette"><option value="big-green-system">Big Green System</option><option value="final-green-system">Final Green System</option><option value="aqua-lime-pop">Aqua Lime Pop</option><option value="reference-aqua11">Reference Aqua 11</option><option value="random">Random</option><option value="soft-gray">Soft Gray</option><option value="mint-lavender">Mint + Lavender</option><option value="tan-yellow">Tan + Yellow</option><option value="olive">Olive</option><option value="sage-mute">Sage Mute</option><option value="greys">Greys</option></select></div>
+      <div class="row"><div class="lbl">Quality</div><select id="quality"><option value="random">Random</option><option value="scale">Scale</option><option value="adaptation">Adaptation</option><option value="flow">Flow</option><option value="convergence">Convergence</option><option value="emergence">Emergence</option><option value="iterator">Iterator</option><option value="gradient">Gradient Descender</option><option value="latent">Latent Space</option><option value="modulator">Modulator</option><option value="containerizer">Container-izer</option><option value="brancher">Brancher</option><option value="retrieval">Retrieval</option></select></div>
+      <div class="row"><div class="lbl">Totem style</div><select id="totemStyle"><option value="random">Random</option><option value="original">Original</option><option value="scale">Scale Totem</option><option value="adaptation">Adaptation Totem</option><option value="flow">Flow Totem</option><option value="convergence">Convergence Totem</option><option value="emergence">Emergence Totem</option><option value="retrieval">Retrieval Totem</option></select></div>
+      <div class="row"><div class="lbl">Fill</div><select id="fillStyle"><option value="solid">Solid</option><option value="isolated">Isolated</option></select></div>
+    </div>
+
+    <div class="surface" id="composerPanel">
+      <h2>Layers Composer</h2>
+      <div id="layerList"></div>
+    </div>
+
+    <div class="surface">
+      <h2>Color Director</h2>
+      <div class="row"><div class="lbl">BG color</div><input id="bgHex" type="color" value="#bac0b4" /></div>
+      <div class="row"><div class="lbl">Ink color</div><input id="inkHex" type="color" value="#000000" /></div>
+      <div class="row"><div class="lbl">Pop color</div><input id="popHex" type="color" value="#00ff73" /></div>
+      <div class="row"><div class="lbl">Accents csv</div><input id="accentsHex" type="text" placeholder="#00FF73,#3F8256,#BAFFCC" /></div>
+    </div>
+
+    <div class="surface">
+      <h2>Dot Dials</h2>
+      <div class="row"><div class="lbl">Variance</div><input type="range" id="dotVariance" min="0" max="4" step="0.05" value="0" /></div>
+      <div class="row"><div class="lbl">Cluster</div><input type="range" id="dotCluster" min="0" max="4" step="0.05" value="0" /></div>
+      <div class="row"><div class="lbl">Jitter</div><input type="range" id="dotJitter" min="0" max="4" step="0.05" value="0" /></div>
+      <div class="row"><div class="lbl">Density</div><input type="range" id="dotDensity" min="0.05" max="1" step="0.05" value="1" /></div>
+      <div class="row"><div class="lbl">Stroke</div><input type="range" id="dotStroke" min="0" max="60" step="1" value="0" /></div>
+
+      <div class="checks">
+        <label class="check"><input type="checkbox" id="randVariance" /> Rand variance</label>
+        <label class="check"><input type="checkbox" id="randCluster" /> Rand cluster</label>
+        <label class="check"><input type="checkbox" id="randJitter" /> Rand jitter</label>
+        <label class="check"><input type="checkbox" id="randDensity" /> Rand density</label>
+        <label class="check"><input type="checkbox" id="randStroke" /> Rand stroke</label>
+        <label class="check"><input type="checkbox" id="caption" /> Caption</label>
+      </div>
+    </div>
+
+    <div class="surface">
+      <h2>Export</h2>
+      <div class="actions">
+        <button id="randomize">Randomize (R)</button>
+        <button id="rerollColors">Reroll colors (C)</button>
+        <button id="exportPng">Export PNG (P)</button>
+        <button id="exportSvg">Export SVG (S)</button>
+        <button id="exportAll" class="full">Export ALL (every quality × every palette)</button>
+        <button id="exportRecipe" class="full">Export recipe JSON</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"></script>
+  <script src="lib/rng.js"></script>
+  <script src="lib/svg-recorder.js"></script>
+  <script src="lib/palette.js"></script>
+  <script src="generators/qualities/_shared.js"></script>
+  <script src="generators/qualities/scale.js"></script>
+  <script src="generators/qualities/adaptation.js"></script>
+  <script src="generators/qualities/flow.js"></script>
+  <script src="generators/qualities/convergence.js"></script>
+  <script src="generators/qualities/emergence.js"></script>
+  <script src="generators/qualities/iterator.js"></script>
+  <script src="generators/qualities/gradient_descender.js"></script>
+  <script src="generators/qualities/latent_space.js"></script>
+  <script src="generators/qualities/modulator.js"></script>
+  <script src="generators/qualities/containerizer.js"></script>
+  <script src="generators/qualities/brancher.js"></script>
+  <script src="generators/qualities/retrieval.js"></script>
+  <script src="generators/totem.js"></script>
+  <script src="generators/dots.js"></script>
+  <script src="sketch.js"></script>
+</body>
+</html>

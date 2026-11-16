@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Layer Generator</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
+      body {
+        background: #111;
+        color: #eee;
+        font: 12px/1.35 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      }
+      .wrap { padding: 10px; display: grid; gap: 8px; }
+      .panel { background: #1b1b1b; border: 1px solid #333; border-radius: 10px; padding: 10px; }
+      h1 { margin: 0 0 8px; font-size: 14px; }
+      .small { color: #aaa; font-size: 11px; }
+      .row { display: grid; grid-template-columns: 92px 1fr; gap: 8px; align-items: center; margin: 6px 0; }
+      .row label { color: #aaa; }
+      .row.inline { grid-template-columns: 1fr 1fr; }
+      .row.inline > div { display: grid; grid-template-columns: 92px 1fr; gap: 8px; align-items: center; }
+      input, select, button {
+        width: 100%;
+        max-width: 100%;
+        background: #111;
+        color: #fff;
+        border: 1px solid #444;
+        border-radius: 6px;
+        padding: 6px 8px;
+        font: inherit;
+      }
+      input[type='checkbox'] { width: auto; }
+      .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .btns3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+      button { cursor: pointer; }
+      button.primary { background: #2b5cff; border-color: #2b5cff; }
+      #preview { width: 100%; height: auto; display: block; background: #0d0d0d; border-radius: 8px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="panel">
+        <h1>Layer Generator</h1>
+        <div id="selInfo" class="small">Selection: 0</div>
+        <div id="status" class="small" style="margin-top:4px; color:#9ecbff;">Ready.</div>
+
+        <div class="row inline">
+          <div><label>Width</label><input id="w" type="number" value="2400" min="256" /></div>
+          <div><label>Height</label><input id="h" type="number" value="2400" min="256" /></div>
+        </div>
+
+        <div class="btns" style="margin-top:8px;">
+          <button id="syncSel">Sync to selection</button>
+          <button id="randomize">Randomize seeds</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="row"><label>Mode</label>
+          <select id="mode">
+            <option value="dots">Dots</option>
+            <option value="totem">Totem</option>
+          </select>
+        </div>
+        <div class="row"><label>Quality</label>
+          <select id="quality">
+            <option value="random">Random</option>
+            <option value="scale">Scale</option>
+            <option value="adaptation">Adaptation</option>
+            <option value="flow">Flow</option>
+            <option value="convergence">Convergence</option>
+            <option value="emergence">Emergence</option>
+            <option value="iterator">Iterator</option>
+            <option value="gradient">Gradient Descender</option>
+            <option value="latent">Latent Space</option>
+            <option value="modulator">Modulator</option>
+            <option value="containerizer">Containerizer</option>
+            <option value="brancher">Brancher</option>
+            <option value="retrieval">Retrieval</option>
+          </select>
+        </div>
+        <div class="row"><label>Palette</label>
+          <select id="palettePreset"></select>
+        </div>
+        <div class="row"><label>Fill style</label>
+          <select id="fillStyle">
+            <option value="solid">Solid</option>
+            <option value="isolated">Isolated</option>
+          </select>
+        </div>
+        <div class="row"><label>Seed</label><input id="seed" type="number" value="12345" /></div>
+        <div class="row"><label>Color seed</label><input id="colorSeed" type="number" value="67890" /></div>
+
+        <div class="row"><label>Variance</label><input id="dotVariance" type="number" min="0" max="4" step="0.1" value="0" /></div>
+        <div class="row"><label>Cluster</label><input id="dotCluster" type="number" min="0" max="4" step="0.1" value="0" /></div>
+        <div class="row"><label>Jitter</label><input id="dotJitter" type="number" min="0" max="4" step="0.1" value="0" /></div>
+        <div class="row"><label>Density</label><input id="dotDensity" type="number" min="0.05" max="1" step="0.05" value="1" /></div>
+        <div class="row"><label>Stroke</label><input id="dotStroke" type="number" min="0" max="60" step="1" value="0" /></div>
+      </div>
+
+      <div class="panel">
+        <canvas id="preview" width="800" height="800"></canvas>
+      </div>
+
+      <div class="panel">
+        <div class="btns3">
+          <button id="render">Render</button>
+          <button id="apply" class="primary">Insert in selection</button>
+          <button id="close">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="vendor/p5.min.js"></script>
+    <script src="generator/lib/rng.js"></script>
+    <script src="generator/lib/palette.js"></script>
+    <script src="generator/generators/qualities/_shared.js"></script>
+    <script src="generator/generators/qualities/adaptation.js"></script>
+    <script src="generator/generators/qualities/brancher.js"></script>
+    <script src="generator/generators/qualities/containerizer.js"></script>
+    <script src="generator/generators/qualities/convergence.js"></script>
+    <script src="generator/generators/qualities/emergence.js"></script>
+    <script src="generator/generators/qualities/flow.js"></script>
+    <script src="generator/generators/qualities/gradient_descender.js"></script>
+    <script src="generator/generators/qualities/iterator.js"></script>
+    <script src="generator/generators/qualities/latent_space.js"></script>
+    <script src="generator/generators/qualities/modulator.js"></script>
+    <script src="generator/generators/qualities/retrieval.js"></script>
+    <script src="generator/generators/qualities/scale.js"></script>
+    <script src="generator/generators/dots.js"></script>
+    <script src="generator/generators/totem.js"></script>
+    <script src="ui.js"></script>
+  </body>
+</html>

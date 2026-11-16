@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root{--ink:#f2f2f0;--bg:#0d0d0c;--line:#262624;--dim:#78786f;--accent:#E8D8B0;--warn:#E4572E}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{background:var(--bg);color:var(--ink);
+    font:400 11px/1.35 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.03em;
+    display:flex;flex-direction:column;user-select:none;-webkit-user-select:none}
+  h2{margin:0 0 8px;font-size:9px;letter-spacing:.24em;color:var(--dim);font-weight:500}
+  .sec{padding:11px 14px;border-bottom:1px solid var(--line)}
+
+  .head{display:flex;gap:10px}
+  .big{width:88px;height:88px;border-radius:6px;background:#222;flex:none}
+  .meta{flex:1;display:flex;flex-direction:column;gap:3px;justify-content:center}
+  .hexin{background:#0d0d0c;border:1px solid var(--line);color:var(--ink);font:inherit;
+    font-size:13px;padding:5px 6px;outline:none;width:100%;letter-spacing:.06em}
+  .hexin:focus{border-color:var(--accent)}
+  .kv{display:flex;justify-content:space-between;color:var(--dim);font-size:9.5px}
+  .kv b{color:var(--ink);font-weight:400;font-variant-numeric:tabular-nums}
+
+  .info{margin-top:9px;padding-top:9px;border-top:1px solid var(--line)}
+  .info .kv b{font-size:9.5px}
+  .rung{display:inline-block;background:#2a2a26;color:var(--dim);padding:1px 5px;border-radius:2px;font-size:9px}
+  .ok{color:var(--accent)} .no{color:var(--warn)}
+  .near{margin-top:7px;font-size:9.5px;color:var(--dim);display:flex;align-items:center;gap:6px}
+  .near .sw{width:13px;height:13px;border-radius:3px}
+  .near.dupe{color:var(--warn)}
+
+  .segs{display:grid;grid-auto-flow:column;border:1px solid var(--line);margin-bottom:10px}
+  .segs button{background:none;border:0;border-right:1px solid var(--line);color:var(--dim);
+    font:inherit;font-size:9.5px;padding:8px 2px;cursor:pointer;letter-spacing:.1em}
+  .segs button:last-child{border-right:0}
+  .segs button.on{background:var(--accent);color:#0d0d0c}
+  .segs button:hover:not(.on){color:var(--ink);background:#1b1b19}
+
+  .ctl{margin:11px 0}
+  .ctl .top{display:flex;align-items:baseline;gap:6px;margin-bottom:5px}
+  .ctl .lbl{flex:1;color:var(--dim);font-size:10px}
+  .ctl output{font-variant-numeric:tabular-nums;font-size:10.5px}
+  .ctl .track{position:relative;height:20px;cursor:ew-resize;touch-action:none}
+  .ctl .band{position:absolute;left:0;right:0;top:8px;height:4px;border-radius:2px;background:#2c2c28}
+  .ctl.h .band{background:linear-gradient(90deg,#F00,#FF0,#0F0,#0FF,#00F,#F0F,#F00)}
+  .ctl .knob{position:absolute;top:3px;width:12px;height:14px;margin-left:-6px;border-radius:3px;
+    background:var(--ink);box-shadow:0 0 0 1.5px #0d0d0c}
+  .ctl .track:hover .knob{background:var(--accent)}
+
+  .row{display:flex;gap:8px}
+  .row label{color:var(--dim);font-size:10px;display:flex;align-items:center;gap:5px;flex:1}
+  .row input{flex:1;background:#0d0d0c;border:1px solid var(--line);color:var(--ink);
+    font:inherit;font-size:10.5px;padding:5px 6px;outline:none;text-align:right}
+  .row input:focus{border-color:var(--accent)}
+
+  .strip{display:flex;gap:2px;margin-top:9px;height:56px}
+  .strip div{flex:1;border-radius:3px;cursor:pointer;position:relative}
+  .strip div:hover{outline:1.5px solid var(--ink);outline-offset:1px}
+  .strip div.base{outline:1.5px solid var(--accent);outline-offset:1px}
+
+  button.act{width:100%;background:none;border:1px solid var(--line);color:var(--ink);font:inherit;
+    font-size:9.5px;letter-spacing:.11em;padding:8px 9px;cursor:pointer;text-align:left;margin-top:6px}
+  button.act:hover{border-color:var(--ink)}
+  button.act.pri{background:var(--accent);color:#0d0d0c;border-color:var(--accent);font-weight:500}
+  .scroll{overflow-y:auto;flex:1}
+  .scroll::-webkit-scrollbar{width:8px}
+  .scroll::-webkit-scrollbar-thumb{background:#242422;border-radius:4px}
+  .foot{padding:10px 14px;border-top:1px solid var(--line)}
+  .note{color:#57574f;font-size:9px;line-height:1.5;margin-top:8px}
+</style>
+</head>
+<body>
+
+<div class="sec">
+  <div class="head">
+    <div class="big" id="big"></div>
+    <div class="meta">
+      <input class="hexin" id="hexin" value="#2F5D9B" spellcheck="false">
+      <div class="kv"><span>hue</span><b id="kH">207&deg;</b></div>
+      <div class="kv"><span>saturation</span><b id="kS">100%</b></div>
+      <div class="kv"><span>lightness</span><b id="kL">50%</b></div>
+    </div>
+  </div>
+  <div class="info">
+    <div class="kv"><span>on Ink</span><b id="cInk">&mdash;</b></div>
+    <div class="kv"><span>on Haze</span><b id="cHaze">&mdash;</b></div>
+    <div class="kv"><span>on Black</span><b id="cBlack">&mdash;</b></div>
+    <div class="kv" style="margin-top:4px"><span>perceived lightness</span><b><span id="pL">&mdash;</span> <span class="rung" id="rung">&mdash;</span></b></div>
+    <div class="near" id="near"></div>
+  </div>
+</div>
+
+<div class="scroll">
+  <div class="sec">
+    <h2>HSL &mdash; same model as HUEHUEHUE</h2>
+    <div class="ctl h" data-k="h"><div class="top"><div class="lbl">hue</div><output>207&deg;</output></div>
+      <div class="track"><div class="band"></div><div class="knob"></div></div></div>
+    <div class="ctl" data-k="s"><div class="top"><div class="lbl">saturation</div><output>100%</output></div>
+      <div class="track"><div class="band"></div><div class="knob"></div></div></div>
+    <div class="ctl" data-k="l"><div class="top"><div class="lbl">lightness</div><output>50%</output></div>
+      <div class="track"><div class="band"></div><div class="knob"></div></div></div>
+  </div>
+
+  <div class="sec">
+    <h2>SPIN</h2>
+    <div class="segs" id="axis">
+      <button data-axis="h" class="on">ROTATE HUE</button>
+      <button data-axis="s">WALK SAT</button>
+      <button data-axis="l">WALK LIGHT</button>
+    </div>
+    <div class="row">
+      <label>steps <input id="steps" type="number" value="8" min="2" max="16"></label>
+      <label>arc&deg; <input id="arc" type="number" value="360" min="15" max="360"></label>
+    </div>
+    <div class="strip" id="strip"></div>
+    <button class="act pri" id="build">BUILD ROW ON CANVAS</button>
+    <button class="act" id="apply">APPLY CURRENT TO SELECTION</button>
+    <div class="note">Hue rotates while saturation and lightness stay put &mdash; colours keep their punch. The contrast and rung readings above are information only; they never alter the result.</div>
+  </div>
+</div>
+
+<div class="foot">
+  <button class="act" id="pick">PULL COLOUR FROM SELECTION</button>
+</div>
+
+<script>
+(function(){
+"use strict";
+var S={h:207,s:1,l:0.5};
+var AXIS="h";
+var RANGE={h:[0,360],s:[0,1],l:[0,1]};
+var items=[];
+function post(m){parent.postMessage({pluginMessage:m},"*");}
+function $(id){return document.getElementById(id);}
+
+document.querySelectorAll(".ctl").forEach(function(ctl){
+  var k=ctl.dataset.k,track=ctl.querySelector(".track"),knob=ctl.querySelector(".knob");
+  function draw(){
+    var r=RANGE[k],t=(S[k]-r[0])/(r[1]-r[0]);
+    knob.style.left=(t*100)+"%";
+    ctl.querySelector("output").textContent =
+      k==="h" ? Math.round(S.h)+"\u00B0" : Math.round(S[k]*100)+"%";
+  }
+  ctl._draw=draw;
+  var drag=false;
+  function set(e){
+    var b=track.getBoundingClientRect();
+    var t=Math.max(0,Math.min(1,(e.clientX-b.left)/b.width));
+    var r=RANGE[k]; S[k]=r[0]+t*(r[1]-r[0]);
+    draw(); recompute();
+  }
+  track.addEventListener("pointerdown",function(e){drag=true;track.setPointerCapture(e.pointerId);set(e);});
+  track.addEventListener("pointermove",function(e){if(drag)set(e);});
+  track.addEventListener("pointerup",function(){drag=false;});
+  draw();
+});
+
+document.querySelectorAll("#axis button").forEach(function(b){
+  b.onclick=function(){
+    AXIS=b.dataset.axis;
+    document.querySelectorAll("#axis button").forEach(function(x){x.classList.toggle("on",x===b);});
+    recompute();
+  };
+});
+
+function recompute(){
+  post({type:"spin",h:S.h,s:S.s,l:S.l,axis:AXIS,
+        steps:parseInt($("steps").value,10)||8,
+        arc:parseFloat($("arc").value)||360});
+}
+function badge(v){
+  var t=v.toFixed(1);
+  return v>=4.5?'<span class="ok">'+t+'</span>':v>=3?'<span>'+t+'</span>':'<span class="no">'+t+'</span>';
+}
+function paint(r){
+  $("big").style.background=r.hex;
+  if(document.activeElement!==$("hexin")) $("hexin").value=r.hex;
+  $("kH").textContent=Math.round(r.h)+"\u00B0";
+  $("kS").textContent=Math.round(r.s*100)+"%";
+  $("kL").textContent=Math.round(r.l*100)+"%";
+  $("cInk").innerHTML=badge(r.onInk);
+  $("cHaze").innerHTML=badge(r.onHaze);
+  $("cBlack").innerHTML=badge(r.onBlack);
+  $("pL").textContent=r.percL.toFixed(2);
+  $("rung").textContent="rung "+r.rung;
+  var dupe=r.nearD<0.05;
+  $("near").className="near"+(dupe?" dupe":"");
+  $("near").innerHTML='<div class="sw" style="background:'+r.nearHex+'"></div>'+
+    (dupe?"same as ":"nearest ")+r.nearName+" \u0394"+r.nearD.toFixed(3);
+}
+
+window.onmessage=function(ev){
+  var m=ev.data.pluginMessage; if(!m) return;
+  if(m.type==="spun"){
+    items=m.items;
+    paint(items[0].report);
+    var s=$("strip"); s.innerHTML="";
+    items.forEach(function(it,i){
+      var d=document.createElement("div");
+      d.style.background=it.hex;
+      if(it.isBase) d.className="base";
+      d.title=it.hex+"  "+(it.note||"base")+"  \u00b7 rung "+it.report.rung;
+      d.onclick=function(){
+        S.h=it.report.h;S.s=it.report.s;S.l=it.report.l;
+        document.querySelectorAll(".ctl").forEach(function(c){c._draw();});
+        recompute();
+      };
+      s.appendChild(d);
+    });
+  } else if(m.type==="report"){
+    S.h=m.report.h;S.s=m.report.s;S.l=m.report.l;
+    document.querySelectorAll(".ctl").forEach(function(c){c._draw();});
+    recompute();
+  } else if(m.type==="selection"){
+    if(m.hex&&m.report){
+      S.h=m.report.h;S.s=m.report.s;S.l=m.report.l;
+      document.querySelectorAll(".ctl").forEach(function(c){c._draw();});
+      recompute();
+    }
+  }
+};
+
+$("hexin").addEventListener("change",function(){
+  var v=$("hexin").value.trim();
+  if(!/^#?[0-9a-fA-F]{6}$/.test(v)) return;
+  post({type:"inspect",hex:v[0]==="#"?v:"#"+v});
+});
+$("steps").onchange=recompute; $("arc").onchange=recompute;
+$("build").onclick=function(){
+  post({type:"buildRow",label:"COLOR MATRIX \u00b7 spin",
+    items:items.slice(1).map(function(i){return {hex:i.hex,note:i.note};})});
+};
+$("apply").onclick=function(){ post({type:"apply",hex:$("hexin").value}); };
+$("pick").onclick=function(){ post({type:"pick"}); };
+
+post({type:"ready"});
+recompute();
+})();
+</script>
+</body>
+</html>

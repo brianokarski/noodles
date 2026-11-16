@@ -1,0 +1,13 @@
+#!/bin/bash
+# Launch the todo.md app and open it in the browser.
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PORT="${TODO_PORT:-4321}"
+
+if curl -s -o /dev/null "http://127.0.0.1:$PORT/api/data"; then
+  echo "already running"
+else
+  nohup node "$DIR/server.js" > "$DIR/server.log" 2>&1 &
+  sleep 0.6
+fi
+
+open "http://127.0.0.1:$PORT"

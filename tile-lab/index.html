@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>TILE LAB — grid, strokes, symmetry</title>
+<style>
+  :root{
+    --ink:#f2f2f0; --bg:#0d0d0c; --panel:#141413; --line:#262624;
+    --dim:#78786f; --accent:#d6ff3f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{
+    background:var(--bg);color:var(--ink);
+    font:400 11px/1.35 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.03em;
+    display:grid;grid-template-columns:252px 1fr;
+    user-select:none;-webkit-user-select:none;
+  }
+  aside{border-right:1px solid var(--line);background:var(--panel);overflow-y:auto;display:flex;flex-direction:column}
+  .brand{padding:13px 14px 11px;border-bottom:1px solid var(--line)}
+  .brand h1{margin:0;font-size:12px;letter-spacing:.22em;font-weight:500}
+  .brand p{margin:5px 0 0;color:var(--dim);font-size:9.5px}
+  section{padding:12px 14px;border-bottom:1px solid var(--line)}
+  section>h2{margin:0 0 10px;font-size:9px;letter-spacing:.24em;color:var(--dim);font-weight:500}
+  section>h3{margin:11px 0 6px;font-size:8.5px;letter-spacing:.2em;color:#5a5a53;font-weight:400}
+
+  .ctl{margin-bottom:11px}
+  .ctl:last-child{margin-bottom:0}
+  .ctl .top{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+  .ctl .chk{flex:none;width:12px;height:12px;border:1px solid #3a3a35;background:none;
+    cursor:pointer;padding:0;border-radius:2px}
+  .ctl .chk.on{background:var(--accent);border-color:var(--accent)}
+  .ctl .lbl{flex:1;color:var(--dim);font-size:10px;cursor:ew-resize;padding:2px 0}
+  .ctl .lbl:hover{color:var(--ink)}
+  .ctl .box{display:flex;align-items:baseline;gap:2px;border:1px solid var(--line);
+    background:#0d0d0c;padding:3px 5px;min-width:58px;justify-content:flex-end}
+  .ctl .box:focus-within{border-color:var(--accent)}
+  .ctl input{background:none;border:0;color:var(--ink);font:inherit;font-size:10.5px;
+    text-align:right;width:40px;padding:0;font-variant-numeric:tabular-nums;outline:none}
+  .ctl .u{color:var(--dim);font-size:9.5px}
+  .ctl .track{position:relative;height:16px;cursor:ew-resize;touch-action:none}
+  .ctl .track::before{content:'';position:absolute;left:0;right:0;top:7px;height:3px;
+    background:#2c2c28;border-radius:2px}
+  .ctl .fill{position:absolute;left:0;top:7px;height:3px;background:#4d5231;border-radius:2px}
+  .ctl .knob{position:absolute;top:1px;width:12px;height:14px;margin-left:-6px;border-radius:3px;
+    background:var(--ink)}
+  .ctl .track:hover .knob,.ctl.live .knob{background:var(--accent)}
+
+  .seg{display:grid;grid-auto-flow:column;border:1px solid var(--line)}
+  .seg button{background:none;border:0;border-right:1px solid var(--line);color:var(--dim);
+    font:inherit;font-size:9.5px;letter-spacing:.06em;padding:8px 2px;cursor:pointer;white-space:nowrap}
+  .seg button:last-child{border-right:0}
+  .seg button:hover{color:var(--ink)}
+  .seg button.on{background:var(--ink);color:#0d0d0c}
+
+  .acts{padding:12px 14px;display:grid;gap:6px}
+  .acts button{background:none;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:9.5px;
+    letter-spacing:.13em;padding:9px;cursor:pointer;text-align:left}
+  .acts button:hover{border-color:var(--ink)}
+  .acts button.pri{background:var(--accent);color:#0d0d0c;border-color:var(--accent);font-weight:500}
+  .acts .k{float:right;color:var(--dim)}
+  .acts .pri .k{color:#0d0d0c;opacity:.55}
+  footer{margin-top:auto;padding:12px 14px;color:var(--dim);font-size:9.5px;line-height:1.7;border-top:1px solid var(--line)}
+
+  main{position:relative;overflow:hidden;background:#000}
+  canvas#c{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair}
+  .hud{position:absolute;left:12px;bottom:10px;color:#6b6b62;font-size:9.5px;letter-spacing:.12em;
+    pointer-events:none;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand">
+    <h1>TILE LAB</h1>
+    <p>two strokes on a grid, fanned out</p>
+  </div>
+
+  <section>
+    <h2>DRAW</h2>
+    <div class="seg" id="tool" style="margin-bottom:6px">
+      <button data-v="line" class="on">LINE</button>
+      <button data-v="arc">ARC</button>
+      <button data-v="liss">LISSAJOUS</button>
+      <button data-v="erase">ERASE</button>
+    </div>
+    <div class="ctls" data-keys="grid"></div>
+    <h3>LISSAJOUS CELL</h3>
+    <div class="ctls" data-keys="la,lb,phase,lsize"></div>
+  </section>
+
+  <section>
+    <h2>SYMMETRY</h2>
+    <div class="seg" id="sym" style="margin-bottom:6px">
+      <button data-v="none">NONE</button>
+      <button data-v="x">MIRROR</button>
+      <button data-v="quad" class="on">QUAD</button>
+    </div>
+    <div class="seg" id="sym2">
+      <button data-v="rot4">ROTATE 4</button>
+      <button data-v="diag">DIAGONAL</button>
+      <button data-v="oct">EIGHTFOLD</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>FAN</h2>
+    <div class="ctls" data-keys="fan,gap"></div>
+    <h3>SIDE</h3>
+    <div class="seg" id="fside">
+      <button data-v="both" class="on">BOTH</button>
+      <button data-v="one">ONE</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>TILE</h2>
+    <div class="ctls" data-keys="repeat,rot,stroke"></div>
+    <h3>SHOW</h3>
+    <div class="seg" id="showgrid">
+      <button data-v="on" class="on">GRID</button>
+      <button data-v="off">CLEAN</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>PRESETS</h2>
+    <div class="seg" id="presets" style="margin-bottom:6px">
+      <button data-p="table">LISSAJOUS TABLE</button>
+      <button data-p="petal">PETAL</button>
+    </div>
+    <div class="seg" id="presets2">
+      <button data-p="weave">WEAVE</button>
+      <button data-p="fanout">FAN OUT</button>
+      <button data-p="cross">CROSS</button>
+    </div>
+  </section>
+
+  <div class="acts">
+    <button id="rand" class="pri">RANDOMIZE <span class="k">R</span></button>
+    <button id="undo">UNDO STROKE <span class="k">&#8984;Z</span></button>
+    <button id="clear">CLEAR <span class="k">C</span></button>
+    <button id="expsvg">EXPORT SVG <span class="k">S</span></button>
+    <button id="exppng">EXPORT PNG <span class="k">E</span></button>
+  </div>
+
+  <footer>
+    drag between grid points. LINE is<br>
+    straight, ARC is a quarter circle<br>
+    (drag past the chord to pick its<br>
+    side). LISSAJOUS drops a cell.<br>
+    animate PHASE to spin the loops.
+  </footer>
+</aside>
+
+<main>
+  <canvas id="c"></canvas>
+  <div class="hud" id="hud"></div>
+</main>
+
+<script>
+(function(){
+"use strict";
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),hud=document.getElementById('hud');
+const TAU=Math.PI*2;
+
+const SPEC={
+  grid:['grid',2,16,1,'',0],
+  la:['freq x',1,9,1,'',0],
+  lb:['freq y',1,9,1,'',0],
+  phase:['phase',0,360,1,'\u00b0',0],
+  lsize:['cell fill',30,100,1,'%',0],
+  fan:['copies',1,24,1,'',0],
+  gap:['gap',1,60,0.5,'px',1],
+  repeat:['repeat',1,6,1,'\u00d7',0],
+  rot:['rotation',0,360,0.5,'\u00b0',1],
+  stroke:['stroke width',0.3,24,0.1,'px',1]
+};
+const DEF={grid:8,la:3,lb:2,phase:90,lsize:80,fan:1,gap:14,repeat:1,rot:0,stroke:3};
+const P=Object.assign({},DEF);
+let tool='line',sym='quad',fside='both',showgrid=true;
+let board={w:1200,h:1200};
+let view={s:1,ox:0,oy:0},dpr=1,hist=[];
+let strokes=[];              /* {k:'line'|'arc'|'liss', ...grid coords} */
+
+const stateStr=()=>JSON.stringify({P:P,sym:sym,fside:fside,strokes:strokes});
+function push(){hist.push(stateStr());if(hist.length>80)hist.shift();}
+function undo(){const h=hist.pop();if(!h)return;const o=JSON.parse(h);
+  Object.assign(P,o.P);sym=o.sym;fside=o.fside;strokes=o.strokes;
+  syncSegs();syncAll();draw();}
+
+/* ================= dials ================= */
+const UI={};
+function fmt(k,v){const d=SPEC[k][5];return d?v.toFixed(d):String(Math.round(v));}
+function clampStep(k,v){
+  const [,mn,mx,st]=SPEC[k];
+  v=Math.max(mn,Math.min(mx,v));
+  return +(Math.round(v/st)*st).toFixed(4);
+}
+function setVal(k,v,o){
+  o=o||{};
+  const nv=clampStep(k,v);
+  if(nv===P[k]&&!o.force) return;
+  P[k]=nv;paintCtl(k);
+  if(!o.silent) draw();
+}
+function paintCtl(k){
+  const u=UI[k];if(!u)return;
+  const [,mn,mx]=SPEC[k];
+  const t=(P[k]-mn)/(mx-mn);
+  u.fill.style.width=(t*100)+'%';u.knob.style.left=(t*100)+'%';
+  if(document.activeElement!==u.input) u.input.value=fmt(k,P[k]);
+}
+let armed=true;
+function pushOnce(){if(armed){push();armed=false;}}
+function buildCtl(k){
+  const [label,mn,mx,st]=SPEC[k];
+  const el=document.createElement('div');
+  el.className='ctl';
+  el.innerHTML='<div class="top"><button class="chk" title="animate"></button>'+
+    '<div class="lbl">'+label+'</div>'+
+    '<div class="box"><input inputmode="decimal" spellcheck="false"><span class="u">'+SPEC[k][4]+'</span></div></div>'+
+    '<div class="track"><div class="fill"></div><div class="knob"></div></div>';
+  const input=el.querySelector('input'),track=el.querySelector('.track'),lbl=el.querySelector('.lbl');
+  UI[k]={el:el,input:input,fill:el.querySelector('.fill'),knob:el.querySelector('.knob')};
+  const factor=e=>e.shiftKey?0.1:(e.altKey?10:1);
+  const commit=()=>{const n=parseFloat(input.value);if(isFinite(n))setVal(k,n,{force:true});paintCtl(k);};
+  input.addEventListener('focus',()=>input.select());
+  input.addEventListener('change',commit);
+  input.addEventListener('blur',commit);
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){commit();input.blur();e.preventDefault();}
+    else if(e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();
+      pushOnce();setVal(k,P[k]+(e.key==='ArrowUp'?1:-1)*st*(e.shiftKey?10:1),{force:true});}
+    else if(e.key==='Escape'){input.value=fmt(k,P[k]);input.blur();}
+    e.stopPropagation();
+  });
+  track.addEventListener('pointerdown',e=>{
+    e.preventDefault();track.setPointerCapture(e.pointerId);
+    pushOnce();el.classList.add('live');
+    const r=track.getBoundingClientRect();
+    const fromX=x=>mn+((x-r.left)/r.width)*(mx-mn);
+    let last=fromX(e.clientX);
+    setVal(k,last,{force:true});
+    const move=ev=>{const rawv=fromX(ev.clientX),f=factor(ev);
+      if(f===1){setVal(k,rawv);last=rawv;}else{setVal(k,P[k]+(rawv-last)*f);last=rawv;}};
+    const up=()=>{track.removeEventListener('pointermove',move);
+      track.removeEventListener('pointerup',up);el.classList.remove('live');armed=true;};
+    track.addEventListener('pointermove',move);
+    track.addEventListener('pointerup',up);
+  });
+  lbl.addEventListener('pointerdown',e=>{
+    e.preventDefault();lbl.setPointerCapture(e.pointerId);
+    pushOnce();el.classList.add('live');
+    let px=e.clientX,start=P[k],acc=0;
+    const move=ev=>{acc+=(ev.clientX-px)*st*factor(ev);px=ev.clientX;setVal(k,start+acc);};
+    const up=()=>{lbl.removeEventListener('pointermove',move);
+      lbl.removeEventListener('pointerup',up);el.classList.remove('live');armed=true;};
+    lbl.addEventListener('pointermove',move);
+    lbl.addEventListener('pointerup',up);
+  });
+  el.addEventListener('wheel',e=>{e.preventDefault();pushOnce();
+    setVal(k,P[k]+(e.deltaY<0?1:-1)*st*(e.shiftKey?10:1));},{passive:false});
+  el.querySelector('.chk').onclick=function(){
+    if(anim[k]){delete anim[k];this.classList.remove('on');}
+    else{const [,a,b]=SPEC[k];anim[k]={u:(P[k]-a)/(b-a),dir:1};this.classList.add('on');startAnim();}
+  };
+  paintCtl(k);
+  return el;
+}
+const anim={};
+let rafId=null,lastTs=0;
+function startAnim(){if(rafId==null){lastTs=0;rafId=requestAnimationFrame(tick);}}
+function tick(ts){
+  if(!lastTs)lastTs=ts;
+  const dt=Math.min(.1,(ts-lastTs)/1000);lastTs=ts;
+  const keys=Object.keys(anim);
+  if(!keys.length){rafId=null;return;}
+  keys.forEach(k=>{const a=anim[k],[,mn,mx]=SPEC[k];
+    if(k==='phase'||k==='rot'){a.u+=dt/6;if(a.u>1)a.u-=1;}          /* wrap */
+    else{a.u+=(dt/7)*a.dir;if(a.u>1){a.u=2-a.u;a.dir=-1;}if(a.u<0){a.u=-a.u;a.dir=1;}}
+    setVal(k,mn+a.u*(mx-mn),{force:true,silent:true});});
+  draw();
+  rafId=requestAnimationFrame(tick);
+}
+document.querySelectorAll('.ctls').forEach(host=>{
+  host.dataset.keys.split(',').forEach(k=>host.appendChild(buildCtl(k.trim())));
+});
+const syncAll=()=>Object.keys(SPEC).forEach(paintCtl);
+
+/* ================= geometry (grid units, tile is 0..G) ================= */
+const G=()=>Math.max(2,Math.round(P.grid));
+function arcPts(a,b,bulge){
+  /* quarter circle between grid points a,b whose offsets are equal:
+     centre is one of the two corners of their square. */
+  const dx=b[0]-a[0],dy=b[1]-a[1];
+  if(Math.abs(Math.abs(dx)-Math.abs(dy))>1e-9||dx===0) return [a,b];
+  const c=bulge>0?[a[0]+dx,a[1]]:[a[0],a[1]+dy];
+  const r=Math.abs(dx);
+  const a0=Math.atan2(a[1]-c[1],a[0]-c[0]),a1=Math.atan2(b[1]-c[1],b[0]-c[0]);
+  let sw=a1-a0;while(sw>Math.PI)sw-=TAU;while(sw<-Math.PI)sw+=TAU;
+  const n=28,out=[];
+  for(let i=0;i<=n;i++){const t=a0+sw*i/n;out.push([c[0]+r*Math.cos(t),c[1]+r*Math.sin(t)]);}
+  return out;
+}
+function lissPts(cell,fa,fb,ph,fill){
+  const cx=cell[0]+0.5,cy=cell[1]+0.5,R=0.5*fill;
+  const n=Math.max(240,60*Math.max(fa,fb)),out=[];
+  for(let i=0;i<=n;i++){
+    const t=i/n*TAU;
+    out.push([cx+R*Math.sin(fa*t+ph),cy+R*Math.sin(fb*t)]);
+  }
+  return out;
+}
+function strokePts(s){
+  if(s.k==='line') return [[s.a[0],s.a[1]],[s.b[0],s.b[1]]];
+  if(s.k==='arc')  return arcPts(s.a,s.b,s.bulge);
+  return lissPts(s.cell,s.fa,s.fb,s.ph*Math.PI/180+P.phase*Math.PI/180,s.fill);
+}
+/* symmetry copies within the tile (about its centre) */
+function symCopies(p){
+  const g=G(),mx=q=>[g-q[0],q[1]],my=q=>[q[0],g-q[1]],dg=q=>[q[1],q[0]];
+  const r90=q=>[g-q[1],q[0]];
+  const app=(f,arr)=>arr.map(f);
+  let out=[p];
+  if(sym==='x') out.push(app(mx,p));
+  else if(sym==='quad'){const m=app(mx,p);out.push(m,app(my,p),app(my,m));}
+  else if(sym==='rot4'){let q=p;for(let k=0;k<3;k++){q=app(r90,q);out.push(q);}}
+  else if(sym==='diag'){out.push(app(dg,p));}
+  else if(sym==='oct'){
+    const d=app(dg,p);const base=[p,d];
+    base.forEach(b=>{const m=app(mx,b);out.push(m,app(my,b),app(my,m));});
+    out.push(d);
+  }
+  return out;
+}
+/* parallel copies along the normal */
+function offsetPts(p,d){
+  const n=p.length,out=new Array(n);
+  for(let i=0;i<n;i++){
+    const a=p[Math.max(0,i-1)],b=p[Math.min(n-1,i+1)];
+    let nx=-(b[1]-a[1]),ny=b[0]-a[0];
+    const m=Math.hypot(nx,ny)||1;
+    out[i]=[p[i][0]+nx/m*d,p[i][1]+ny/m*d];
+  }
+  return out;
+}
+
+/* ================= build: everything in board px ================= */
+function buildTile(){
+  const g=G(),rep=Math.max(1,Math.round(P.repeat));
+  const cellPx=board.w/rep,unit=cellPx/g;         /* one grid unit in px */
+  const gapU=P.gap/unit;                             /* fan gap in grid units */
+  const fan=Math.max(1,Math.round(P.fan));
+  const base=[];
+  strokes.forEach(s=>{
+    const p=strokePts(s);
+    symCopies(p).forEach(c=>{
+      if(fan===1){base.push(c);return;}
+      for(let k=0;k<fan;k++){
+        let d;
+        if(fside==='both') d=(k-(fan-1)/2)*gapU;
+        else d=k*gapU;
+        base.push(d===0?c:offsetPts(c,d));
+      }
+    });
+  });
+  /* tile it, rotate the sheet */
+  const out=[];
+  const cx=board.w/2,cy=board.h/2,ra=P.rot*Math.PI/180,cr=Math.cos(ra),sr=Math.sin(ra);
+  for(let ty=0;ty<rep;ty++)for(let tx=0;tx<rep;tx++){
+    base.forEach(p=>{
+      out.push(p.map(q=>{
+        const x=tx*cellPx+q[0]*unit,y=ty*cellPx+q[1]*unit;
+        const dx=x-cx,dy=y-cy;
+        return [cx+dx*cr-dy*sr,cy+dx*sr+dy*cr];
+      }));
+    });
+  }
+  return {paths:out,unit:unit,cellPx:cellPx,g:g,rep:rep};
+}
+
+/* ================= render ================= */
+function renderContent(g2,forExport){
+  g2.fillStyle='#000';g2.fillRect(0,0,board.w,board.h);
+  const T=buildTile();
+  if(showgrid&&!forExport){
+    g2.strokeStyle='rgba(255,255,255,.10)';g2.lineWidth=1;
+    g2.beginPath();
+    for(let i=0;i<=T.g*T.rep;i++){
+      const v=i*T.unit;
+      g2.moveTo(v,0);g2.lineTo(v,board.h);g2.moveTo(0,v);g2.lineTo(board.w,v);
+    }
+    g2.stroke();
+    g2.strokeStyle='rgba(255,255,255,.28)';
+    g2.beginPath();
+    for(let i=0;i<=T.rep;i++){const v=i*T.cellPx;g2.moveTo(v,0);g2.lineTo(v,board.h);g2.moveTo(0,v);g2.lineTo(board.w,v);}
+    g2.stroke();
+  }
+  g2.strokeStyle='#fff';g2.lineWidth=P.stroke;g2.lineCap='round';g2.lineJoin='round';
+  g2.beginPath();
+  T.paths.forEach(p=>{
+    g2.moveTo(p[0][0],p[0][1]);
+    for(let i=1;i<p.length;i++) g2.lineTo(p[i][0],p[i][1]);
+  });
+  g2.stroke();
+  return T;
+}
+function fit(){
+  dpr=Math.min(window.devicePixelRatio||1,2);
+  const r=cv.parentElement.getBoundingClientRect();
+  cv.width=Math.round(r.width*dpr);cv.height=Math.round(r.height*dpr);
+  const pad=28;
+  view.s=Math.min((r.width-pad*2)/board.w,(r.height-pad*2)/board.h);
+  view.ox=(r.width-board.w*view.s)/2;view.oy=(r.height-board.h*view.s)/2;
+  draw();
+}
+new ResizeObserver(fit).observe(document.querySelector('main'));
+let live=null;
+function draw(){
+  const W=cv.width/dpr,H=cv.height/dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.translate(view.ox,view.oy);ctx.scale(view.s,view.s);
+  ctx.beginPath();ctx.rect(0,0,board.w,board.h);ctx.clip();
+  const T=renderContent(ctx,false);
+  /* live stroke preview, in the first tile only */
+  if(live&&live.a&&live.b){
+    const s=live.k==='arc'?{k:'arc',a:live.a,b:live.b,bulge:live.bulge}:{k:'line',a:live.a,b:live.b};
+    const pts=strokePts(s);
+    ctx.strokeStyle='#d6ff3f';ctx.lineWidth=Math.max(1.5,P.stroke);
+    ctx.beginPath();
+    pts.forEach((q,i)=>{const x=q[0]*T.unit,y=q[1]*T.unit;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+    ctx.stroke();
+  }
+  ctx.restore();
+  hud.textContent=strokes.length+' strokes \u00b7 '+T.paths.length+' paths \u00b7 grid '+T.g+' \u00b7 '+sym
+    +(P.fan>1?' \u00b7 fan '+Math.round(P.fan)+' @'+P.gap.toFixed(1)+'px':'')
+    +(P.repeat>1?' \u00b7 '+T.rep+'\u00d7'+T.rep:'')+' \u00b7 '+tool;
+}
+
+/* ================= drawing ================= */
+function toGrid(e){
+  const r=cv.getBoundingClientRect();
+  const x=(e.clientX-r.left-view.ox)/view.s,y=(e.clientY-r.top-view.oy)/view.s;
+  const rep=Math.max(1,Math.round(P.repeat)),unit=board.w/rep/G();
+  return [x/unit,y/unit];                      /* fractional grid coords, first tile */
+}
+const snapPt=q=>[Math.round(q[0]),Math.round(q[1])];
+const snapCell=q=>[Math.floor(q[0]),Math.floor(q[1])];
+function nearStroke(q){
+  const g=G(),cell=1;
+  for(let i=strokes.length-1;i>=0;i--){
+    const pts=strokePts(strokes[i]);
+    for(let k=0;k<pts.length;k++)
+      if(Math.hypot(pts[k][0]-q[0],pts[k][1]-q[1])<0.35) return i;
+    /* lines: distance to segment */
+    if(strokes[i].k==='line'){
+      const a=pts[0],b=pts[1],dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy||1;
+      const t=Math.max(0,Math.min(1,((q[0]-a[0])*dx+(q[1]-a[1])*dy)/L));
+      if(Math.hypot(a[0]+dx*t-q[0],a[1]+dy*t-q[1])<0.25) return i;
+    }
+  }
+  return -1;
+}
+cv.addEventListener('pointerdown',e=>{
+  cv.setPointerCapture(e.pointerId);
+  const q=toGrid(e),g=G();
+  if(q[0]<-0.5||q[1]<-0.5||q[0]>g+0.5||q[1]>g+0.5) return;
+  if(tool==='erase'){const i=nearStroke(q);if(i>=0){push();strokes.splice(i,1);draw();}return;}
+  if(tool==='liss'){
+    push();
+    const c=snapCell(q);
+    strokes.push({k:'liss',cell:[Math.max(0,Math.min(g-1,c[0])),Math.max(0,Math.min(g-1,c[1]))],
+                  fa:Math.round(P.la),fb:Math.round(P.lb),ph:0,fill:P.lsize/100});
+    draw();return;
+  }
+  live={k:tool,a:snapPt(q),b:null,bulge:1,path:[q]};
+});
+cv.addEventListener('pointermove',e=>{
+  if(!live) return;
+  const q=toGrid(e);
+  live.path.push(q);
+  let b=snapPt(q);
+  if(live.k==='arc'){
+    /* arcs need equal legs: snap the longer leg down */
+    const dx=b[0]-live.a[0],dy=b[1]-live.a[1];
+    const m=Math.min(Math.abs(dx),Math.abs(dy));
+    b=[live.a[0]+Math.sign(dx)*m,live.a[1]+Math.sign(dy)*m];
+    /* which side of the chord did the hand travel? */
+    const mid=live.path[Math.floor(live.path.length/2)];
+    const cross=(b[0]-live.a[0])*(mid[1]-live.a[1])-(b[1]-live.a[1])*(mid[0]-live.a[0]);
+    /* centre at (a.x+dx, a.y) bows one way; pick by side */
+    live.bulge=cross*Math.sign(dx)*Math.sign(dy)>0?-1:1;
+  }
+  live.b=(b[0]===live.a[0]&&b[1]===live.a[1])?null:b;
+  draw();
+});
+function endStroke(){
+  if(!live) return;
+  if(live.b){
+    push();
+    if(live.k==='arc') strokes.push({k:'arc',a:live.a,b:live.b,bulge:live.bulge});
+    else strokes.push({k:'line',a:live.a,b:live.b});
+  }
+  live=null;draw();
+}
+cv.addEventListener('pointerup',endStroke);
+cv.addEventListener('pointercancel',endStroke);
+
+/* ================= chrome ================= */
+const segOn=(id,val)=>document.querySelectorAll('#'+id+' button')
+  .forEach(b=>b.classList.toggle('on',b.dataset.v===val));
+function syncSegs(){segOn('tool',tool);segOn('sym',sym);segOn('sym2',sym);segOn('fside',fside);
+  segOn('showgrid',showgrid?'on':'off');}
+document.getElementById('tool').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  tool=b.dataset.v;segOn('tool',tool);draw();};
+['sym','sym2'].forEach(id=>document.getElementById(id).onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  push();sym=b.dataset.v;segOn('sym',sym);segOn('sym2',sym);draw();});
+document.getElementById('fside').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  push();fside=b.dataset.v;segOn('fside',fside);draw();};
+document.getElementById('showgrid').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  showgrid=b.dataset.v==='on';segOn('showgrid',b.dataset.v);draw();};
+document.getElementById('undo').onclick=undo;
+document.getElementById('clear').onclick=()=>{push();strokes=[];draw();};
+
+/* ================= presets ================= */
+const PRESETS={
+  table(){                       /* the gif */
+    P.grid=5;P.repeat=1;P.fan=1;P.rot=0;P.stroke=3;sym='none';
+    strokes=[];
+    for(let y=0;y<5;y++)for(let x=0;x<5;x++)
+      strokes.push({k:'liss',cell:[x,y],fa:x+1,fb:y+1,ph:0,fill:0.78});
+    P.phase=90;
+  },
+  petal(){                       /* Barry: four leaves meeting at the centre */
+    P.grid=8;P.repeat=1;P.fan=3;P.gap=16;fside='one';P.rot=0;P.stroke=3;sym='quad';
+    strokes=[{k:'arc',a:[0,4],b:[4,0],bulge:1},{k:'arc',a:[4,0],b:[8,4],bulge:1}];
+  },
+  weave(){                       /* Barry: two rules meet at a corner, quad */
+    P.grid=8;P.repeat=2;P.fan=3;P.gap=10;fside='both';P.rot=0;P.stroke=2.5;sym='quad';
+    strokes=[{k:'line',a:[1,0],b:[1,5]},{k:'line',a:[0,3],b:[5,3]}];
+  },
+  fanout(){                      /* Barry: radial lines to a corner */
+    P.grid=8;P.repeat=1;P.fan=1;P.rot=0;P.stroke=2.5;sym='none';
+    strokes=[];
+    for(let i=0;i<=8;i++) strokes.push({k:'line',a:[0,0],b:[8,i]});
+    for(let i=0;i<8;i++) strokes.push({k:'line',a:[0,0],b:[i,8]});
+  },
+  cross(){                       /* Barry: concentric corner arcs + a spoke, eightfold */
+    P.grid=8;P.repeat=1;P.fan=3;P.gap=14;fside='one';P.rot=0;P.stroke=3;sym='oct';
+    strokes=[{k:'arc',a:[0,4],b:[4,0],bulge:-1},{k:'line',a:[4,4],b:[4,0]}];
+  }
+};
+['presets','presets2'].forEach(id=>document.getElementById(id).onclick=e=>{
+  const b=e.target.closest('button');if(!b)return;
+  push();PRESETS[b.dataset.p]();syncSegs();syncAll();draw();});
+
+function randomize(){
+  push();
+  const R=Math.random,ri=(a,b)=>a+Math.floor(R()*(b-a+1)),pk=a=>a[Math.floor(R()*a.length)];
+  const g=pk([4,6,8,8]);P.grid=g;
+  const h=g/2;
+  sym=pk(['quad','quad','quad','rot4','oct','oct','diag']);
+  fside=pk(['both','one','one']);
+  P.fan=pk([1,2,3,3,4,6]);P.gap=pk([8,10,12,14,18]);
+  P.repeat=pk([1,1,1,2,3]);P.rot=pk([0,0,0,45]);P.stroke=pk([2,2.5,3,4]);
+  strokes=[];
+  /* Barry's grammar: every stroke is anchored to an axis, an edge or a
+     corner, and spans a whole half-tile. arcs are quarter circles whose
+     centres sit on a corner or the middle. */
+  const anchors=[[0,0],[h,0],[0,h],[h,h],[g,0],[0,g]];
+  const n=ri(2,3);
+  for(let k=0;k<n;k++){
+    const kind=R();
+    if(kind<0.45){
+      /* quarter arc, radius h or h/2, centred on a corner or the middle */
+      const r=pk([h,h,h/2]);
+      const c=pk([[0,0],[h,h],[g,0],[0,g],[h,0],[0,h]]);
+      const dirs=[[1,0,0,1],[0,1,1,0],[-1,0,0,1],[0,1,-1,0],[1,0,0,-1],[0,-1,1,0],[-1,0,0,-1],[0,-1,-1,0]];
+      const d=pk(dirs);
+      const a=[c[0]+d[0]*r,c[1]+d[1]*r],b=[c[0]+d[2]*r,c[1]+d[3]*r];
+      const ok=q=>q[0]>=0&&q[0]<=g&&q[1]>=0&&q[1]<=g;
+      if(ok(a)&&ok(b)&&a[0]!==b[0]&&a[1]!==b[1]){
+        /* bulge sign that puts the centre at c */
+        const dx=b[0]-a[0];
+        const bulge=(Math.abs(a[0]+dx-c[0])<1e-9&&Math.abs(a[1]-c[1])<1e-9)?1:-1;
+        strokes.push({k:'arc',a:a,b:b,bulge:bulge});
+        continue;
+      }
+    }
+    if(kind<0.75){
+      /* a rule: full or half span, on a grid line */
+      const v=R()<0.5;
+      const pos=pk([0,1,h/2,h-1,h].map(Math.round));
+      const len=pk([h,h,g]);
+      const s=v?{k:'line',a:[pos,0],b:[pos,len]}:{k:'line',a:[0,pos],b:[len,pos]};
+      strokes.push(s);continue;
+    }
+    /* a diagonal from an anchor */
+    const a=pk(anchors),d=pk([h/2,h]);
+    const b=[a[0]+d,a[1]+d];
+    if(b[0]<=g&&b[1]<=g) strokes.push({k:'line',a:a,b:b});
+    else strokes.push({k:'line',a:[0,h],b:[h,h]});
+  }
+  if(!strokes.length) strokes.push({k:'line',a:[0,h],b:[h,h]});
+  syncSegs();syncAll();draw();
+}
+document.getElementById('rand').onclick=randomize;
+
+/* ================= export ================= */
+function download(url,name){
+  const a=document.createElement('a');a.href=url;a.download=name;
+  document.body.appendChild(a);a.click();a.remove();
+}
+function exportPNG(){
+  const sc=2,oc=document.createElement('canvas');
+  oc.width=board.w*sc;oc.height=board.h*sc;
+  const g2=oc.getContext('2d');g2.scale(sc,sc);
+  renderContent(g2,true);
+  download(oc.toDataURL('image/png'),'tile.png');
+}
+function exportSVG(){
+  const T=buildTile();
+  let body='<g fill="none" stroke="#ffffff" stroke-width="'+P.stroke.toFixed(2)+
+    '" stroke-linecap="round" stroke-linejoin="round">';
+  T.paths.forEach(p=>{
+    let d='M'+p[0][0].toFixed(2)+' '+p[0][1].toFixed(2);
+    for(let i=1;i<p.length;i++) d+='L'+p[i][0].toFixed(2)+' '+p[i][1].toFixed(2);
+    body+='<path d="'+d+'"/>';
+  });
+  body+='</g>';
+  const out='<svg xmlns="http://www.w3.org/2000/svg" width="'+board.w+'" height="'+board.h+
+    '" viewBox="0 0 '+board.w+' '+board.h+'"><rect width="'+board.w+'" height="'+board.h+
+    '" fill="#000000"/>'+body+'</svg>';
+  download(URL.createObjectURL(new Blob([out],{type:'image/svg+xml'})),'tile.svg');
+}
+document.getElementById('exppng').onclick=exportPNG;
+document.getElementById('expsvg').onclick=exportSVG;
+
+addEventListener('keydown',e=>{
+  const tag=e.target.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA') return;
+  const k=e.key.toLowerCase();
+  if((e.metaKey||e.ctrlKey)&&k==='z'){e.preventDefault();undo();return;}
+  if(k==='e')exportPNG();
+  else if(k==='s')exportSVG();
+  else if(k==='r')randomize();
+  else if(k==='c'){push();strokes=[];draw();}
+  else if(k==='l'){tool='line';segOn('tool',tool);draw();}
+  else if(k==='a'){tool='arc';segOn('tool',tool);draw();}
+  else if(k==='x'){tool='erase';segOn('tool',tool);draw();}
+});
+addEventListener('pointerup',()=>{armed=true;});
+window.addEventListener('error',ev=>{
+  hud.textContent='ERROR: '+ev.message+' @'+ev.lineno;hud.style.color='#ff5c3a';});
+
+PRESETS.petal();
+syncSegs();syncAll();
+fit();
+})();
+</script>
+</body>
+</html>

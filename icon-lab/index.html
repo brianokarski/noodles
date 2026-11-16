@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>ICON LAB: lissajous app icons</title>
+<style>
+  :root{
+    --ink:#f2f2f0; --bg:#0d0d0c; --panel:#141413; --line:#262624;
+    --dim:#78786f; --accent:#F2B134;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{
+    background:var(--bg);color:var(--ink);
+    font:400 11px/1.35 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.03em;
+    display:grid;grid-template-columns:252px 1fr;
+    user-select:none;-webkit-user-select:none;
+  }
+  aside{border-right:1px solid var(--line);background:var(--panel);overflow-y:auto;display:flex;flex-direction:column}
+  .brand{padding:13px 14px 11px;border-bottom:1px solid var(--line)}
+  .brand h1{margin:0;font-size:12px;letter-spacing:.22em;font-weight:500}
+  .brand p{margin:5px 0 0;color:var(--dim);font-size:9.5px}
+  section{padding:12px 14px;border-bottom:1px solid var(--line)}
+  section>h2{margin:0 0 10px;font-size:9px;letter-spacing:.24em;color:var(--dim);font-weight:500;display:flex;justify-content:space-between}
+  section>h2 small{color:#5a5a53;letter-spacing:.05em;font-weight:400}
+
+  .ctl{margin-bottom:11px}
+  .ctl:last-child{margin-bottom:0}
+  .ctl .top{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+  .ctl .lbl{flex:1;color:var(--dim);font-size:10px;cursor:ew-resize;padding:2px 0}
+  .ctl .lbl:hover{color:var(--ink)}
+  .ctl .box{display:flex;align-items:baseline;gap:2px;border:1px solid var(--line);
+    background:#0d0d0c;padding:3px 5px;min-width:58px;justify-content:flex-end}
+  .ctl .box:focus-within{border-color:var(--accent)}
+  .ctl input{background:none;border:0;color:var(--ink);font:inherit;font-size:10.5px;
+    text-align:right;width:40px;padding:0;font-variant-numeric:tabular-nums;outline:none}
+  .ctl .u{color:var(--dim);font-size:9.5px}
+  .ctl .track{position:relative;height:16px;cursor:ew-resize;touch-action:none}
+  .ctl .track::before{content:'';position:absolute;left:0;right:0;top:7px;height:3px;
+    background:#2c2c28;border-radius:2px}
+  .ctl .fill{position:absolute;left:0;top:7px;height:3px;background:#2f4a38;border-radius:2px}
+  .ctl .knob{position:absolute;top:1px;width:12px;height:14px;margin-left:-6px;border-radius:3px;background:var(--ink)}
+  .ctl .track:hover .knob,.ctl.live .knob{background:var(--accent)}
+
+  .seg{display:grid;grid-auto-flow:column;border:1px solid var(--line);margin-bottom:10px}
+  .seg button{background:none;border:0;border-right:1px solid var(--line);color:var(--dim);
+    font:inherit;font-size:9.5px;letter-spacing:.06em;padding:8px 2px;cursor:pointer;white-space:nowrap}
+  .seg button:last-child{border-right:0}
+  .seg button:hover{color:var(--ink)}
+  .seg button.on{background:var(--ink);color:#0d0d0c}
+
+  .tog{display:flex;flex-wrap:wrap;gap:5px}
+  .tog button{background:none;border:1px solid var(--line);color:var(--dim);font:inherit;font-size:9px;
+    letter-spacing:.12em;padding:6px 8px;cursor:pointer}
+  .tog button:hover{color:var(--ink)}
+  .tog button.on{border-color:var(--accent);color:var(--accent)}
+
+  .sw{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+  .sw label{color:var(--dim);font-size:9.5px;width:34px}
+  .sw input[type=color]{-webkit-appearance:none;appearance:none;width:28px;height:22px;border:1px solid var(--line);background:none;padding:0;cursor:pointer;border-radius:2px}
+  .sw input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+  .sw input[type=color]::-webkit-color-swatch{border:0;border-radius:1px}
+  .sw .hex{flex:1;background:#0d0d0c;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:10px;padding:3px 5px;outline:none;text-transform:uppercase}
+  .sw .hex:focus{border-color:var(--accent)}
+
+  .pal{display:flex;flex-wrap:wrap;gap:4px}
+  .pal button{width:22px;height:22px;border:1px solid rgba(255,255,255,.14);border-radius:2px;padding:0;cursor:pointer}
+  .pal button:hover{outline:1px solid var(--accent)}
+
+  .presets{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+  .presets button{background:none;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:9.5px;
+    letter-spacing:.08em;padding:8px 6px;cursor:pointer;text-align:left}
+  .presets button:hover{border-color:var(--ink)}
+
+  .acts{padding:12px 14px;display:grid;gap:6px}
+  .acts button{background:none;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:9.5px;
+    letter-spacing:.13em;padding:9px;cursor:pointer;text-align:left}
+  .acts button:hover{border-color:var(--ink)}
+  .acts button.pri{background:var(--accent);color:#0d0d0c;border-color:var(--accent);font-weight:500}
+  .acts .k{float:right;color:var(--dim)}
+  .acts .pri .k{color:#0d0d0c;opacity:.55}
+  .acts input[type=file]{display:none}
+  footer{margin-top:auto;padding:12px 14px;color:var(--dim);font-size:9.5px;line-height:1.7;border-top:1px solid var(--line)}
+
+  main{position:relative;overflow:hidden;background:#000;display:grid;grid-template-rows:1fr auto}
+  .stagewrap{position:relative;overflow:hidden;display:grid;place-items:center;padding:28px}
+  #stage{display:block;max-width:100%;max-height:100%;filter:drop-shadow(0 18px 50px rgba(0,0,0,.6))}
+
+  /* Real-size legibility rail — the whole reason this tool exists. */
+  .rail{border-top:1px solid var(--line);background:#0a0a09;padding:14px 18px 16px;
+    display:flex;align-items:flex-end;gap:22px;overflow-x:auto}
+  .rail .slot{display:grid;gap:7px;justify-items:center;flex:0 0 auto}
+  .rail img{display:block;image-rendering:auto}
+  .rail .cap{color:#6b6b62;font-size:9px;letter-spacing:.1em;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .rail .ctx{display:flex;align-items:flex-end;gap:14px;padding-left:10px;margin-left:4px;border-left:1px solid var(--line)}
+  .rail .onlight{background:#e9e9e4;padding:9px;border-radius:4px}
+  .rail .ondark{background:#111;padding:9px;border-radius:4px}
+
+  .hud{position:absolute;left:14px;top:12px;color:#6b6b62;font-size:9.5px;letter-spacing:.12em;
+    pointer-events:none;font-variant-numeric:tabular-nums;line-height:1.8}
+  .hud b{color:var(--accent);font-weight:400}
+  .hud .warn{color:#FF6A00}
+  .toast{position:absolute;right:14px;top:12px;background:var(--accent);color:#0d0d0c;font-size:9.5px;
+    letter-spacing:.14em;padding:7px 10px;opacity:0;transition:opacity .15s;pointer-events:none}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand">
+    <h1>ICON LAB</h1>
+    <p>app icon · lissajous · 1024²</p>
+  </div>
+
+  <section>
+    <h2>MASK <small id="maskNote">squircle</small></h2>
+    <div class="seg" id="mask">
+      <button data-m="squircle" class="on">SQUIRCLE</button><button data-m="rrect">R-RECT</button><button data-m="circle">CIRCLE</button>
+    </div>
+    <div class="ctl" data-k="maskN" data-min="2" data-max="8" data-step=".1" data-u="n"></div>
+    <div class="ctl" data-k="maskR" data-min="0" data-max="50" data-step=".5" data-u="%"></div>
+  </section>
+
+  <section>
+    <h2>CURVE <small>a : b</small></h2>
+    <div class="ctl" data-k="a"     data-min="1" data-max="9"   data-step="1"></div>
+    <div class="ctl" data-k="b"     data-min="1" data-max="9"   data-step="1"></div>
+    <div class="ctl" data-k="delta" data-min="-180" data-max="180" data-step="5" data-u="°"></div>
+    <div class="ctl" data-k="rot"   data-min="-90" data-max="90"  data-step="2.5" data-u="°"></div>
+  </section>
+
+  <section>
+    <h2>MARK BOX <small id="boxNote">% of icon</small></h2>
+    <div class="ctl" data-k="scale"  data-min="20" data-max="110" data-step="1" data-u="%"></div>
+    <div class="ctl" data-k="aspect" data-min=".5" data-max="1.6" data-step=".01"></div>
+    <div class="ctl" data-k="cy"     data-min="-15" data-max="15" data-step=".5" data-u="%"></div>
+  </section>
+
+  <section>
+    <h2>STRANDS</h2>
+    <div class="ctl" data-k="n"     data-min="1" data-max="24" data-step="1"></div>
+    <div class="ctl" data-k="gap"   data-min="0" data-max="60" data-step="1"></div>
+    <div class="ctl" data-k="phase" data-min="0" data-max="12" data-step=".25" data-u="°"></div>
+    <div class="ctl" data-k="sscale" data-min="-.12" data-max=".12" data-step=".005"></div>
+    <div class="ctl" data-k="w"     data-min="1" data-max="90" data-step="1" data-u="px"></div>
+  </section>
+
+  <section>
+    <h2>ENVELOPE <small>pinch</small></h2>
+    <div class="ctl" data-k="eamt" data-min="0" data-max="1" data-step=".05"></div>
+    <div class="ctl" data-k="em"   data-min="1" data-max="8" data-step="1"></div>
+    <div class="ctl" data-k="epsi" data-min="-180" data-max="180" data-step="15" data-u="°"></div>
+  </section>
+
+  <section>
+    <h2>COLOUR</h2>
+    <div class="seg" id="cmode">
+      <button data-c="solid">SOLID</button><button data-c="across" class="on">ACROSS</button><button data-c="along">ALONG</button>
+    </div>
+    <div class="sw"><label>bg</label><input type="color" id="bg"><input class="hex" id="bgHex"></div>
+    <div class="sw"><label>c1</label><input type="color" id="c1"><input class="hex" id="c1Hex"></div>
+    <div class="sw"><label>c2</label><input type="color" id="c2"><input class="hex" id="c2Hex"></div>
+    <div class="sw"><label>c3</label><input type="color" id="c3"><input class="hex" id="c3Hex"></div>
+    <div class="tog" style="margin-bottom:8px"><button id="three">3-STOP</button><button id="revc">REVERSE</button></div>
+    <h2 style="margin-top:4px">BRAND <small>figma tokens</small></h2>
+    <div class="pal" id="pal"></div>
+  </section>
+
+  <section>
+    <h2>GUIDES</h2>
+    <div class="tog">
+      <button id="gSafe">PLAY SAFE</button><button id="gGrid">GRID</button><button id="gFigma">FIGMA 372</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>PRESETS</h2>
+    <div class="presets" id="presets"></div>
+  </section>
+
+  <div class="acts">
+    <button class="pri" id="bCopy">COPY SVG<span class="k">⌘C</span></button>
+    <button id="bDl">SVG 1024<span class="k">⌘S</span></button>
+    <button id="bPng">PNG 1024<span class="k">P</span></button>
+    <button id="bSet">PNG FULL SET<span class="k">⇧P</span></button>
+    <button id="bVar">VARIATION<span class="k">V</span></button>
+    <button id="bRand">RANDOMIZE<span class="k">R</span></button>
+    <button id="bSave">SAVE JSON</button>
+    <button id="bLoad">LOAD JSON</button>
+    <input type="file" id="fLoad" accept=".json">
+    <button id="bReset">RESET<span class="k">0</span></button>
+  </div>
+
+  <footer>
+    Masters at 1024². The rail below shows true pixel sizes —
+    if the mark dies at 29px it is not an app icon yet.
+  </footer>
+</aside>
+
+<main>
+  <div class="stagewrap">
+    <div class="hud" id="hud"></div>
+    <div class="toast" id="toast"></div>
+    <img id="stage" width="520" height="520" alt="">
+  </div>
+  <div class="rail" id="rail"></div>
+</main>
+
+<script src="ring.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const SZ = 1024;
+
+// iOS / App Store + Play. 29 is the real test.
+const RAIL = [1024, 180, 120, 87, 60, 40, 29];
+const PNG_SET = [1024, 512, 180, 167, 152, 120, 87, 80, 76, 60, 58, 40, 29, 20];
+
+// Figma app icon frames (Card Carrier page, 614x596 artboards, 372x368 tile,
+// corner radius 72.78 -> 19.56% of width). Mark vector is 251x285 inside the
+// tile: 67.5% wide, 77.4% tall. Those are the defaults below.
+const FIGMA = { tile: 372, radiusPct: 72.7779 / 372 * 100, markW: 251 / 372, markH: 285 / 368 };
+
+const PAL = [
+  ['#070B11', 'ink'], ['#1F2A36', 'ink navy'], ['#201717', 'ink warm'],
+  ['#3E7CB1', 'blue'], ['#C9D6E8', 'blue soft'],
+  ['#F2B134', 'mint'], ['#FBE7B5', 'mint soft'],
+  ['#FFFFFF', 'white'], ['#000000', 'black'], ['#F2F2F0', 'paper'],
+];
+
+const BASE = {
+  mask: 'squircle', maskN: 5, maskR: FIGMA.radiusPct,
+  bg: '#1F2A36',
+  place: { scale: 100, aspect: 1, cy: 0 },
+};
+let U = JSON.parse(JSON.stringify(BASE));
+
+let S = Ring.merge(Ring.DEFAULTS, {
+  family: 'lissajous',
+  curve: { a: 2, b: 5, delta: 0, rot: 0 },
+  strands: { n: 7, gap: 14, phase: 0, scale: 0, twist: 0, ramp: 0 },
+  stroke: { w: 16, cap: 'round' },
+  color: { mode: 'across', stops: ['#C9D6E8', '#3E7CB1', '#F2B134'], three: false, chunks: 48 },
+  card: { w: SZ, h: SZ, r: 200 },
+});
+
+// ── Mask geometry ─────────────────────────────────────────────────────
+function maskPath() {
+  const c = SZ / 2;
+  if (U.mask === 'circle') {
+    const r = c;
+    return `M${c} ${c - r}A${r} ${r} 0 1 1 ${c} ${c + r}A${r} ${r} 0 1 1 ${c} ${c - r}Z`;
+  }
+  if (U.mask === 'rrect') {
+    const r = Math.min(c, U.maskR / 100 * SZ);
+    return `M${r} 0H${SZ - r}A${r} ${r} 0 0 1 ${SZ} ${r}V${SZ - r}A${r} ${r} 0 0 1 ${SZ - r} ${SZ}H${r}A${r} ${r} 0 0 1 0 ${SZ - r}V${r}A${r} ${r} 0 0 1 ${r} 0Z`;
+  }
+  // Superellipse |x|^n + |y|^n = 1 — the Apple-style continuous squircle.
+  const n = Math.max(2, U.maskN), N = 720, pts = [];
+  const sp = (v, e) => Math.sign(v) * Math.pow(Math.abs(v), e);
+  for (let i = 0; i < N; i++) {
+    const th = i / N * Math.PI * 2;
+    pts.push([c + c * sp(Math.cos(th), 2 / n), c + c * sp(Math.sin(th), 2 / n)]);
+  }
+  let d = `M${pts[0][0].toFixed(2)} ${pts[0][1].toFixed(2)}`;
+  for (let i = 1; i < pts.length; i++) d += `L${pts[i][0].toFixed(2)} ${pts[i][1].toFixed(2)}`;
+  return d + 'Z';
+}
+
+function applyPlace() {
+  const p = U.place;
+  S.box.w = SZ * FIGMA.markW * (p.scale / 100) * Math.max(0.01, p.aspect);
+  S.box.h = SZ * FIGMA.markH * (p.scale / 100) / Math.max(0.01, p.aspect);
+  S.box.cx = SZ / 2;
+  S.box.cy = SZ / 2 + SZ * (p.cy / 100);
+}
+
+// ── SVG ───────────────────────────────────────────────────────────────
+const view = { safe: false, grid: false, figma: false };
+
+function svgOut(opts = {}) {
+  applyPlace();
+  const parts = Ring.paint(S, Ring.build(S));
+  const { defs, paths } = Ring.partsSVG(S, parts, { idPrefix: 'ic' });
+  const mp = maskPath();
+  const guides = [];
+  if (opts.guides) {
+    if (view.grid) {
+      const g = [];
+      for (let i = 1; i < 8; i++) { const v = i * SZ / 8; g.push(`<path d="M${v} 0V${SZ}M0 ${v}H${SZ}"/>`); }
+      guides.push(`<g stroke="#F2B134" stroke-width="1" opacity=".16" fill="none">${g.join('')}</g>`);
+      guides.push(`<g stroke="#F2B134" stroke-width="1.5" opacity=".3" fill="none"><path d="M0 0L${SZ} ${SZ}M${SZ} 0L0 ${SZ}"/><circle cx="512" cy="512" r="512"/></g>`);
+    }
+    if (view.safe) {
+      // Play Store adaptive: keep art inside a 66.7% centred circle.
+      guides.push(`<circle cx="512" cy="512" r="${(SZ * 0.667 / 2).toFixed(1)}" fill="none" stroke="#FF6A00" stroke-width="2" stroke-dasharray="10 10" opacity=".8"/>`);
+    }
+    if (view.figma) {
+      // The 372x368 Figma tile, scaled up — shows the mark box they reviewed.
+      const w = SZ * FIGMA.markW, h = SZ * FIGMA.markH;
+      guides.push(`<rect x="${((SZ - w) / 2).toFixed(1)}" y="${((SZ - h) / 2).toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="none" stroke="#3E7CB1" stroke-width="2" stroke-dasharray="6 8" opacity=".9"/>`);
+    }
+  }
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${SZ}" height="${SZ}" viewBox="0 0 ${SZ} ${SZ}" fill="none">`,
+    `  <defs><clipPath id="icmask"><path d="${mp}"/></clipPath>${defs.join('')}</defs>`,
+    `  <g clip-path="url(#icmask)">`,
+    `    <path d="${mp}" fill="${U.bg}"/>`,
+    `    <g stroke-linecap="${S.stroke.cap}" stroke-linejoin="round" fill="none">`,
+    paths.map((p) => '      ' + p).join('\n'),
+    `    </g>`,
+    `  </g>`,
+    guides.length ? '  ' + guides.join('\n  ') : '',
+    `</svg>`,
+  ].filter(Boolean).join('\n');
+}
+
+const asURI = (svg) => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+
+// ── Render ────────────────────────────────────────────────────────────
+function buildRail() {
+  const rail = $('rail');
+  rail.innerHTML = '';
+  for (const s of RAIL) {
+    const slot = document.createElement('div');
+    slot.className = 'slot';
+    const img = document.createElement('img');
+    img.width = Math.min(s, 220); img.height = Math.min(s, 220);
+    img.dataset.size = s;
+    const cap = document.createElement('div');
+    cap.className = 'cap';
+    cap.textContent = s === 1024 ? '1024 → 220' : s + 'px';
+    slot.appendChild(img); slot.appendChild(cap);
+    rail.appendChild(slot);
+  }
+  const ctx = document.createElement('div');
+  ctx.className = 'ctx';
+  for (const [cls, label] of [['onlight', 'on light'], ['ondark', 'on dark']]) {
+    const slot = document.createElement('div');
+    slot.className = 'slot';
+    const box = document.createElement('div');
+    box.className = cls;
+    const img = document.createElement('img');
+    img.width = 60; img.height = 60; img.dataset.size = 60;
+    box.appendChild(img);
+    const cap = document.createElement('div');
+    cap.className = 'cap'; cap.textContent = label;
+    slot.appendChild(box); slot.appendChild(cap);
+    ctx.appendChild(slot);
+  }
+  rail.appendChild(ctx);
+}
+
+function render() {
+  const clean = asURI(svgOut({ guides: false }));
+  $('stage').src = asURI(svgOut({ guides: true }));
+  document.querySelectorAll('.rail img').forEach((im) => { im.src = clean; });
+
+  const px29 = S.stroke.w / SZ * 29;
+  const thin = px29 < 0.5;
+  $('hud').innerHTML =
+    `LISSAJOUS <b>${S.curve.a}:${S.curve.b}</b> δ${S.curve.delta}°<br>` +
+    `STRANDS <b>${Math.round(S.strands.n)}</b> gap ${S.strands.gap}<br>` +
+    `STROKE <b>${S.stroke.w}px</b> @1024<br>` +
+    `<span class="${thin ? 'warn' : ''}">= ${px29.toFixed(2)}px @29${thin ? ' ⚠ TOO THIN' : ''}</span><br>` +
+    `MASK ${U.mask}${U.mask === 'squircle' ? ' n' + U.maskN : ''}`;
+  syncHex();
+}
+
+// ── Sliders ───────────────────────────────────────────────────────────
+const GET = {
+  a: () => S.curve.a, b: () => S.curve.b, delta: () => S.curve.delta, rot: () => S.curve.rot,
+  scale: () => U.place.scale, aspect: () => U.place.aspect, cy: () => U.place.cy,
+  n: () => S.strands.n, gap: () => S.strands.gap, phase: () => S.strands.phase,
+  sscale: () => S.strands.scale, w: () => S.stroke.w,
+  eamt: () => S.env.amt, em: () => S.env.m, epsi: () => S.env.psi,
+  maskN: () => U.maskN, maskR: () => U.maskR,
+};
+const SET = {
+  a: (v) => S.curve.a = v, b: (v) => S.curve.b = v, delta: (v) => S.curve.delta = v, rot: (v) => S.curve.rot = v,
+  scale: (v) => U.place.scale = v, aspect: (v) => U.place.aspect = v, cy: (v) => U.place.cy = v,
+  n: (v) => S.strands.n = v, gap: (v) => S.strands.gap = v, phase: (v) => S.strands.phase = v,
+  sscale: (v) => S.strands.scale = v, w: (v) => S.stroke.w = v,
+  eamt: (v) => S.env.amt = v, em: (v) => S.env.m = v, epsi: (v) => S.env.psi = v,
+  maskN: (v) => U.maskN = v, maskR: (v) => U.maskR = v,
+};
+const LABEL = {
+  a: 'a', b: 'b', delta: 'delta', rot: 'rotate', scale: 'scale', aspect: 'aspect', cy: 'y offset',
+  n: 'count', gap: 'gap', phase: 'phase', sscale: 'nest', w: 'weight',
+  eamt: 'amount', em: 'lobes', epsi: 'angle', maskN: 'squircle n', maskR: 'radius',
+};
+const ctls = {};
+document.querySelectorAll('.ctl[data-k]').forEach((el) => {
+  const k = el.dataset.k;
+  const min = +el.dataset.min, max = +el.dataset.max, step = +el.dataset.step;
+  const u = el.dataset.u || '';
+  el.innerHTML =
+    `<div class="top"><div class="lbl">${LABEL[k] || k}</div>
+       <div class="box"><input type="text"><span class="u">${u}</span></div></div>
+     <div class="track"><div class="fill"></div><div class="knob"></div></div>`;
+  const inp = el.querySelector('input'), fill = el.querySelector('.fill'),
+        knob = el.querySelector('.knob'), track = el.querySelector('.track');
+  const dec = step < 1 ? (step < 0.05 ? 3 : 2) : 0;
+  function paint() {
+    const v = GET[k]();
+    const p = Math.max(0, Math.min(1, (v - min) / (max - min)));
+    fill.style.width = (p * 100) + '%';
+    knob.style.left = (p * 100) + '%';
+    if (document.activeElement !== inp) inp.value = (+v).toFixed(dec);
+  }
+  function set(v, quiet) {
+    v = Math.max(min, Math.min(max, Math.round(v / step) * step));
+    SET[k](+v.toFixed(4));
+    paint(); if (!quiet) render();
+  }
+  let drag = null;
+  const fromX = (cx) => {
+    const r = track.getBoundingClientRect();
+    return min + (max - min) * Math.max(0, Math.min(1, (cx - r.left) / r.width));
+  };
+  track.addEventListener('pointerdown', (e) => {
+    track.setPointerCapture(e.pointerId); el.classList.add('live'); set(fromX(e.clientX));
+  });
+  track.addEventListener('pointermove', (e) => { if (track.hasPointerCapture(e.pointerId)) set(fromX(e.clientX)); });
+  track.addEventListener('pointerup', (e) => { track.releasePointerCapture(e.pointerId); el.classList.remove('live'); });
+  // Scrub the label like Figma.
+  const lbl = el.querySelector('.lbl');
+  lbl.addEventListener('pointerdown', (e) => {
+    drag = { x: e.clientX, v: GET[k]() }; lbl.setPointerCapture(e.pointerId); el.classList.add('live');
+  });
+  lbl.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    set(drag.v + (e.clientX - drag.x) * step * (e.shiftKey ? 10 : 1));
+  });
+  lbl.addEventListener('pointerup', (e) => { drag = null; lbl.releasePointerCapture(e.pointerId); el.classList.remove('live'); });
+  inp.addEventListener('change', () => { const v = parseFloat(inp.value); if (!isNaN(v)) set(v); });
+  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') inp.blur(); });
+  ctls[k] = { paint };
+  paint();
+});
+const repaint = () => Object.values(ctls).forEach((c) => c.paint());
+
+// ── Segments / toggles ────────────────────────────────────────────────
+function seg(id, attr, fn) {
+  const wrap = $(id);
+  wrap.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    [...wrap.children].forEach((c) => c.classList.toggle('on', c === b));
+    fn(b.dataset[attr]); render();
+  });
+}
+seg('mask', 'm', (v) => {
+  U.mask = v;
+  $('maskNote').textContent = v === 'squircle' ? 'superellipse' : v === 'rrect' ? 'rounded rect' : 'play adaptive';
+});
+seg('cmode', 'c', (v) => S.color.mode = v);
+
+function tog(id, get, set) {
+  const b = $(id);
+  const paint = () => b.classList.toggle('on', !!get());
+  b.onclick = () => { set(!get()); paint(); render(); };
+  paint();
+}
+tog('three', () => S.color.three, (v) => S.color.three = v);
+tog('revc', () => S.color.reverse, (v) => S.color.reverse = v);
+tog('gSafe', () => view.safe, (v) => view.safe = v);
+tog('gGrid', () => view.grid, (v) => view.grid = v);
+tog('gFigma', () => view.figma, (v) => view.figma = v);
+
+// ── Colour ────────────────────────────────────────────────────────────
+const SWATCHES = [['bg', null], ['c1', 0], ['c2', 1], ['c3', 2]];
+function syncHex() {
+  for (const [id, i] of SWATCHES) {
+    const v = i === null ? U.bg : S.color.stops[i];
+    $(id).value = v;
+    if (document.activeElement !== $(id + 'Hex')) $(id + 'Hex').value = v.toUpperCase();
+  }
+}
+for (const [id, i] of SWATCHES) {
+  const put = (v) => {
+    if (!/^#[0-9a-f]{6}$/i.test(v)) return;
+    if (i === null) U.bg = v; else S.color.stops[i] = v;
+    render();
+  };
+  $(id).addEventListener('input', (e) => put(e.target.value));
+  $(id + 'Hex').addEventListener('change', (e) => put(e.target.value.trim()));
+}
+let palTarget = 1;
+PAL.forEach(([hex, name]) => {
+  const b = document.createElement('button');
+  b.style.background = hex; b.title = name + ' ' + hex;
+  b.onclick = (e) => {
+    if (e.shiftKey) { U.bg = hex; }
+    else { S.color.stops[palTarget % 3] = hex; palTarget++; }
+    render();
+  };
+  $('pal').appendChild(b);
+});
+
+// ── Presets ───────────────────────────────────────────────────────────
+const PRESETS = {
+  'FIGMA 2:5': { curve: { a: 2, b: 5, delta: 0, rot: 0 }, strands: { n: 7, gap: 14 }, stroke: { w: 16 },
+                 u: { bg: '#1F2A36' }, color: { mode: 'across', stops: ['#C9D6E8', '#3E7CB1', '#F2B134'] } },
+  'SINGLE':    { curve: { a: 2, b: 5, delta: 0, rot: 0 }, strands: { n: 1, gap: 0 }, stroke: { w: 54 },
+                 u: { bg: '#1F2A36' }, color: { mode: 'solid', stops: ['#F2B134', '#3E7CB1', '#F2B134'] } },
+  'KNOT 3:4':  { curve: { a: 3, b: 4, delta: 90, rot: 0 }, strands: { n: 3, gap: 20 }, stroke: { w: 30 },
+                 u: { bg: '#070B11' }, color: { mode: 'across', stops: ['#3E7CB1', '#F2B134', '#FBE7B5'] } },
+  'PINCH':     { curve: { a: 2, b: 3, delta: 0, rot: 0 }, strands: { n: 11, gap: 22 }, stroke: { w: 10 },
+                 env: { amt: 0.85, m: 2, psi: 90, pow: 1.4 },
+                 u: { bg: '#3E7CB1' }, color: { mode: 'across', stops: ['#FFFFFF', '#C9D6E8', '#1F2A36'] } },
+  'MONO':      { curve: { a: 2, b: 5, delta: 0, rot: 0 }, strands: { n: 5, gap: 18 }, stroke: { w: 22 },
+                 u: { bg: '#FFFFFF' }, color: { mode: 'solid', stops: ['#070B11', '#070B11', '#070B11'] } },
+  'MINT':      { curve: { a: 1, b: 2, delta: 90, rot: 0 }, strands: { n: 9, gap: 26 }, stroke: { w: 14 },
+                 u: { bg: '#F2B134' }, color: { mode: 'across', stops: ['#1F2A36', '#3E7CB1', '#1F2A36'] } },
+};
+Object.keys(PRESETS).forEach((name) => {
+  const b = document.createElement('button');
+  b.textContent = name;
+  b.onclick = () => {
+    const p = PRESETS[name];
+    S = Ring.merge(S, { env: { amt: 0, m: 2, psi: 0, pow: 1 }, strands: { phase: 0, scale: 0, twist: 0, ramp: 0 } });
+    S = Ring.merge(S, p);
+    if (p.u) Object.assign(U, p.u);
+    repaint(); render(); toast(name);
+  };
+  $('presets').appendChild(b);
+});
+
+// ── Export ────────────────────────────────────────────────────────────
+function toast(msg) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1100);
+}
+function dl(name, blob) {
+  const a = document.createElement('a');
+  a.href = blob instanceof Blob ? URL.createObjectURL(blob) : blob;
+  a.download = name; a.click();
+  setTimeout(() => { if (blob instanceof Blob) URL.revokeObjectURL(a.href); }, 600);
+}
+const stamp = () => `icon_${S.curve.a}-${S.curve.b}_n${Math.round(S.strands.n)}_${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')}`;
+
+$('bCopy').onclick = async () => {
+  try { await navigator.clipboard.writeText(svgOut()); toast('SVG COPIED'); }
+  catch { toast('COPY BLOCKED'); }
+};
+$('bDl').onclick = () => { dl(stamp() + '.svg', new Blob([svgOut()], { type: 'image/svg+xml' })); toast('SVG 1024'); };
+
+function png(size) {
+  return new Promise((res) => {
+    const img = new Image();
+    img.onload = () => {
+      const cv = document.createElement('canvas');
+      cv.width = cv.height = size;
+      const cx = cv.getContext('2d');
+      cx.drawImage(img, 0, 0, size, size);
+      cv.toBlob(res, 'image/png');
+    };
+    img.src = asURI(svgOut());
+  });
+}
+$('bPng').onclick = async () => { dl(stamp() + '_1024.png', await png(1024)); toast('PNG 1024'); };
+$('bSet').onclick = async () => {
+  toast('BUILDING SET…');
+  for (const s of PNG_SET) { dl(`${stamp()}_${s}.png`, await png(s)); await new Promise((r) => setTimeout(r, 180)); }
+  toast(PNG_SET.length + ' PNGS');
+};
+$('bSave').onclick = () => dl(stamp() + '.json', new Blob([JSON.stringify({ S, U }, null, 2)], { type: 'application/json' }));
+$('bLoad').onclick = () => $('fLoad').click();
+$('fLoad').onchange = (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const j = JSON.parse(rd.result);
+      if (j.S) S = Ring.merge(Ring.DEFAULTS, j.S);
+      if (j.U) U = Object.assign(JSON.parse(JSON.stringify(BASE)), j.U);
+      S.card = { w: SZ, h: SZ, r: 200 };
+      repaint(); render(); toast('LOADED');
+    } catch { toast('BAD JSON'); }
+  };
+  rd.readAsText(f); e.target.value = '';
+};
+$('bReset').onclick = () => {
+  U = JSON.parse(JSON.stringify(BASE));
+  S = Ring.merge(Ring.DEFAULTS, {
+    curve: { a: 2, b: 5, delta: 0, rot: 0 }, strands: { n: 7, gap: 14, phase: 0, scale: 0 },
+    stroke: { w: 16, cap: 'round' }, env: { amt: 0, m: 2, psi: 0, pow: 1 },
+    color: { mode: 'across', stops: ['#C9D6E8', '#3E7CB1', '#F2B134'], three: false, chunks: 48 },
+    card: { w: SZ, h: SZ, r: 200 },
+  });
+  repaint(); render(); toast('RESET');
+};
+
+// ── Variation / randomize — stays inside brand palette ────────────────
+const R = (a, b, s = 1) => Math.round((a + Math.random() * (b - a)) / s) * s;
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+$('bVar').onclick = () => {
+  const mode = pick(['fan', 'nest', 'weave', 'pinch']);
+  S.strands = Object.assign(S.strands, { n: R(3, 13), gap: R(8, 30), phase: 0, scale: 0 });
+  S.env = { amt: 0, m: 2, psi: 0, pow: 1 };
+  if (mode === 'nest')  { S.strands.gap = 0; S.strands.scale = R(-0.09, -0.02, 0.005); }
+  if (mode === 'weave') { S.strands.gap = 0; S.strands.phase = R(1, 6, 0.25); }
+  if (mode === 'pinch') S.env = { amt: R(0.6, 1, 0.05), m: pick([1, 2, 3]), psi: R(-180, 180, 15), pow: R(1, 2, 0.2) };
+  repaint(); render(); toast(mode.toUpperCase());
+};
+$('bRand').onclick = () => {
+  const [a, b] = pick([[2, 5], [2, 5], [3, 4], [1, 2], [2, 3], [3, 5], [4, 5]]);
+  S.curve = { a, b, delta: pick([0, 0, 90, 45]), rot: pick([0, 0, R(-20, 20, 2.5)]) };
+  U.place = { scale: R(60, 100, 2), aspect: pick([1, 1, R(0.75, 1.25, 0.05)]), cy: 0 };
+  const darks = ['#1F2A36', '#070B11', '#3E7CB1', '#201717'];
+  const lights = ['#C9D6E8', '#F2B134', '#FBE7B5', '#FFFFFF', '#F2F2F0'];
+  const darkBg = Math.random() < 0.7;
+  U.bg = darkBg ? pick(darks) : pick(lights);
+  S.color.stops = darkBg ? [pick(lights), pick(lights), pick(lights)] : [pick(darks), pick(darks), pick(darks)];
+  S.color.mode = pick(['solid', 'across', 'across']);
+  S.stroke.w = pick([10, 14, 18, 22, 30, 44]);
+  $('bVar').click();
+  repaint(); render(); toast('RANDOM');
+};
+
+window.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  const meta = e.metaKey || e.ctrlKey;
+  const k = e.key.toLowerCase();
+  if (meta && k === 'c') { e.preventDefault(); $('bCopy').click(); }
+  else if (meta && k === 's') { e.preventDefault(); $('bDl').click(); }
+  else if (k === 'p') { e.preventDefault(); (e.shiftKey ? $('bSet') : $('bPng')).click(); }
+  else if (k === 'v') $('bVar').click();
+  else if (k === 'r') $('bRand').click();
+  else if (k === 'g') $('gGrid').click();
+  else if (k === 's') $('gSafe').click();
+  else if (e.key === '0') $('bReset').click();
+});
+
+buildRail();
+render();
+</script>
+</body>
+</html>

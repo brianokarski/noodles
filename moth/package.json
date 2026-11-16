@@ -1,0 +1,39 @@
+{
+  "name": "moth-design-agent",
+  "version": "1.0.0",
+  "description": "Generative brand identity agent for Figma",
+  "type": "module",
+  "scripts": {
+    "moth:init": "tsx src/agent/cli.ts init",
+    "moth:learn": "tsx src/agent/cli.ts learn",
+    "moth:styles": "tsx src/agent/cli.ts styles",
+    "moth:ideate": "tsx src/agent/cli.ts ideate",
+    "moth:execute": "tsx src/agent/cli.ts execute",
+    "moth:critique": "tsx src/agent/cli.ts critique",
+    "moth:sync": "tsx src/agent/cli.ts sync",
+    "tokens:build": "tsx src/tokens/build.ts",
+    "dev": "tsx watch src/agent/index.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.0",
+    "@figma/rest-api-spec": "^0.14.0",
+    "axios": "^1.6.0",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "dotenv": "^16.3.0",
+    "inquirer": "^9.2.0",
+    "openai": "^4.20.0",
+    "ora": "^7.0.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.0",
+    "@types/node": "^20.10.0",
+    "tsx": "^4.6.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+

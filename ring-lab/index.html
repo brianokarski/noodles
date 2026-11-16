@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>RING LAB — lissajous line system</title>
+<style>
+  :root{
+    --ink:#f2f2f0; --bg:#0d0d0c; --panel:#141413; --line:#262624;
+    --dim:#78786f; --accent:#d6ff3f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{
+    background:var(--bg);color:var(--ink);
+    font:400 11px/1.35 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.03em;
+    display:grid;grid-template-columns:252px 1fr;
+    user-select:none;-webkit-user-select:none;
+  }
+  aside{border-right:1px solid var(--line);background:var(--panel);overflow-y:auto;display:flex;flex-direction:column}
+  .brand{padding:13px 14px 11px;border-bottom:1px solid var(--line)}
+  .brand h1{margin:0;font-size:12px;letter-spacing:.22em;font-weight:500}
+  .brand p{margin:5px 0 0;color:var(--dim);font-size:9.5px}
+  section{padding:12px 14px;border-bottom:1px solid var(--line)}
+  section>h2{margin:0 0 10px;font-size:9px;letter-spacing:.24em;color:var(--dim);font-weight:500;display:flex;justify-content:space-between}
+  section>h2 small{color:#5a5a53;letter-spacing:.05em;font-weight:400}
+
+  .ctl{margin-bottom:11px}
+  .ctl:last-child{margin-bottom:0}
+  .ctl .top{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+  .ctl .lbl{flex:1;color:var(--dim);font-size:10px;cursor:ew-resize;padding:2px 0}
+  .ctl .lbl:hover{color:var(--ink)}
+  .ctl .box{display:flex;align-items:baseline;gap:2px;border:1px solid var(--line);
+    background:#0d0d0c;padding:3px 5px;min-width:58px;justify-content:flex-end}
+  .ctl .box:focus-within{border-color:var(--accent)}
+  .ctl input{background:none;border:0;color:var(--ink);font:inherit;font-size:10.5px;
+    text-align:right;width:40px;padding:0;font-variant-numeric:tabular-nums;outline:none}
+  .ctl .u{color:var(--dim);font-size:9.5px}
+  .ctl .track{position:relative;height:16px;cursor:ew-resize;touch-action:none}
+  .ctl .track::before{content:'';position:absolute;left:0;right:0;top:7px;height:3px;
+    background:#2c2c28;border-radius:2px}
+  .ctl .fill{position:absolute;left:0;top:7px;height:3px;background:#4d5231;border-radius:2px}
+  .ctl .knob{position:absolute;top:1px;width:12px;height:14px;margin-left:-6px;border-radius:3px;background:var(--ink)}
+  .ctl .track:hover .knob,.ctl.live .knob{background:var(--accent)}
+
+  .seg{display:grid;grid-auto-flow:column;border:1px solid var(--line);margin-bottom:10px}
+  .seg button{background:none;border:0;border-right:1px solid var(--line);color:var(--dim);
+    font:inherit;font-size:9.5px;letter-spacing:.06em;padding:8px 2px;cursor:pointer;white-space:nowrap}
+  .seg button:last-child{border-right:0}
+  .seg button:hover{color:var(--ink)}
+  .seg button.on{background:var(--ink);color:#0d0d0c}
+
+  .tog{display:flex;flex-wrap:wrap;gap:5px}
+  .tog button{background:none;border:1px solid var(--line);color:var(--dim);font:inherit;font-size:9px;
+    letter-spacing:.12em;padding:6px 8px;cursor:pointer}
+  .tog button:hover{color:var(--ink)}
+  .tog button.on{border-color:var(--accent);color:var(--accent)}
+
+  .sw{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+  .sw label{color:var(--dim);font-size:9.5px;width:34px}
+  .sw input[type=color]{-webkit-appearance:none;appearance:none;width:28px;height:22px;border:1px solid var(--line);background:none;padding:0;cursor:pointer;border-radius:2px}
+  .sw input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+  .sw input[type=color]::-webkit-color-swatch{border:0;border-radius:1px}
+  .sw .hex{flex:1;background:#0d0d0c;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:10px;padding:3px 5px;outline:none;text-transform:uppercase}
+  .sw .hex:focus{border-color:var(--accent)}
+  .mesh{display:grid;gap:2px;margin-bottom:8px}
+  .mesh button{aspect-ratio:1;border:1px solid rgba(0,0,0,.4);padding:0;cursor:pointer;border-radius:1px;min-width:0}
+  .mesh button:hover{outline:1px solid var(--accent)}
+  .presets{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+  .presets button{background:none;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:9.5px;
+    letter-spacing:.08em;padding:8px 6px;cursor:pointer;text-align:left}
+  .presets button:hover{border-color:var(--ink)}
+
+  .acts{padding:12px 14px;display:grid;gap:6px}
+  .acts button{background:none;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:9.5px;
+    letter-spacing:.13em;padding:9px;cursor:pointer;text-align:left}
+  .acts button:hover{border-color:var(--ink)}
+  .acts button.pri{background:var(--accent);color:#0d0d0c;border-color:var(--accent);font-weight:500}
+  .acts .k{float:right;color:var(--dim)}
+  .acts .pri .k{color:#0d0d0c;opacity:.55}
+  .acts input[type=file]{display:none}
+  footer{margin-top:auto;padding:12px 14px;color:var(--dim);font-size:9.5px;line-height:1.7;border-top:1px solid var(--line)}
+
+  main{position:relative;overflow:hidden;background:#000;cursor:grab}
+  main.panning{cursor:grabbing}
+  svg#stage{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .hud{position:absolute;left:12px;bottom:10px;color:#6b6b62;font-size:9.5px;letter-spacing:.12em;
+    pointer-events:none;font-variant-numeric:tabular-nums;line-height:1.7}
+  .toast{position:absolute;right:14px;top:12px;background:var(--accent);color:#0d0d0c;font-size:9.5px;
+    letter-spacing:.14em;padding:7px 10px;opacity:0;transition:opacity .15s;pointer-events:none}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand">
+    <h1>RING LAB</h1>
+    <p>lissajous line system · card 806×508</p>
+  </div>
+
+  <section style="padding-bottom:12px">
+    <div class="seg" id="segFam" style="margin-bottom:0">
+      <button data-v="lissajous">LISSAJOUS</button><button data-v="confluence">CONFLUENCE</button>
+    </div>
+  </section>
+
+  <section data-fam="confluence">
+    <h2>ORIGIN</h2>
+    <div class="seg" id="segSide"><button data-v="left">LEFT</button><button data-v="right">RIGHT</button></div>
+    <div id="cOrigin"></div>
+  </section>
+
+  <section data-fam="confluence">
+    <h2>LINES</h2>
+    <div class="seg" id="segProf"><button data-v="arc">ARC · 90°</button><button data-v="merge">MERGE · TANGENT</button></div>
+    <div id="cLines"></div>
+    <div id="cArc"></div>
+    <div id="cMerge"></div>
+  </section>
+
+  <section data-fam="confluence">
+    <h2>AXIS · MIRROR</h2>
+    <div class="tog" id="confTog">
+      <button data-v="bottom">BOTTOM SET</button>
+      <button data-v="axis">AXIS LINE</button>
+      <button data-v="axisFromJoin">AXIS FROM 1ST JOIN</button>
+    </div>
+    <div id="cAxis" style="margin-top:10px"></div>
+  </section>
+
+  <section data-fam="lissajous">
+    <h2>CURVE <small id="hRatio"></small></h2>
+    <div id="cCurve"></div>
+  </section>
+
+  <section data-fam="lissajous">
+    <h2>PLACE</h2>
+    <div id="cBox"></div>
+  </section>
+
+  <section data-fam="lissajous">
+    <h2>STRANDS</h2>
+    <div id="cStrands"></div>
+  </section>
+
+  <section data-fam="lissajous">
+    <h2>JOIN / SPREAD <small>envelope along t</small></h2>
+    <div id="cEnv"></div>
+  </section>
+
+  <section data-fam="lissajous">
+    <h2>SPIRAL · TRIM</h2>
+    <div id="cSpiral"></div>
+  </section>
+
+  <section>
+    <h2>STROKE</h2>
+    <div class="seg" id="segCap">
+      <button data-v="round">ROUND</button><button data-v="butt">BUTT</button><button data-v="square">SQUARE</button>
+    </div>
+    <div id="cStroke"></div>
+  </section>
+
+  <section>
+    <h2>COLOUR <small>strokes stay strokes</small></h2>
+    <div class="seg" id="segColor">
+      <button data-v="solid">SOLID</button><button data-v="across">ACROSS</button><button data-v="along">ALONG</button><button data-v="field">FIELD</button><button data-v="linear">LINEAR</button>
+    </div>
+    <div id="swStops">
+      <div class="sw"><label>c0</label><input type="color" data-stop="0"><input class="hex" data-stop="0"></div>
+      <div class="sw"><label>c1</label><input type="color" data-stop="1"><input class="hex" data-stop="1"></div>
+      <div class="sw" id="swC2"><label>c2</label><input type="color" data-stop="2"><input class="hex" data-stop="2"></div>
+    </div>
+    <div id="meshUI" style="display:none">
+      <div class="seg" id="segMeshRes"><button data-v="2x2">2×2</button><button data-v="3x2">3×2</button><button data-v="4x3">4×3</button><button data-v="6x4">6×4</button><button data-v="12x7">12×7</button></div>
+      <div class="mesh" id="meshGrid"></div>
+      <div class="tog" style="margin-bottom:6px"><button id="bMeshFigma">FIGMA GRADIENT</button><button id="bMeshShow" data-v="show">SHOW MESH</button></div>
+      <div class="tog" style="margin-bottom:10px">
+        <button id="bMeshRand">RANDOM MESH <span style="color:var(--dim)">M</span></button>
+        <button data-pal="figma" class="meshPal">FIGMA TONES</button><button data-pal="brand" class="meshPal">BRAND</button><button data-pal="harmony" class="meshPal">HARMONY</button>
+      </div>
+      <div id="cMesh"></div>
+      <input type="color" id="meshPick" style="position:absolute;opacity:0;pointer-events:none">
+    </div>
+    <div class="tog" id="colTog" style="margin-bottom:10px">
+      <button data-v="three">3 STOPS</button><button data-v="reverse">REVERSE</button>
+    </div>
+    <div id="cColor"></div>
+  </section>
+
+  <section>
+    <h2>DEPTH <small>along t</small></h2>
+    <div class="tog" id="depthTog" style="margin-bottom:10px"><button data-v="on">ON</button></div>
+    <div id="cDepth"></div>
+  </section>
+
+  <section>
+    <h2>FURNITURE <small>on top</small></h2>
+    <div class="sw"><label>mark</label><input type="color" id="furnColor"><input class="hex" id="furnHex"></div>
+    <div class="tog" id="furnTog">
+      <button data-v="logo">LOGO</button><button data-v="visa">VISA</button><button data-v="chip">CHIP</button><button data-v="export">IN EXPORT</button>
+    </div>
+    <div class="tog" style="margin-top:6px" id="furnQuick">
+      <button data-c="#262626">GHOST</button><button data-c="#F2F2F0">WHITE</button><button data-c="#000000">BLACK</button><button data-c="#C9D6E8">BLUE SOFT</button><button data-c="#F2B134">MINT</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>VIEW</h2>
+    <div class="tog" id="views">
+      <button data-v="card">CARD</button>
+      <button data-v="ref">FIGMA REF</button>
+      <button data-v="clip">CLIP</button>
+      <button data-v="dark">DARK</button>
+      <button data-v="smooth">SMOOTH</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>PRESETS</h2>
+    <div class="presets" id="presets"></div>
+  </section>
+
+  <div class="acts">
+    <button class="pri" id="bCopy">COPY SVG <span class="k">⌘C</span></button>
+    <button id="bDl">DOWNLOAD SVG <span class="k">⌘S</span></button>
+    <button id="bRand">RANDOMIZE <span class="k">R</span></button>
+    <button id="bVar">VARIATION <span class="k">V</span></button>
+    <button id="bSave">SAVE PRESET JSON</button>
+    <button id="bLoad">LOAD PRESET JSON</button>
+    <button id="bReset">RESET TO FIGMA REF <span class="k">0</span></button>
+    <button id="bSimple">SIMPLE MAKER ▸</button>
+    <input type="file" id="fLoad" accept="application/json">
+  </div>
+
+  <footer>
+    drag labels to scrub · F fit · scroll zoom · R random · V vary · M mesh<br>
+    output is strokes only — recolor / reweight in Illustrator<br>
+    ⌘C then ⌘V in Figma or Illustrator pastes live paths
+  </footer>
+</aside>
+
+<main id="main">
+  <svg id="stage" xmlns="http://www.w3.org/2000/svg">
+    <g id="world">
+      <g id="cardG">
+        <rect id="cardBg" rx="28" ry="28"/>
+      </g>
+      <g id="meshPrev" opacity=".55" style="display:none"></g>
+      <path id="ref" fill="#d6ff3f" fill-opacity=".18" fill-rule="evenodd"/>
+      <defs id="defs"></defs>
+      <g id="ring" fill="none" stroke-linejoin="round"></g>
+      <g id="furnG"></g>
+    </g>
+  </svg>
+  <div class="hud" id="hud"></div>
+  <div class="toast" id="toast"></div>
+</main>
+
+<script src="ring.js"></script>
+<script src="ref.js"></script>
+<script src="furniture.js"></script>
+<script src="mesh-figma.js"></script>
+<script>
+// ── State ─────────────────────────────────────────────────────────────
+const LS = 'ring-lab.state.v1';
+let S = Ring.clone(Ring.DEFAULTS);
+let view = { card: true, ref: false, clip: false, dark: true, smooth: true };
+let furn = { logo: true, visa: true, chip: true, export: false, color: '#262626' };
+let setMeshFigmaLater = false;
+try {
+  const saved = JSON.parse(localStorage.getItem(LS));
+  if (saved && saved.S) { S = Ring.merge(Ring.DEFAULTS, saved.S); view = Object.assign(view, saved.view || {}); furn = Object.assign(furn, saved.furn || {}); }
+  if (!S.place) S.place = { scale: 100, aspect: 1 };
+  if (!saved || !saved.S || !saved.S.mesh) setMeshFigmaLater = true;
+} catch {}
+
+const PRESETS = {
+  'FIGMA REF 2:5':  {},
+  'TWIN':           { strands: { n: 2, gap: 9 } },
+  'TRIPLE':         { strands: { n: 3, gap: 7 } },
+  'FAN 7':          { strands: { n: 7, gap: 5 } },
+  'JOIN ×2':        { strands: { n: 5, gap: 9 }, env: { amt: 1, m: 2, psi: 0, pow: 1.4 } },
+  'JOIN ×5':        { strands: { n: 5, gap: 7 }, env: { amt: 1, m: 5, psi: 90, pow: 1.2 } },
+  'WEAVE':          { strands: { n: 4, gap: 0, phase: 6 } },
+  'NEST':           { strands: { n: 5, gap: 0, scale: -0.06 } },
+  'SPIRAL':         { strands: { n: 1 }, spiral: { grow: 0.9, turns: 4 }, box: { w: 420, h: 259 } },
+  'ARC':            { strands: { n: 6, gap: 6 }, trim: { start: 0.12, end: 0.62 }, env: { amt: 0.9, m: 1, psi: 180 } },
+  '3:4':            { curve: { a: 3, b: 4 } },
+  '1:3 BOW':        { curve: { a: 1, b: 3, delta: 90 }, strands: { n: 5, gap: 8 } },
+  // ── colour ──
+  'FIGMA MESH':     { strands: { n: 5, gap: 6 }, color: { mode: 'field', chunks: 64 }, mesh: 'figma' },
+  'MESH WOVEN':     { strands: { n: 7, gap: 5 }, color: { mode: 'field', chunks: 64 }, mesh: 'figma', depth: { on: true, width: 0.45, alpha: 0.55, freq: 5, phase: 0, chunks: 64 } },
+  'MESH CONFLUENCE':{ family: 'confluence', color: { mode: 'field', chunks: 32 }, mesh: 'figma', stroke: { w: 4 } },
+  // ── confluence ──
+  'FIGMA ALT 3':    { family: 'confluence', conf: { profile: 'arc', side: 'left', ox: -9, radii: [91, 189, 245, 329, 400, 555, 646] } },
+  'ARCS EVEN 7':    { family: 'confluence', conf: { profile: 'arc', n: 7, rMin: 90, rMax: 650, pow: 1 } },
+  'ARCS TIGHT':     { family: 'confluence', conf: { profile: 'arc', n: 9, rMin: 60, rMax: 700, pow: 1.8 } },
+  'MERGE 4':        { family: 'confluence', conf: { profile: 'merge', n: 4, entry: 120, entryStep: 90, join: 380, joinStep: 60, tension: 0.55 } },
+  'MERGE FAN':      { family: 'confluence', conf: { profile: 'merge', n: 6, entry: 40, entryStep: 70, join: 430, joinStep: 0, tension: 0.6 } },
+  'MERGE RIGHT':    { family: 'confluence', conf: { profile: 'merge', side: 'right', n: 5, entry: 100, entryStep: 80, join: 360, joinStep: 50, tension: 0.5, lean: 0.2 } },
+  'TOP ONLY':       { family: 'confluence', conf: { profile: 'merge', n: 5, bottom: false, entry: 80, entryStep: 110, join: 300, joinStep: 90, tension: 0.7 } },
+};
+
+// ── Controls ──────────────────────────────────────────────────────────
+const ctls = [];
+function ctl(host, label, path, min, max, step, unit = '') {
+  const el = document.createElement('div');
+  el.className = 'ctl';
+  el.innerHTML = `<div class="top"><span class="lbl">${label}</span>
+    <span class="box"><input type="text" inputmode="decimal"><span class="u">${unit}</span></span></div>
+    <div class="track"><div class="fill"></div><div class="knob"></div></div>`;
+  host.appendChild(el);
+  const input = el.querySelector('input'), track = el.querySelector('.track'),
+        fill = el.querySelector('.fill'), knob = el.querySelector('.knob'), lbl = el.querySelector('.lbl');
+  const acc = typeof path === 'object' ? path : null;
+  const get = () => acc ? acc.get() : path.split('.').reduce((o, k) => o[k], S);
+  const set = (v) => {
+    v = Math.min(max, Math.max(min, Math.round(v / step) * step));
+    if (acc) acc.set(+v.toFixed(6));
+    else { const ks = path.split('.'); const o = ks.slice(0, -1).reduce((o, k) => o[k], S); o[ks[ks.length - 1]] = +v.toFixed(6); }
+    render();
+  };
+  const dec = step < 1 ? String(step).split('.')[1].length : 0;
+  const sync = () => {
+    const v = get(); const p = (v - min) / (max - min) * 100;
+    fill.style.width = p + '%'; knob.style.left = p + '%';
+    if (document.activeElement !== input) input.value = v.toFixed(dec);
+  };
+  input.addEventListener('change', () => { const v = parseFloat(input.value); if (!isNaN(v)) set(v); sync(); });
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); });
+  const scrub = (target, perPx) => (e) => {
+    e.preventDefault(); el.classList.add('live');
+    const x0 = e.clientX, v0 = get();
+    const mv = (e) => set(v0 + (e.clientX - x0) * perPx);
+    const up = () => { el.classList.remove('live'); window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); };
+    window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up);
+  };
+  lbl.addEventListener('pointerdown', scrub(lbl, (max - min) / 400));
+  track.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); el.classList.add('live');
+    const r = track.getBoundingClientRect();
+    const at = (e) => set(min + (max - min) * Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)));
+    at(e);
+    const up = () => { el.classList.remove('live'); window.removeEventListener('pointermove', at); window.removeEventListener('pointerup', up); };
+    window.addEventListener('pointermove', at); window.addEventListener('pointerup', up);
+  });
+  ctls.push(sync);
+  return el;
+}
+
+const $ = (id) => document.getElementById(id);
+ctl($('cCurve'),   'a  (x freq)',       'curve.a',      1, 12, 1);
+ctl($('cCurve'),   'b  (y freq)',       'curve.b',      1, 12, 1);
+ctl($('cCurve'),   'δ  phase',          'curve.delta',  -180, 180, 1, '°');
+ctl($('cCurve'),   'rotate',            'curve.rot',    -90, 90, 0.5, '°');
+// PLACE: always centred on the card. One scale, from centre. Aspect is the
+// reference proportion (787:486) unless you push it.
+const REF_W = Ring.DEFAULTS.box.w, REF_H = Ring.DEFAULTS.box.h;
+S.place = S.place || { scale: 100, aspect: 1 };
+function applyPlace() {
+  S.box.cx = S.card.w / 2; S.box.cy = S.card.h / 2;
+  S.box.w = REF_W * S.place.scale / 100;
+  S.box.h = REF_H * S.place.scale / 100 * S.place.aspect;
+}
+ctl($('cBox'), 'scale  (100 = figma ref)', { get: () => S.place.scale,  set: (v) => { S.place.scale = v; applyPlace(); } }, 5, 250, 0.5, '%');
+ctl($('cBox'), 'aspect  (1 = ref)',        { get: () => S.place.aspect, set: (v) => { S.place.aspect = v; applyPlace(); } }, 0.2, 3, 0.01);
+ctl($('cStrands'), 'count',             'strands.n',    1, 24, 1);
+ctl($('cStrands'), 'gap  (normal)',     'strands.gap',  -40, 40, 0.25, 'px');
+ctl($('cStrands'), 'phase / strand',    'strands.phase',-30, 30, 0.25, '°');
+ctl($('cStrands'), 'scale / strand',    'strands.scale',-0.3, 0.3, 0.005);
+ctl($('cStrands'), 'twist / strand',    'strands.twist',-30, 30, 0.25, '°');
+ctl($('cStrands'), 'width ramp',        'strands.ramp', -0.4, 0.4, 0.01);
+ctl($('cEnv'),     'amount',            'env.amt',      0, 1, 0.01);
+ctl($('cEnv'),     'pinches / loop',    'env.m',        1, 12, 1);
+ctl($('cEnv'),     'offset',            'env.psi',      -180, 180, 1, '°');
+ctl($('cEnv'),     'sharpness',         'env.pow',      0.3, 6, 0.1);
+ctl($('cSpiral'),  'grow',              'spiral.grow',  -0.95, 3, 0.01);
+ctl($('cSpiral'),  'turns',             'spiral.turns', 0.25, 8, 0.25);
+ctl($('cSpiral'),  'trim start',        'trim.start',   0, 1, 0.005);
+ctl($('cSpiral'),  'trim end',          'trim.end',     0, 1, 0.005);
+ctl($('cStroke'),  'width',             'stroke.w',     0.25, 24, 0.25, 'pt');
+
+// ── Confluence ──
+ctl($('cOrigin'), 'origin x  (from edge)',   'conf.ox',        -400, 400, 1, 'px');
+ctl($('cOrigin'), 'axis y  (0 = centre)',    'conf.ay',        -254, 254, 1, 'px');
+ctl($('cLines'),  'lines per side',          'conf.n',         1, 16, 1);
+ctl($('cArc'),    'radius min',              'conf.rMin',      10, 1200, 1, 'px');
+ctl($('cArc'),    'radius max',              'conf.rMax',      10, 1600, 1, 'px');
+ctl($('cArc'),    'distribution  (1 = even)','conf.pow',       0.2, 4, 0.05);
+ctl($('cMerge'),  'entry x  (1st line)',     'conf.entry',     -400, 1200, 1, 'px');
+ctl($('cMerge'),  'entry step',              'conf.entryStep', -200, 200, 1, 'px');
+ctl($('cMerge'),  'join x  (1st line)',      'conf.join',      -400, 1200, 1, 'px');
+ctl($('cMerge'),  'join step',               'conf.joinStep',  -200, 200, 1, 'px');
+ctl($('cMerge'),  'tension  (.55 = round)',  'conf.tension',   0.05, 0.95, 0.01);
+ctl($('cMerge'),  'lean',                    'conf.lean',      -1.5, 1.5, 0.01);
+ctl($('cAxis'),   'interleave bottom',       'conf.interleave',-1, 1, 0.05);
+
+// ── Colour / depth ──
+ctl($('cMesh'), 'field x',     'meshT.x',     -1, 1, 0.01);
+ctl($('cMesh'), 'field y',     'meshT.y',     -1, 1, 0.01);
+ctl($('cMesh'), 'field scale', 'meshT.scale', 0.2, 4, 0.01);
+ctl($('cMesh'), 'field rotate','meshT.rot',   -180, 180, 1, '°');
+ctl($('cColor'), 'chunks  (along · field)', 'color.chunks', 4, 160, 1);
+ctl($('cColor'), 'offset  (across · along)','color.offset', -1, 1, 0.01);
+ctl($('cColor'), 'angle  (linear)',         'color.angle',  -180, 180, 1, '°');
+ctl($('cDepth'), 'width ±',                 'depth.width',  0, 0.95, 0.01);
+ctl($('cDepth'), 'fade',                    'depth.alpha',  0, 0.97, 0.01);
+ctl($('cDepth'), 'cycles / strand',         'depth.freq',   0.25, 12, 0.25);
+ctl($('cDepth'), 'phase',                   'depth.phase',  -180, 180, 1, '°');
+ctl($('cDepth'), 'chunks',                  'depth.chunks', 4, 160, 1);
+
+$('segColor').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; S.color.mode = b.dataset.v; render(); });
+$('colTog').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; S.color[b.dataset.v] = !S.color[b.dataset.v]; render(); });
+$('depthTog').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; S.depth.on = !S.depth.on; render(); });
+function wireSwatch(colorEl, hexEl, get, set) {
+  colorEl.addEventListener('input', () => { set(colorEl.value.toUpperCase()); render(); });
+  hexEl.addEventListener('change', () => { let v = hexEl.value.trim(); if (!v.startsWith('#')) v = '#' + v; if (/^#[0-9a-f]{6}$/i.test(v)) { set(v.toUpperCase()); render(); } else hexEl.value = get(); });
+  ctls.push(() => { const v = get(); colorEl.value = v; if (document.activeElement !== hexEl) hexEl.value = v; });
+}
+document.querySelectorAll('#swStops .sw').forEach((row) => {
+  const i = +row.querySelector('input[type=color]').dataset.stop;
+  wireSwatch(row.querySelector('input[type=color]'), row.querySelector('.hex'), () => S.color.stops[i], (v) => S.color.stops[i] = v);
+});
+// ── Mesh editor ──
+let meshShow = false;
+function setMeshFigma() { S.mesh = { cols: MESH_FIGMA.cols, rows: MESH_FIGMA.rows, colors: MESH_FIGMA.colors.slice() }; S.meshT = { x: 0, y: 0, scale: 1, rot: 0 }; }
+$('bMeshFigma').onclick = () => { setMeshFigma(); render(); toast('FIGMA MESH 12×7'); };
+$('bMeshShow').onclick = () => { meshShow = !meshShow; render(); };
+let meshPal = null;   // null = mixed
+function randomMesh() {
+  const m = Ring.randomMesh(S.mesh.cols, S.mesh.rows, { palette: meshPal || undefined });
+  S.mesh = { cols: m.cols, rows: m.rows, colors: m.colors };
+  S.color.mode = 'field'; render(); toast('MESH · ' + m.palette.toUpperCase());
+}
+$('bMeshRand').onclick = randomMesh;
+document.querySelectorAll('.meshPal').forEach((b) => b.onclick = () => { meshPal = meshPal === b.dataset.pal ? null : b.dataset.pal; randomMesh(); });
+$('segMeshRes').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  const [c, r] = b.dataset.v.split('x').map(Number);
+  S.mesh = Ring.resampleMesh(Ring.merge(Ring.DEFAULTS, S), c, r); render();
+});
+let meshEditIdx = -1;
+$('meshPick').addEventListener('input', () => { if (meshEditIdx >= 0) { S.mesh.colors[meshEditIdx] = $('meshPick').value.toUpperCase(); render(); } });
+function drawMeshEditor() {
+  const g = $('meshGrid'); g.style.gridTemplateColumns = `repeat(${S.mesh.cols}, 1fr)`;
+  g.innerHTML = S.mesh.colors.map((c, i) => `<button data-i="${i}" title="${c}" style="background:${c}"></button>`).join('');
+  g.onclick = (e) => { const b = e.target.closest('button'); if (!b) return; meshEditIdx = +b.dataset.i; const pk = $('meshPick'); pk.value = S.mesh.colors[meshEditIdx]; pk.click(); };
+  document.querySelectorAll('#segMeshRes button').forEach((b) => b.classList.toggle('on', b.dataset.v === `${S.mesh.cols}x${S.mesh.rows}`));
+  $('bMeshShow').classList.toggle('on', meshShow);
+  document.querySelectorAll('.meshPal').forEach((b) => b.classList.toggle('on', meshPal === b.dataset.pal));
+}
+wireSwatch($('furnColor'), $('furnHex'), () => furn.color, (v) => furn.color = v);
+$('furnTog').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; furn[b.dataset.v] = !furn[b.dataset.v]; render(); });
+$('furnQuick').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; furn.color = b.dataset.c; render(); });
+
+$('segFam').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; S.family = b.dataset.v; render(); });
+$('segSide').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; S.conf.side = b.dataset.v; render(); });
+$('segProf').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; S.conf.profile = b.dataset.v; S.conf.radii = null; render(); });
+$('confTog').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return; const k = b.dataset.v;
+  if (k === 'axisFromJoin') S.conf.axisFrom = S.conf.axisFrom === 'firstJoin' ? 'origin' : 'firstJoin';
+  else S.conf[k] = !S.conf[k];
+  render();
+});
+
+$('segCap').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  S.stroke.cap = b.dataset.v; render();
+});
+$('views').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  view[b.dataset.v] = !view[b.dataset.v]; render();
+});
+for (const name in PRESETS) {
+  const b = document.createElement('button'); b.textContent = name;
+  b.addEventListener('click', () => { const pr = Object.assign({}, PRESETS[name]); const wantFigma = pr.mesh === 'figma'; if (wantFigma) delete pr.mesh; S = Ring.merge(Ring.DEFAULTS, pr); if (wantFigma) setMeshFigma();
+    S.place = { scale: +(S.box.w / REF_W * 100).toFixed(1), aspect: +((S.box.h / REF_H) / (S.box.w / REF_W)).toFixed(3) }; applyPlace(); render(); fit(); });
+  $('presets').appendChild(b);
+}
+
+// ── Render ────────────────────────────────────────────────────────────
+const stage = $('stage'), world = $('world'), ringG = $('ring'), refP = $('ref'),
+      cardBg = $('cardBg'), hud = $('hud');
+let cam = { x: 0, y: 0, k: 1 };
+
+function render() {
+  const { w, h, r } = S.card;
+  const ink = view.dark ? '#f2f2f0' : '#000000';
+  cardBg.setAttribute('width', w); cardBg.setAttribute('height', h);
+  cardBg.setAttribute('rx', r); cardBg.setAttribute('ry', r);
+  cardBg.setAttribute('fill', view.dark ? '#0a0a0a' : '#ffffff');
+  cardBg.setAttribute('stroke', view.dark ? '#2a2a27' : '#d0d0cc');
+  $('cardG').style.display = view.card ? '' : 'none';
+
+  refP.style.display = view.ref ? '' : 'none';
+  if (view.ref) { refP.setAttribute('d', REF_223_18.d); refP.setAttribute('transform', `translate(${REF_223_18.x} ${REF_223_18.y})`); }
+
+  // Solid mode with the default stop follows the theme ink; anything else is literal.
+  const strands = Ring.build(S);
+  const themed = S.color.mode === 'solid' && S.color.stops[0].toUpperCase() === Ring.DEFAULTS.color.stops[0];
+  const parts = Ring.paint(S, strands).map((p) => themed ? { ...p, color: ink } : p);
+  const rendered = Ring.partsSVG(S, parts, { smooth: view.smooth !== false, idPrefix: 'pg' });
+  $('defs').innerHTML = (S.color.mode === 'linear' ? Ring.gradientDef(S) : '') + rendered.defs.join('') +
+    (view.clip ? `<clipPath id="clipCard"><rect width="${w}" height="${h}" rx="${r}" ry="${r}"/></clipPath>` : '');
+  ringG.removeAttribute('stroke');
+  ringG.setAttribute('stroke-linecap', S.stroke.cap);
+  ringG.setAttribute('clip-path', view.clip ? 'url(#clipCard)' : '');
+  ringG.innerHTML = rendered.paths.join('');
+
+  // Furniture on top. Logo + Visa take furn.color; chip keeps its own tones.
+  const fsvg = furnitureSVG(furn.color, { chip: furn.chip });
+  $('furnG').innerHTML = fsvg;
+  const fg = $('furnG').firstElementChild;
+  if (fg) { const kids = [...fg.children]; const idx = furn.chip ? { chip: 0, logo: 1, visa: 2 } : { logo: 0, visa: 1 };
+    if (!furn.logo && kids[idx.logo]) kids[idx.logo].style.display = 'none';
+    if (!furn.visa && kids[idx.visa]) kids[idx.visa].style.display = 'none'; }
+
+  $('swStops').style.display = S.color.mode === 'field' ? 'none' : '';
+  $('meshUI').style.display = S.color.mode === 'field' ? '' : 'none';
+  if (S.color.mode === 'field') drawMeshEditor();
+  // Mesh preview: coarse cell grid under the lines (preview only, never exported).
+  const mp = $('meshPrev');
+  if (meshShow && S.color.mode === 'field') {
+    const SS = Ring.merge(Ring.DEFAULTS, S), cols = 40, rows = 25, cw = w / cols, ch = h / rows; let html = '';
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) html += `<rect x="${(c * cw).toFixed(1)}" y="${(r * ch).toFixed(1)}" width="${(cw + 0.5).toFixed(1)}" height="${(ch + 0.5).toFixed(1)}" fill="${Ring.field(SS, (c + 0.5) * cw, (r + 0.5) * ch)}"/>`;
+    mp.innerHTML = html; mp.style.display = '';
+  } else { mp.innerHTML = ''; mp.style.display = 'none'; }
+  $('swC2').style.display = S.color.three ? '' : 'none';
+  document.querySelectorAll('#segColor button').forEach((b) => b.classList.toggle('on', b.dataset.v === S.color.mode));
+  document.querySelectorAll('#colTog button').forEach((b) => b.classList.toggle('on', !!S.color[b.dataset.v]));
+  document.querySelectorAll('#depthTog button').forEach((b) => b.classList.toggle('on', !!S.depth.on));
+  document.querySelectorAll('#furnTog button').forEach((b) => b.classList.toggle('on', !!furn[b.dataset.v]));
+
+  document.querySelectorAll('[data-fam]').forEach((el) => el.style.display = el.dataset.fam === S.family ? '' : 'none');
+  $('cArc').style.display = S.conf.profile === 'arc' ? '' : 'none';
+  $('cMerge').style.display = S.conf.profile === 'merge' ? '' : 'none';
+  document.querySelectorAll('#segFam button').forEach((b) => b.classList.toggle('on', b.dataset.v === S.family));
+  document.querySelectorAll('#segSide button').forEach((b) => b.classList.toggle('on', b.dataset.v === S.conf.side));
+  document.querySelectorAll('#segProf button').forEach((b) => b.classList.toggle('on', b.dataset.v === S.conf.profile));
+  document.querySelectorAll('#confTog button').forEach((b) => b.classList.toggle('on', b.dataset.v === 'axisFromJoin' ? S.conf.axisFrom === 'firstJoin' : !!S.conf[b.dataset.v]));
+  document.querySelectorAll('#segCap button').forEach((b) => b.classList.toggle('on', b.dataset.v === S.stroke.cap));
+  document.querySelectorAll('#views button').forEach((b) => b.classList.toggle('on', !!view[b.dataset.v]));
+  $('hRatio').textContent = `${S.curve.a}:${S.curve.b}`;
+  ctls.forEach((f) => f());
+
+  const segs = strands.reduce((n, s) => n + (s.d.match(/C/g) || []).length, 0);
+  const colorTag = S.color.mode === 'solid' ? '' : ` · ${S.color.mode}${parts.length > strands.length ? ` ${parts.filter((p) => !p.dot).length} parts${view.smooth === false ? ' flat' : ' smooth'}` : ''}`;
+  const head = S.family === 'confluence'
+    ? `CONFLUENCE · ${S.conf.profile} · ${S.conf.side} · ${strands.length} paths`
+    : `${S.curve.a}:${S.curve.b} · δ${S.curve.delta}° · ${strands.length} strand${strands.length > 1 ? 's' : ''} · ${segs} béziers`;
+  hud.innerHTML = `${head} · ${S.stroke.w}pt${colorTag}${S.depth.on ? ' · depth' : ''}<br>${Math.round(cam.k * 100)}%`;
+  localStorage.setItem(LS, JSON.stringify({ S, view, furn }));
+}
+
+// ── Camera ────────────────────────────────────────────────────────────
+const main = $('main');
+function applyCam() { world.setAttribute('transform', `translate(${cam.x} ${cam.y}) scale(${cam.k})`); hud.innerHTML = hud.innerHTML.replace(/\d+%$/, Math.round(cam.k * 100) + '%'); }
+function fit() {
+  const r = main.getBoundingClientRect(); const pad = 80;
+  cam.k = Math.min((r.width - pad * 2) / S.card.w, (r.height - pad * 2) / S.card.h) * 0.4;   // realistic card size; scroll to zoom
+  cam.x = (r.width - S.card.w * cam.k) / 2; cam.y = (r.height - S.card.h * cam.k) / 2;
+  applyCam();
+}
+main.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const r = main.getBoundingClientRect(); const mx = e.clientX - r.left, my = e.clientY - r.top;
+  const k2 = Math.min(12, Math.max(0.1, cam.k * Math.exp(-e.deltaY * 0.0015)));
+  cam.x = mx - (mx - cam.x) * (k2 / cam.k); cam.y = my - (my - cam.y) * (k2 / cam.k); cam.k = k2;
+  applyCam();
+}, { passive: false });
+main.addEventListener('pointerdown', (e) => {
+  if (e.button !== 0) return;
+  main.classList.add('panning');
+  const x0 = e.clientX - cam.x, y0 = e.clientY - cam.y;
+  const mv = (e) => { cam.x = e.clientX - x0; cam.y = e.clientY - y0; applyCam(); };
+  const up = () => { main.classList.remove('panning'); window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); };
+  window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up);
+});
+window.addEventListener('resize', fit);
+
+// ── Export ────────────────────────────────────────────────────────────
+function svgOut() {
+  // Export literal colours. In themed solid mode, write black so AI/Figma get a neutral stroke.
+  const st = Ring.clone(S);
+  if (st.color.mode === 'solid' && st.color.stops[0].toUpperCase() === Ring.DEFAULTS.color.stops[0]) st.color.stops[0] = '#000000';
+  let fsvg = '';
+  if (furn.export) {
+    fsvg = furnitureSVG(furn.color, { chip: furn.chip });
+    if (!furn.logo) fsvg = fsvg.replace(/<g transform="translate\(518\.10[^]*?<\/g>/, '');
+    if (!furn.visa) fsvg = fsvg.replace(/<g transform="translate\(599 [^]*?<\/g>/, '');
+  }
+  return Ring.toSVG(st, { clip: view.clip, furniture: fsvg, smooth: view.smooth !== false });
+}
+function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 1400); }
+async function copySVG() {
+  const svg = svgOut();
+  try { await navigator.clipboard.writeText(svg); toast('SVG COPIED — ⌘V IN FIGMA / AI'); }
+  catch { const ta = document.createElement('textarea'); ta.value = svg; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); toast('SVG COPIED'); }
+}
+function dl(name, text, type) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 500);
+}
+const stamp = () => `ring_${S.curve.a}-${S.curve.b}_n${Math.round(S.strands.n)}_${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')}`;
+$('bCopy').onclick = copySVG;
+$('bDl').onclick = () => { dl(stamp() + '.svg', svgOut(), 'image/svg+xml'); toast('DOWNLOADED'); };
+$('bSave').onclick = () => { dl(stamp() + '.json', JSON.stringify({ S, view }, null, 2), 'application/json'); toast('PRESET SAVED'); };
+$('bLoad').onclick = () => $('fLoad').click();
+$('fLoad').onchange = (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => { try { const j = JSON.parse(rd.result); S = Ring.merge(Ring.DEFAULTS, j.S || j); if (!S.place) S.place = { scale: 100, aspect: 1 }; applyPlace(); if (j.view) view = Object.assign(view, j.view); render(); toast('PRESET LOADED'); } catch { toast('BAD JSON'); } };
+  rd.readAsText(f); e.target.value = '';
+};
+$('bReset').onclick = () => { S = Ring.clone(Ring.DEFAULTS); S.place = { scale: 100, aspect: 1 }; applyPlace(); render(); fit(); };
+
+// Variation: keep the curve, shuffle the system around it.
+function variation() {
+  const R = (a, b, s = 1) => Math.round((a + Math.random() * (b - a)) / s) * s;
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  if (S.family === 'confluence') {
+    const prof = pick(['arc', 'merge', 'merge']);
+    S.conf = Object.assign(S.conf, { profile: prof, radii: null, n: R(3, 9), bottom: Math.random() < 0.8, interleave: pick([0, 0, 0.5]),
+      rMin: R(40, 160, 5), rMax: R(400, 800, 10), pow: R(0.6, 2.2, 0.1),
+      entry: R(-50, 250, 10), entryStep: R(40, 130, 5), join: R(250, 520, 10), joinStep: pick([0, 0, R(20, 100, 5)]), tension: R(0.35, 0.8, 0.05), lean: pick([0, 0, R(-0.6, 0.6, 0.05)]) });
+    render(); toast(prof.toUpperCase()); return;
+  }
+  const mode = pick(['fan', 'join', 'weave', 'nest', 'arc']);
+  S.strands = Object.assign(S.strands, { n: R(3, 9), gap: R(3, 12, 0.5), phase: 0, scale: 0, twist: 0 });
+  S.env = { amt: 0, m: 2, psi: 0, pow: 1 }; S.trim = { start: 0, end: 1 }; S.spiral = { grow: 0, turns: 1 };
+  if (mode === 'join')  S.env = { amt: R(0.7, 1, 0.05), m: pick([1, 2, 2, 3, 5]), psi: R(-180, 180, 15), pow: R(0.8, 2.4, 0.1) };
+  if (mode === 'weave') { S.strands.gap = 0; S.strands.phase = R(2, 9, 0.25); }
+  if (mode === 'nest')  { S.strands.gap = 0; S.strands.scale = R(-0.08, -0.02, 0.005); }
+  if (mode === 'arc')   { S.trim = { start: R(0, 0.3, 0.01), end: R(0.5, 0.9, 0.01) }; S.env = { amt: R(0.6, 1, 0.05), m: 1, psi: R(-180, 180, 15), pow: 1 }; }
+  render(); toast(mode.toUpperCase());
+}
+$('bVar').onclick = variation;
+
+// Randomize: everything in the active family, incl. the curve itself + colour.
+function randomize() {
+  const R = (a, b, s = 1) => Math.round((a + Math.random() * (b - a)) / s) * s;
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const PAL = ['#3E7CB1', '#C9D6E8', '#F2B134', '#FBE7B5', '#1F2A36', '#F2F2F0', '#E8A87C', '#6C8EAD', '#3A9188', '#C2603A'];
+  if (S.family === 'lissajous') {
+    const ratios = [[2, 5], [2, 5], [3, 4], [3, 5], [1, 3], [2, 3], [3, 7], [4, 5], [1, 2], [5, 6]];
+    const [a, b] = pick(ratios);
+    S.curve = { a, b, delta: pick([0, 0, 90, 45, R(-180, 180, 15)]), rot: pick([0, 0, 0, R(-30, 30, 2.5)]) };
+    S.place = { scale: R(70, 135, 2.5), aspect: pick([1, 1, 1, R(0.6, 1.4, 0.05)]) }; applyPlace();
+  }
+  variation();   // strand system / confluence lines
+  S.stroke.w = pick([1, 1.5, 2, 2, 3, 4, 6]);
+  const cm = pick(['solid', 'across', 'across', 'along', 'field', 'field']);
+  S.color.mode = cm;
+  S.color.stops = [pick(PAL), pick(PAL), pick(PAL)]; S.color.three = Math.random() < 0.4; S.color.offset = R(-0.5, 0.5, 0.05);
+  if (cm === 'field') { if (Math.random() < 0.4) setMeshFigma(); else { const m = Ring.randomMesh(pick([3, 4, 6]), pick([2, 3, 4])); S.mesh = { cols: m.cols, rows: m.rows, colors: m.colors }; }
+    S.meshT = { x: R(-0.3, 0.3, 0.05), y: R(-0.3, 0.3, 0.05), scale: R(0.7, 1.8, 0.05), rot: pick([0, 0, R(-45, 45, 5)]) }; }
+  S.depth = { on: Math.random() < 0.45, width: R(0.2, 0.7, 0.05), alpha: R(0.2, 0.8, 0.05), freq: pick([1, 2, 3, 5, S.curve.b]), phase: R(-180, 180, 15), chunks: 48 };
+  render(); toast('RANDOM');
+}
+$('bRand').onclick = randomize;
+$('bSimple').onclick = () => location.href = 'simple.html';
+
+// ── Keys ──────────────────────────────────────────────────────────────
+window.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  const meta = e.metaKey || e.ctrlKey;
+  if (meta && e.key.toLowerCase() === 'c') { e.preventDefault(); copySVG(); }
+  else if (meta && e.key.toLowerCase() === 's') { e.preventDefault(); $('bDl').click(); }
+  else if (e.key.toLowerCase() === 'f') fit();
+  else if (e.key.toLowerCase() === 'v') variation();
+  else if (e.key.toLowerCase() === 'r') randomize();
+  else if (e.key.toLowerCase() === 'm') randomMesh();
+  else if (e.key === '0') $('bReset').click();
+  else if (e.key.toLowerCase() === 'c') { view.card = !view.card; render(); }
+  else if (e.key.toLowerCase() === 'g') { view.ref = !view.ref; render(); }
+  else if (e.key.toLowerCase() === 'd') { view.dark = !view.dark; render(); }
+  else if (e.key.startsWith('Arrow')) { e.preventDefault(); const st = e.shiftKey ? 10 : 1;
+    if (e.key === 'ArrowLeft') S.box.cx -= st; if (e.key === 'ArrowRight') S.box.cx += st;
+    if (e.key === 'ArrowUp') S.box.cy -= st; if (e.key === 'ArrowDown') S.box.cy += st; render(); }
+});
+
+if (setMeshFigmaLater) setMeshFigma();
+render(); fit();
+</script>
+</body>
+</html>

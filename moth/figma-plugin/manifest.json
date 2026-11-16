@@ -1,0 +1,35 @@
+{
+  "name": "Moth",
+  "id": "moth-design-agent",
+  "id": "1588369718988882032",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "ui": "dist/ui.html",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["http://localhost", "https://api.openai.com", "https://api.anthropic.com"],
+    "reasoning": "Connects to AI APIs for design generation"
+  },
+  "permissions": ["currentuser"],
+  "menu": [
+    {
+      "name": "Open Moth",
+      "command": "open"
+    },
+    {
+      "name": "Execute Last Spec",
+      "command": "execute-last"
+    },
+    {
+      "separator": true
+    },
+    {
+      "name": "Sync Variables from Tokens",
+      "command": "sync-variables"
+    }
+  ]
+}
+

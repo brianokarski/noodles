@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 12px;
+    background: #1e1e1e;
+    color: #e0e0e0;
+    padding: 16px;
+    user-select: none;
+  }
+
+  h1 {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #aaa;
+    margin-bottom: 14px;
+  }
+
+  /* Selection status card */
+  #selection-card {
+    background: #2a2a2a;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  #selection-info { display: flex; flex-direction: column; gap: 3px; }
+  #selection-count {
+    font-size: 15px;
+    font-weight: 600;
+    color: #e0e0e0;
+  }
+  #selection-hint {
+    font-size: 11px;
+    color: #666;
+    line-height: 1.4;
+  }
+  #refresh-btn {
+    background: #333;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #aaa;
+    font-size: 11px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  #refresh-btn:hover { background: #3a3a3a; color: #e0e0e0; }
+
+  /* Image list */
+  #image-list {
+    max-height: 100px;
+    overflow-y: auto;
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  #image-list:empty { display: none; }
+  .image-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #252525;
+    border-radius: 5px;
+    padding: 5px 8px;
+    font-size: 11px;
+    color: #bbb;
+  }
+  .image-item .name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .image-item .dims { color: #555; flex-shrink: 0; }
+
+  /* Controls */
+  .section { margin-bottom: 16px; }
+  .section-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #555;
+    margin-bottom: 8px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  label { color: #888; font-size: 11px; }
+
+  input[type="number"] {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 5px;
+    color: #e0e0e0;
+    font-size: 12px;
+    padding: 6px 8px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type="number"]:focus { border-color: #7c6af7; }
+  input[type="number"]::-webkit-inner-spin-button { opacity: 0.4; }
+
+  input[type="color"] {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 5px;
+    height: 32px;
+    width: 100%;
+    padding: 2px 4px;
+    cursor: pointer;
+    outline: none;
+  }
+
+  /* Status */
+  #status {
+    font-size: 11px;
+    color: #888;
+    text-align: center;
+    min-height: 16px;
+    margin-bottom: 10px;
+  }
+  #status.error { color: #e05555; }
+  #status.success { color: #5cb85c; }
+
+  /* Button */
+  #arrange-btn {
+    width: 100%;
+    padding: 10px;
+    background: #7c6af7;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  #arrange-btn:hover:not(:disabled) { background: #6b59e8; }
+  #arrange-btn:disabled { opacity: 0.35; cursor: default; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<h1>Moodboard Arranger</h1>
+
+<!-- Selection status -->
+<div id="selection-card">
+  <div id="selection-info">
+    <div id="selection-count">0 images</div>
+    <div id="selection-hint">Select image nodes in Figma, then refresh</div>
+  </div>
+  <button id="refresh-btn">↻ Refresh</button>
+</div>
+
+<!-- Image list (names) -->
+<div id="image-list"></div>
+
+<!-- Controls -->
+<div class="section">
+  <div class="section-title">Layout</div>
+  <div class="row">
+    <div class="field">
+      <label>Columns</label>
+      <input type="number" id="numCols" value="3" min="1" max="12" step="1" />
+    </div>
+    <div class="field">
+      <label>Margin (px)</label>
+      <input type="number" id="margin" value="40" min="0" max="400" step="4" />
+    </div>
+    <div class="field">
+      <label>H Gap (px)</label>
+      <input type="number" id="hGap" value="12" min="0" max="300" step="2" />
+    </div>
+    <div class="field">
+      <label>V Gap (px)</label>
+      <input type="number" id="vGap" value="12" min="0" max="300" step="2" />
+    </div>
+    <div class="field">
+      <label>Background</label>
+      <input type="color" id="bgColor" value="#ffffff" />
+    </div>
+  </div>
+</div>
+
+<div id="status"></div>
+<button id="arrange-btn" disabled>Arrange on Board</button>
+
+<script>
+  let images = [];
+
+  const countEl  = document.getElementById('selection-count');
+  const hintEl   = document.getElementById('selection-hint');
+  const listEl   = document.getElementById('image-list');
+  const statusEl = document.getElementById('status');
+  const btn      = document.getElementById('arrange-btn');
+
+  document.getElementById('refresh-btn').addEventListener('click', () => {
+    parent.postMessage({ pluginMessage: { type: 'refresh' } }, '*');
+  });
+
+  btn.addEventListener('click', () => {
+    if (images.length === 0) return;
+    btn.disabled = true;
+    parent.postMessage({
+      pluginMessage: {
+        type: 'arrange',
+        numCols: parseInt(document.getElementById('numCols').value) || 3,
+        margin:  parseInt(document.getElementById('margin').value)  || 40,
+        hGap:    parseInt(document.getElementById('hGap').value)    || 12,
+        vGap:    parseInt(document.getElementById('vGap').value)    || 12,
+        bgColor: document.getElementById('bgColor').value,
+      }
+    }, '*');
+  });
+
+  window.onmessage = (event) => {
+    const msg = event.data.pluginMessage;
+    if (!msg) return;
+
+    if (msg.type === 'images-found') {
+      images = msg.images || [];
+      const n = images.length;
+
+      countEl.textContent = `${n} image${n !== 1 ? 's' : ''} found`;
+      hintEl.textContent  = n === 0
+        ? 'Select image nodes in Figma, then refresh'
+        : `Ready to arrange on a 1920×1080 frame`;
+
+      listEl.innerHTML = '';
+      for (const img of images) {
+        const item = document.createElement('div');
+        item.className = 'image-item';
+        item.innerHTML = `
+          <span class="name">${img.name}</span>
+          <span class="dims">${Math.round(img.width)}×${Math.round(img.height)}</span>
+        `;
+        listEl.appendChild(item);
+      }
+
+      btn.disabled = n === 0;
+      setStatus('');
+    }
+
+    if (msg.type === 'status') setStatus(msg.message);
+    if (msg.type === 'done')   { setStatus(`✓ ${msg.count} images arranged`, 'success'); btn.disabled = false; }
+    if (msg.type === 'error')  { setStatus(msg.message, 'error'); btn.disabled = images.length === 0; }
+  };
+
+  function setStatus(text, cls = '') {
+    statusEl.textContent = text;
+    statusEl.className = cls;
+  }
+</script>
+</body>
+</html>

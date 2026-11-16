@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dithered Image Transitions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 40px 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2em;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .demo-card {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        .demo-card h2 {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #4a9eff;
+        }
+        
+        .demo-card p {
+            font-size: 0.9em;
+            color: #aaa;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #000;
+        }
+        
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        label {
+            font-size: 0.85em;
+            color: #ccc;
+            min-width: 80px;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            height: 4px;
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+            background: #444;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #4a9eff;
+            cursor: pointer;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #4a9eff;
+            cursor: pointer;
+            border: none;
+        }
+        
+        button {
+            padding: 8px 16px;
+            background: #4a9eff;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #3a8eef;
+        }
+        
+        .value-display {
+            font-size: 0.85em;
+            color: #4a9eff;
+            min-width: 40px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dithered Image Transition Techniques</h1>
+    
+    <div class="demo-grid">
+        <!-- Demo 1: Basic Threshold -->
+        <div class="demo-card">
+            <h2>1. Basic Threshold (Random Noise)</h2>
+            <p>Simple random noise threshold. Clean but can show clustering patterns.</p>
+            <canvas id="canvas1"></canvas>
+            <div class="controls">
+                <div class="control-row">
+                    <label>Progress:</label>
+                    <input type="range" id="progress1" min="0" max="100" value="0" />
+                    <span class="value-display" id="value1">0%</span>
+                </div>
+                <button id="animate1">Animate</button>
+            </div>
+        </div>
+        
+        <!-- Demo 2: Blue Noise -->
+        <div class="demo-card">
+            <h2>2. Blue Noise Dither</h2>
+            <p>Uses blue noise for evenly distributed pattern. This is what most high-quality transitions use.</p>
+            <canvas id="canvas2"></canvas>
+            <div class="controls">
+                <div class="control-row">
+                    <label>Progress:</label>
+                    <input type="range" id="progress2" min="0" max="100" value="0" />
+                    <span class="value-display" id="value2">0%</span>
+                </div>
+                <button id="animate2">Animate</button>
+            </div>
+        </div>
+        
+        <!-- Demo 3: Ordered Dither -->
+        <div class="demo-card">
+            <h2>3. Ordered Dither (Bayer Matrix)</h2>
+            <p>Classic Bayer dithering. Creates a distinctive crosshatch pattern.</p>
+            <canvas id="canvas3"></canvas>
+            <div class="controls">
+                <div class="control-row">
+                    <label>Progress:</label>
+                    <input type="range" id="progress3" min="0" max="100" value="0" />
+                    <span class="value-display" id="value3">0%</span>
+                </div>
+                <button id="animate3">Animate</button>
+            </div>
+        </div>
+        
+        <!-- Demo 4: Soft Threshold -->
+        <div class="demo-card">
+            <h2>4. Soft Threshold (Smoothstep)</h2>
+            <p>Adds smoothing to the threshold for anti-aliased edges on each pixel.</p>
+            <canvas id="canvas4"></canvas>
+            <div class="controls">
+                <div class="control-row">
+                    <label>Progress:</label>
+                    <input type="range" id="progress4" min="0" max="100" value="0" />
+                    <span class="value-display" id="value4">0%</span>
+                </div>
+                <div class="control-row">
+                    <label>Softness:</label>
+                    <input type="range" id="softness4" min="0" max="20" value="5" />
+                    <span class="value-display" id="softValue4">5</span>
+                </div>
+                <button id="animate4">Animate</button>
+            </div>
+        </div>
+        
+        <!-- Demo 5: Perlin Noise -->
+        <div class="demo-card">
+            <h2>5. Perlin Noise</h2>
+            <p>Organic flowing patterns. Creates smooth, cloud-like transitions.</p>
+            <canvas id="canvas5"></canvas>
+            <div class="controls">
+                <div class="control-row">
+                    <label>Progress:</label>
+                    <input type="range" id="progress5" min="0" max="100" value="0" />
+                    <span class="value-display" id="value5">0%</span>
+                </div>
+                <div class="control-row">
+                    <label>Scale:</label>
+                    <input type="range" id="scale5" min="1" max="10" value="3" />
+                    <span class="value-display" id="scaleValue5">3</span>
+                </div>
+                <button id="animate5">Animate</button>
+            </div>
+        </div>
+        
+        <!-- Demo 6: Animated Noise -->
+        <div class="demo-card">
+            <h2>6. Animated Noise</h2>
+            <p>Noise pattern changes over time for a sparkling effect.</p>
+            <canvas id="canvas6"></canvas>
+            <div class="controls">
+                <div class="control-row">
+                    <label>Progress:</label>
+                    <input type="range" id="progress6" min="0" max="100" value="0" />
+                    <span class="value-display" id="value6">0%</span>
+                </div>
+                <button id="animate6">Animate</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="transition-engine.js"></script>
+</body>
+</html>

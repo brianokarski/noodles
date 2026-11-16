@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candy Equipment</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍬</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍬</text></svg>">
+    
+    <!-- Open Graph / iMessage / Social Sharing -->
+    <meta property="og:title" content="Candy Equipment">
+    <meta property="og:description" content="🍬">
+    <meta property="og:image" content="CANDY.png">
+    <meta property="og:type" content="website">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { overflow: hidden; background: #0a0a0a; }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Detect mobile
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        
+        // Setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0a0a);
+        
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.z = 6;
+        
+        const renderer = new THREE.WebGLRenderer({ 
+            antialias: !isMobile,  // Disable antialiasing on mobile
+            powerPreference: 'high-performance'
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+        document.body.appendChild(renderer.domElement);
+
+        // Lights
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        
+        const light1 = new THREE.DirectionalLight(0xffffff, 1.2);
+        light1.position.set(5, 5, 5);
+        scene.add(light1);
+        
+        const light2 = new THREE.DirectionalLight(0x8899ff, 0.6);
+        light2.position.set(-5, 2, 3);
+        scene.add(light2);
+        
+        const backLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        backLight.position.set(0, 0, -5);
+        scene.add(backLight);
+        
+
+        // Environment for chrome reflections (smaller on mobile)
+        const cubeSize = isMobile ? 128 : 256;
+        const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(cubeSize);
+        const envScene = new THREE.Scene();
+        
+        const envGeo = new THREE.SphereGeometry(50, 16, 16);
+        const envMat = new THREE.MeshBasicMaterial({ 
+            color: 0x222222, 
+            side: THREE.BackSide 
+        });
+        envScene.add(new THREE.Mesh(envGeo, envMat));
+        
+        const spotGeo = new THREE.SphereGeometry(8, 8, 8);
+        const spotMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const spot = new THREE.Mesh(spotGeo, spotMat);
+        spot.position.set(0, 35, 0);
+        envScene.add(spot);
+        
+        const cubeCamera = new THREE.CubeCamera(0.1, 100, cubeRenderTarget);
+        cubeCamera.update(renderer, envScene);
+
+        // Logo group
+        const logoGroup = new THREE.Group();
+        scene.add(logoGroup);
+
+        // Load logo
+        const loader = new THREE.TextureLoader();
+        loader.load('CANDY.png', function(texture) {
+            const aspect = texture.image.width / texture.image.height;
+            const w = 4 * aspect;
+            const h = 4;
+            const depth = 0.5;
+            
+            // Fewer layers on mobile
+            const layers = isMobile ? 15 : 30;
+
+            // Chrome material for all layers
+            const logoMaterial = new THREE.MeshStandardMaterial({
+                map: texture,
+                transparent: true,
+                side: THREE.DoubleSide,
+                metalness: 1.0,
+                roughness: 0.12,
+                envMap: cubeRenderTarget.texture,
+                envMapIntensity: 1.0
+            });
+
+            // Create extruded layers
+            for (let i = 0; i < layers; i++) {
+                const t = i / (layers - 1);
+                const z = (t - 0.5) * depth;
+                
+                const geo = new THREE.PlaneGeometry(w, h);
+                const mesh = new THREE.Mesh(geo, logoMaterial);
+                mesh.position.z = z;
+                logoGroup.add(mesh);
+            }
+        });
+
+        // Animate
+        let angle = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            angle += 0.008;
+            
+            const normAngle = angle % (Math.PI * 2);
+            
+            if (normAngle > Math.PI / 2 && normAngle < Math.PI * 1.5) {
+                logoGroup.rotation.y = angle + Math.PI;
+            } else {
+                logoGroup.rotation.y = angle;
+            }
+            
+            
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

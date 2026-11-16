@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WT–series — weirdo tools for techno producers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Archivo:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <span class="logo-block">WT</span>
+    <span class="topbar-title">weirdo tools</span>
+    <span class="topbar-sub">audio research unit</span>
+    <span class="topbar-right">seven instruments · browser dsp · no install</span>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <p class="hero-kicker">WT–series / rev 01</p>
+    <h1 class="hero-title">tools that<br>don't exist yet.</h1>
+    <p class="hero-body">
+      seven offline dsp instruments for chopping, mangling and echoing — capped by a generative system that plays your slices by rules.
+      drop a loop, turn knobs, run, export .wav back into your session.
+      everything runs locally in your browser — nothing is uploaded anywhere.
+    </p>
+    <div class="hero-index">
+      <span>01 spectral chop</span><span>02 ratchet delay</span><span>03 freeze delay</span>
+      <span>04 corridor delay</span><span>05 feedback chopper</span><span>06 markov mutator</span><span class="idx-hot">07 confield system</span>
+    </div>
+  </div>
+  <div class="hero-dots" aria-hidden="true"></div>
+</header>
+
+<main class="main">
+
+  <!-- WT-00 SOURCE -->
+  <section class="unit unit-source accent-orange">
+    <header class="unit-head">
+      <div class="unit-id">
+        <span class="unit-code">WT–00</span>
+        <span class="led" id="src-led-play"></span>
+        <span class="led led-green" id="src-led"></span>
+      </div>
+      <h2 class="unit-name">source</h2>
+      <p class="unit-desc">feed the machines. any mp3 / wav / aiff. decoded locally, mixed to mono.</p>
+    </header>
+
+    <div class="source-row">
+      <div class="dropzone" id="dropzone">
+        <span class="dz-label">drop audio file</span>
+        <span class="dz-sub">or click to browse</span>
+        <input type="file" id="file-input" accept="audio/*" hidden>
+      </div>
+      <div class="source-info">
+        <canvas class="wave" id="src-wave"></canvas>
+        <div class="source-meta">
+          <span class="src-name" id="src-name">no source loaded</span>
+          <span class="src-meta" id="src-meta">—</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-run" id="demo-btn">load demo loop</button>
+          <button class="btn" id="src-play" disabled>play</button>
+          <button class="btn" id="src-stop">stop</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-rule"><span>the instruments</span></div>
+
+  <div class="units-grid" id="units"></div>
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="logo-block">WT</span>
+    <span>weirdo tools — audio research unit</span>
+    <span class="footer-right">all processing is local · seeds make every roll recallable · exports are 16-bit wav</span>
+  </div>
+</footer>
+
+<script src="dsp.js"></script>
+<script src="tools.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

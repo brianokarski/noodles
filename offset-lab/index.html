@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>OFFSET LAB — offsets & blends</title>
+<style>
+  :root{
+    --ink:#f2f2f0; --bg:#0d0d0c; --panel:#141413; --line:#262624;
+    --dim:#78786f; --accent:#d6ff3f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{
+    background:var(--bg);color:var(--ink);
+    font:400 11px/1.35 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.03em;
+    display:grid;grid-template-columns:252px 1fr;
+    user-select:none;-webkit-user-select:none;
+  }
+  aside{border-right:1px solid var(--line);background:var(--panel);overflow-y:auto;display:flex;flex-direction:column}
+  .brand{padding:13px 14px 11px;border-bottom:1px solid var(--line)}
+  .brand h1{margin:0;font-size:12px;letter-spacing:.22em;font-weight:500}
+  .brand p{margin:5px 0 0;color:var(--dim);font-size:9.5px}
+  section{padding:12px 14px;border-bottom:1px solid var(--line)}
+  section>h2{margin:0 0 10px;font-size:9px;letter-spacing:.24em;color:var(--dim);font-weight:500}
+  section>h3{margin:11px 0 6px;font-size:8.5px;letter-spacing:.2em;color:#5a5a53;font-weight:400}
+
+  .ctl{margin-bottom:11px}
+  .ctl:last-child{margin-bottom:0}
+  .ctl .top{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+  .ctl .chk{flex:none;width:12px;height:12px;border:1px solid #3a3a35;background:none;
+    cursor:pointer;padding:0;border-radius:2px}
+  .ctl .chk.on{background:var(--accent);border-color:var(--accent)}
+  .ctl .lbl{flex:1;color:var(--dim);font-size:10px;cursor:ew-resize;padding:2px 0}
+  .ctl .lbl:hover{color:var(--ink)}
+  .ctl .box{display:flex;align-items:baseline;gap:2px;border:1px solid var(--line);
+    background:#0d0d0c;padding:3px 5px;min-width:58px;justify-content:flex-end}
+  .ctl .box:focus-within{border-color:var(--accent)}
+  .ctl input{background:none;border:0;color:var(--ink);font:inherit;font-size:10.5px;
+    text-align:right;width:40px;padding:0;font-variant-numeric:tabular-nums;outline:none}
+  .ctl .u{color:var(--dim);font-size:9.5px}
+  .ctl .track{position:relative;height:16px;cursor:ew-resize;touch-action:none}
+  .ctl .track::before{content:'';position:absolute;left:0;right:0;top:7px;height:3px;
+    background:#2c2c28;border-radius:2px}
+  .ctl .fill{position:absolute;left:0;top:7px;height:3px;background:#4d5231;border-radius:2px}
+  .ctl .knob{position:absolute;top:1px;width:12px;height:14px;margin-left:-6px;border-radius:3px;
+    background:var(--ink)}
+  .ctl .track:hover .knob,.ctl.live .knob{background:var(--accent)}
+
+  .seg{display:grid;grid-auto-flow:column;border:1px solid var(--line)}
+  .seg button{background:none;border:0;border-right:1px solid var(--line);color:var(--dim);
+    font:inherit;font-size:9.5px;letter-spacing:.06em;padding:8px 2px;cursor:pointer;white-space:nowrap}
+  .seg button:last-child{border-right:0}
+  .seg button:hover{color:var(--ink)}
+  .seg button.on{background:var(--ink);color:#0d0d0c}
+
+  .pal{display:flex;gap:5px;flex-wrap:wrap}
+  .pal button{width:22px;height:22px;border-radius:3px;border:1px solid #33332f;padding:0;cursor:pointer}
+  .pal button.on{box-shadow:0 0 0 1px var(--panel),0 0 0 2px var(--accent)}
+
+  .acts{padding:12px 14px;display:grid;gap:6px}
+  .acts button{background:none;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:9.5px;
+    letter-spacing:.13em;padding:9px;cursor:pointer;text-align:left;width:100%}
+  .acts button:hover{border-color:var(--ink)}
+  .acts button.pri{background:var(--accent);color:#0d0d0c;border-color:var(--accent);font-weight:500}
+  .acts .k{float:right;color:var(--dim)}
+  .acts .pri .k{color:#0d0d0c;opacity:.55}
+  footer{margin-top:auto;padding:12px 14px;color:var(--dim);font-size:9.5px;line-height:1.7;border-top:1px solid var(--line)}
+
+  main{position:relative;overflow:hidden;background:#000}
+  canvas#c{position:absolute;inset:0;width:100%;height:100%}
+  .hud{position:absolute;left:12px;bottom:10px;color:#6b6b62;font-size:9.5px;letter-spacing:.12em;
+    pointer-events:none;font-variant-numeric:tabular-nums}
+  .drop{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+    background:rgba(13,13,12,.82);border:2px dashed var(--accent);color:var(--accent);
+    font-size:12px;letter-spacing:.2em}
+  .drop.on{display:flex}
+  #svgpen{position:absolute;width:0;height:0;overflow:hidden;pointer-events:none}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand">
+    <h1>OFFSET LAB</h1>
+    <p>offset paths &amp; shape blends</p>
+  </div>
+
+  <section>
+    <h2>MAKER</h2>
+    <div class="seg" id="facet">
+      <button data-v="offset" class="on">OFFSET</button>
+      <button data-v="blend">BLEND</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>SHAPE A</h2>
+    <div class="seg" id="srcA" style="margin-bottom:6px">
+      <button data-v="circle" class="on">CIRC</button>
+      <button data-v="square">SQR</button>
+      <button data-v="tri">TRI</button>
+      <button data-v="hex">HEX</button>
+    </div>
+    <div class="seg" id="srcA2" style="margin-bottom:12px">
+      <button data-v="star">STAR</button>
+      <button data-v="cross">CROSS</button>
+      <button data-v="blob">BLOB</button>
+      <button data-v="upload">FILE</button>
+    </div>
+    <div class="ctls" data-keys="ashape"></div>
+  </section>
+
+  <section data-f="blend">
+    <h2>SHAPE B</h2>
+    <div class="seg" id="srcB" style="margin-bottom:6px">
+      <button data-v="circle">CIRC</button>
+      <button data-v="square">SQR</button>
+      <button data-v="tri">TRI</button>
+      <button data-v="hex">HEX</button>
+    </div>
+    <div class="seg" id="srcB2">
+      <button data-v="star" class="on">STAR</button>
+      <button data-v="cross">CROSS</button>
+      <button data-v="blob">BLOB</button>
+      <button data-v="upload">FILE</button>
+    </div>
+  </section>
+
+  <section data-f="offset">
+    <h2>OFFSET</h2>
+    <div class="ctls" data-keys="spacing,count"></div>
+    <h3>RHYTHM</h3>
+    <div class="seg" id="rhythm" style="margin-bottom:12px">
+      <button data-v="1">TOUCH</button>
+      <button data-v="2">EQUAL</button>
+      <button data-v="3">1 : 2</button>
+      <button data-v="5">THIN</button>
+    </div>
+    <h3>CORNERS</h3>
+    <div class="seg" id="join" style="margin-bottom:12px">
+      <button data-v="miter" class="on">SHARP</button>
+      <button data-v="round">ROUND</button>
+    </div>
+    <h3>DIRECTION</h3>
+    <div class="seg" id="dir">
+      <button data-v="out" class="on">OUT</button>
+      <button data-v="in">IN</button>
+      <button data-v="both">BOTH</button>
+    </div>
+  </section>
+
+  <section data-f="blend">
+    <h2>BLEND</h2>
+    <div class="ctls" data-keys="steps,ease,bx,by,bscale,brot"></div>
+    <h3>METHOD</h3>
+    <div class="seg" id="bmode">
+      <button data-v="shape" class="on">OUTLINE</button>
+      <button data-v="field">FIELD</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>STROKE</h2>
+    <div class="ctls" data-keys="stroke,alpha"></div>
+    <h3>FILL</h3>
+    <div class="seg" id="fillmode">
+      <button data-v="none" class="on">NONE</button>
+      <button data-v="alt">ALTERNATE</button>
+      <button data-v="all">ALL</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>SHEET</h2>
+    <div class="seg" id="invert">
+      <button data-v="off" class="on">BLACK ON WHITE</button>
+      <button data-v="on">WHITE ON BLACK</button>
+    </div>
+  </section>
+
+  <div class="acts">
+    <button id="randomize" class="pri">RANDOMIZE <span class="k">R</span></button>
+    <button id="load">UPLOAD SVG&hellip; <span class="k">U</span></button>
+    <button id="reset">RESET DIALS</button>
+    <button id="copysvg">COPY SVG <span class="k">C</span></button>
+    <button id="expsvg">EXPORT SVG <span class="k">S</span></button>
+    <button id="exppng">EXPORT PNG <span class="k">E</span></button>
+    <input id="file" type="file" accept=".svg,image/svg+xml" hidden>
+  </div>
+
+  <footer>
+    convex shapes offset exactly: lines<br>
+    and true arcs. anything else is<br>
+    traced and curve-fitted.<br>
+    EQUAL = stripe and gap match.<br>
+    drop an SVG anywhere on the canvas.<br>
+    spacing is a multiple of the stroke,<br>
+    so thickening the line opens the<br>
+    gaps with it. exported SVG is<br>
+    transparent, one named group each.
+  </footer>
+</aside>
+
+<main>
+  <canvas id="c"></canvas>
+  <div class="hud" id="hud"></div>
+  <div class="drop" id="drop">DROP AN SVG</div>
+  <div id="svgpen"></div>
+</main>
+
+<script>
+(function(){
+"use strict";
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),hud=document.getElementById('hud');
+const pen=document.getElementById('svgpen'),dropEl=document.getElementById('drop');
+const TAU=Math.PI*2;
+
+let invert=false;
+const INK=()=>invert?'#ffffff':'#000000';
+const SHEET=()=>invert?'#000000':'#ffffff';
+
+const SPEC={
+  spacing:['offset spacing',1,40,0.25,'\u00d7stroke',2],
+  count:['offsets',1,80,1,'',0],
+  ashape:['shape size',5,95,1,'%',0],
+  smooth:['smoothing',0,10,1,'',0],
+  steps:['blend steps',2,80,1,'',0],
+  ease:['blend ease',-100,100,1,'%',0],
+  bx:['B shift x',-100,100,1,'%',0],
+  by:['B shift y',-100,100,1,'%',0],
+  bscale:['B scale',5,200,1,'%',0],
+  brot:['B rotate',-180,180,1,'\u00b0',0],
+  stroke:['stroke width',0.2,24,0.1,'px',1],
+  alpha:['opacity',5,100,1,'%',0]
+};
+const DEF={spacing:2,count:10,ashape:26,smooth:0,
+           steps:14,ease:0,bx:78,by:0,bscale:85,brot:0,
+           stroke:12,alpha:100};
+const P=Object.assign({},DEF);
+let facet='offset',srcA='circle',srcB='star',dir='out',bmode='shape',
+    fillmode='none',join='miter';
+let board={w:1100,h:1100};
+let view={s:1,ox:0,oy:0},dpr=1,hist=[];
+let uploaded=null;            /* polylines from a dropped SVG, unit space */
+
+const stateStr=()=>JSON.stringify({P:P,facet:facet,srcA:srcA,srcB:srcB,dir:dir,
+  bmode:bmode,fillmode:fillmode,invert:invert,join:join});
+function push(){hist.push(stateStr());if(hist.length>60)hist.shift();}
+function undo(){const h=hist.pop();if(!h)return;const o=JSON.parse(h);
+  Object.assign(P,o.P);facet=o.facet;srcA=o.srcA;srcB=o.srcB;dir=o.dir;
+  bmode=o.bmode;fillmode=o.fillmode;invert=!!o.invert;join=o.join||'miter';
+  syncSegs();syncAll();invalidate();draw();}
+
+/* ================= dials ================= */
+const UI={};
+function fmt(k,v){const d=SPEC[k][5];return d?v.toFixed(d):String(Math.round(v));}
+function clampStep(k,v){
+  const [,mn,mx,st]=SPEC[k];
+  v=Math.max(mn,Math.min(mx,v));
+  return +(Math.round(v/st)*st).toFixed(4);
+}
+const GEOM={spacing:1,count:1,ashape:1,smooth:1,steps:1,ease:1,bx:1,by:1,bscale:1,brot:1,
+            stroke:1};
+function setVal(k,v,o){
+  o=o||{};
+  const nv=clampStep(k,v);
+  if(nv===P[k]&&!o.force) return;
+  P[k]=nv;paintCtl(k);
+  if(k==='spacing') segOn('rhythm',String(nv));
+  if(GEOM[k]) invalidate();
+  if(!o.silent) draw();
+}
+function paintCtl(k){
+  const u=UI[k];if(!u)return;
+  const [,mn,mx]=SPEC[k];
+  const t=(P[k]-mn)/(mx-mn);
+  u.fill.style.width=(t*100)+'%';u.knob.style.left=(t*100)+'%';
+  if(document.activeElement!==u.input) u.input.value=fmt(k,P[k]);
+}
+let armed=true;
+function pushOnce(){if(armed){push();armed=false;}}
+function buildCtl(k){
+  const [label,mn,mx,st]=SPEC[k];
+  const el=document.createElement('div');
+  el.className='ctl';
+  el.innerHTML='<div class="top"><button class="chk" title="animate"></button>'+
+    '<div class="lbl">'+label+'</div>'+
+    '<div class="box"><input inputmode="decimal" spellcheck="false"><span class="u">'+SPEC[k][4]+'</span></div></div>'+
+    '<div class="track"><div class="fill"></div><div class="knob"></div></div>';
+  const input=el.querySelector('input'),track=el.querySelector('.track'),lbl=el.querySelector('.lbl');
+  UI[k]={el:el,input:input,fill:el.querySelector('.fill'),knob:el.querySelector('.knob')};
+  const factor=e=>e.shiftKey?0.1:(e.altKey?10:1);
+  const commit=()=>{const n=parseFloat(input.value);if(isFinite(n))setVal(k,n,{force:true});paintCtl(k);};
+  input.addEventListener('focus',()=>input.select());
+  input.addEventListener('change',commit);
+  input.addEventListener('blur',commit);
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){commit();input.blur();e.preventDefault();}
+    else if(e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();
+      pushOnce();setVal(k,P[k]+(e.key==='ArrowUp'?1:-1)*st*(e.shiftKey?10:1),{force:true});}
+    else if(e.key==='Escape'){input.value=fmt(k,P[k]);input.blur();}
+    e.stopPropagation();
+  });
+  track.addEventListener('pointerdown',e=>{
+    e.preventDefault();track.setPointerCapture(e.pointerId);
+    pushOnce();el.classList.add('live');
+    const r=track.getBoundingClientRect();
+    const fromX=x=>mn+((x-r.left)/r.width)*(mx-mn);
+    let last=fromX(e.clientX);
+    setVal(k,last,{force:true});
+    const move=ev=>{const rawv=fromX(ev.clientX),f=factor(ev);
+      if(f===1){setVal(k,rawv);last=rawv;}else{setVal(k,P[k]+(rawv-last)*f);last=rawv;}};
+    const up=()=>{track.removeEventListener('pointermove',move);
+      track.removeEventListener('pointerup',up);el.classList.remove('live');armed=true;};
+    track.addEventListener('pointermove',move);
+    track.addEventListener('pointerup',up);
+  });
+  lbl.addEventListener('pointerdown',e=>{
+    e.preventDefault();lbl.setPointerCapture(e.pointerId);
+    pushOnce();el.classList.add('live');
+    let px=e.clientX,start=P[k],acc=0;
+    const move=ev=>{acc+=(ev.clientX-px)*st*factor(ev);px=ev.clientX;setVal(k,start+acc);};
+    const up=()=>{lbl.removeEventListener('pointermove',move);
+      lbl.removeEventListener('pointerup',up);el.classList.remove('live');armed=true;};
+    lbl.addEventListener('pointermove',move);
+    lbl.addEventListener('pointerup',up);
+  });
+  el.addEventListener('wheel',e=>{e.preventDefault();pushOnce();
+    setVal(k,P[k]+(e.deltaY<0?1:-1)*st*(e.shiftKey?10:1));},{passive:false});
+  el.querySelector('.chk').onclick=function(){
+    if(anim[k]){delete anim[k];this.classList.remove('on');}
+    else{const [,a,b]=SPEC[k];anim[k]={u:(P[k]-a)/(b-a),dir:1};this.classList.add('on');startAnim();}
+  };
+  paintCtl(k);
+  return el;
+}
+const anim={};
+let rafId=null,lastTs=0;
+function startAnim(){if(rafId==null){lastTs=0;rafId=requestAnimationFrame(tick);}}
+function tick(ts){
+  if(!lastTs)lastTs=ts;
+  const dt=Math.min(.1,(ts-lastTs)/1000);lastTs=ts;
+  const keys=Object.keys(anim);
+  if(!keys.length){rafId=null;return;}
+  keys.forEach(k=>{const a=anim[k],[,mn,mx]=SPEC[k];
+    a.u+=(dt/6)*a.dir;
+    if(a.u>1){a.u=2-a.u;a.dir=-1;}
+    if(a.u<0){a.u=-a.u;a.dir=1;}
+    setVal(k,mn+a.u*(mx-mn),{force:true,silent:true});});
+  draw();
+  rafId=requestAnimationFrame(tick);
+}
+document.querySelectorAll('.ctls').forEach(host=>{
+  host.dataset.keys.split(',').forEach(k=>host.appendChild(buildCtl(k.trim())));
+});
+const syncAll=()=>Object.keys(SPEC).forEach(paintCtl);
+
+/* ================= shapes (unit space, -1..1, closed) ================= */
+function poly(n,rot,rx,ry){
+  const p=[];
+  for(let i=0;i<n;i++){const a=rot+i/n*TAU;p.push([Math.cos(a)*rx,Math.sin(a)*ry]);}
+  p.push(p[0].slice());
+  return p;
+}
+function starPoly(n,r1,r2){
+  const p=[];
+  for(let i=0;i<n*2;i++){
+    const a=-Math.PI/2+i/(n*2)*TAU,r=(i%2)?r2:r1;
+    p.push([Math.cos(a)*r,Math.sin(a)*r]);
+  }
+  p.push(p[0].slice());
+  return p;
+}
+function crossPoly(t){
+  const a=t,b=1;
+  const pts=[[-a,-b],[a,-b],[a,-a],[b,-a],[b,a],[a,a],[a,b],[-a,b],[-a,a],[-b,a],[-b,-a],[-a,-a]];
+  pts.push(pts[0].slice());
+  return pts;
+}
+function blobPoly(seed){
+  let s=seed|0;
+  const rnd=()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff;};
+  const n=9,rs=[];
+  for(let i=0;i<n;i++) rs.push(0.55+rnd()*0.45);
+  const p=[];
+  for(let i=0;i<=n*8;i++){
+    const t=i/(n*8)*n,i0=Math.floor(t)%n,f=t-Math.floor(t);
+    const r0=rs[i0],r1=rs[(i0+1)%n],rm1=rs[(i0-1+n)%n],r2=rs[(i0+2)%n];
+    const u=f*f*(3-2*f);
+    const r=r0+(r1-r0)*u+0.06*(r2-rm1)*(u-u*u);
+    const a=i/(n*8)*TAU;
+    p.push([Math.cos(a)*r,Math.sin(a)*r]);
+  }
+  p.push(p[0].slice());
+  return p;
+}
+function shapeOf(name){
+  if(name==='circle') return [poly(240,0,1,1)];
+  if(name==='square') return [poly(4,Math.PI/4,1.24,1.24)];
+  if(name==='tri')    return [poly(3,-Math.PI/2,1.15,1.15)];
+  if(name==='hex')    return [poly(6,Math.PI/2,1.1,1.1)];
+  if(name==='star')   return [starPoly(5,1.15,0.5)];
+  if(name==='cross')  return [crossPoly(0.36)];
+  if(name==='blob')   return [blobPoly(20240917)];
+  if(name==='upload') return uploaded?uploaded.map(p=>p.map(q=>q.slice())):[poly(240,0,1,1)];
+  return [poly(96,0,1,1)];
+}
+
+/* ================= SVG intake ================= */
+function normalise(polys){
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  polys.forEach(p=>p.forEach(q=>{
+    if(q[0]<x0)x0=q[0];if(q[0]>x1)x1=q[0];
+    if(q[1]<y0)y0=q[1];if(q[1]>y1)y1=q[1];
+  }));
+  const w=Math.max(1e-6,x1-x0),h=Math.max(1e-6,y1-y0);
+  const s=2/Math.max(w,h),cx=(x0+x1)/2,cy=(y0+y1)/2;
+  return polys.map(p=>p.map(q=>[(q[0]-cx)*s,(q[1]-cy)*s]));
+}
+/* let the browser flatten every path command for us */
+function polysFromSVG(text){
+  pen.innerHTML=text;
+  const root=pen.querySelector('svg');
+  if(!root) return null;
+  root.setAttribute('width','1000');root.setAttribute('height','1000');
+  const els=root.querySelectorAll('path,polygon,polyline,rect,circle,ellipse,line');
+  const out=[];
+  els.forEach(el=>{
+    if(typeof el.getTotalLength!=='function') return;
+    let len=0;
+    try{len=el.getTotalLength();}catch(e){return;}
+    if(!(len>0.5)) return;
+    const m=el.getCTM?el.getCTM():null;
+    const n=Math.max(12,Math.min(2400,Math.round(len/1.4)));
+    const p=[];
+    for(let i=0;i<=n;i++){
+      const pt=el.getPointAtLength(len*i/n);
+      let x=pt.x,y=pt.y;
+      if(m){const nx=m.a*x+m.c*y+m.e,ny=m.b*x+m.d*y+m.f;x=nx;y=ny;}
+      p.push([x,y]);
+    }
+    const closed=Math.hypot(p[0][0]-p[n][0],p[0][1]-p[n][1])<Math.max(1,len*0.002);
+    if(closed) p[n]=p[0].slice();
+    out.push(p);
+  });
+  pen.innerHTML='';
+  if(!out.length) return null;
+  out.sort((a,b)=>area(b)-area(a));
+  return normalise(out);
+}
+function area(p){
+  let s=0;
+  for(let i=0;i<p.length-1;i++) s+=p[i][0]*p[i+1][1]-p[i+1][0]*p[i][1];
+  return Math.abs(s/2);
+}
+function takeSVG(text,name){
+  const polys=polysFromSVG(text);
+  if(!polys){hud.textContent='no drawable geometry in that file';return;}
+  uploaded=polys;
+  push();
+  srcA='upload';
+  syncSegs();invalidate();draw();
+  hud.textContent=(name||'file')+' \u00b7 '+polys.length+' contours';
+}
+document.getElementById('file').addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0];
+  if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>takeSVG(String(r.result),f.name);
+  r.readAsText(f);
+});
+document.getElementById('load').onclick=()=>document.getElementById('file').click();
+['dragenter','dragover'].forEach(t=>document.addEventListener(t,e=>{
+  e.preventDefault();dropEl.classList.add('on');}));
+['dragleave','drop'].forEach(t=>document.addEventListener(t,e=>{
+  if(t==='dragleave'&&e.relatedTarget) return;
+  dropEl.classList.remove('on');}));
+document.addEventListener('drop',e=>{
+  e.preventDefault();
+  const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];
+  if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>takeSVG(String(r.result),f.name);
+  r.readAsText(f);
+});
+
+/* ================= geometry helpers ================= */
+function toBoard(polys,scalePct,ox,oy){
+  const R=Math.min(board.w,board.h)*0.5*(scalePct/100);
+  const cx=board.w/2+(ox||0),cy=board.h/2+(oy||0);
+  return polys.map(p=>p.map(q=>[cx+q[0]*R,cy+q[1]*R]));
+}
+function smoothClosed(p,iters){
+  let q=p;
+  for(let k=0;k<iters;k++){
+    const n=q.length-1,o=[];
+    for(let i=0;i<n;i++){
+      const a=q[(i-1+n)%n],b=q[i],c=q[(i+1)%n];
+      o.push([(a[0]+b[0]*2+c[0])/4,(a[1]+b[1]*2+c[1])/4]);
+    }
+    o.push(o[0].slice());
+    q=o;
+  }
+  return q;
+}
+function resampleClosed(p,n){
+  const segs=[];let total=0;
+  for(let i=0;i<p.length-1;i++){
+    const d=Math.hypot(p[i+1][0]-p[i][0],p[i+1][1]-p[i][1]);
+    segs.push(d);total+=d;
+  }
+  if(total<1e-9) return new Array(n).fill(0).map(()=>p[0].slice());
+  const out=[];let i=0,acc=0;
+  for(let k=0;k<n;k++){
+    const target=total*k/n;
+    while(i<segs.length-1&&acc+segs[i]<target){acc+=segs[i];i++;}
+    const t=segs[i]>1e-9?(target-acc)/segs[i]:0;
+    out.push([p[i][0]+(p[i+1][0]-p[i][0])*t,p[i][1]+(p[i+1][1]-p[i][1])*t]);
+  }
+  return out;
+}
+function centroid(p){
+  let x=0,y=0;
+  for(let i=0;i<p.length;i++){x+=p[i][0];y+=p[i][1];}
+  return [x/p.length,y/p.length];
+}
+function xform(p,cx,cy,sc,rot,dx,dy){
+  const c=Math.cos(rot),s=Math.sin(rot);
+  return p.map(q=>{
+    const ax=(q[0]-cx)*sc,ay=(q[1]-cy)*sc;
+    return [cx+ax*c-ay*s+dx,cy+ax*s+ay*c+dy];
+  });
+}
+
+/* ================= distance field ================= */
+const INF=1e20;
+function edt1d(f,d,v,z,n){
+  let k=0;v[0]=0;z[0]=-INF;z[1]=INF;
+  for(let q=1;q<n;q++){
+    let s=((f[q]+q*q)-(f[v[k]]+v[k]*v[k]))/(2*q-2*v[k]);
+    while(s<=z[k]){k--;s=((f[q]+q*q)-(f[v[k]]+v[k]*v[k]))/(2*q-2*v[k]);}
+    k++;v[k]=q;z[k]=s;z[k+1]=INF;
+  }
+  k=0;
+  for(let q=0;q<n;q++){
+    while(z[k+1]<q)k++;
+    d[q]=(q-v[k])*(q-v[k])+f[v[k]];
+  }
+}
+function edt2d(F,w,h){
+  const n=Math.max(w,h);
+  const f=new Float64Array(n),d=new Float64Array(n),
+        v=new Int32Array(n),z=new Float64Array(n+1);
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++) f[x]=F[y*w+x];
+    edt1d(f,d,v,z,w);
+    for(let x=0;x<w;x++) F[y*w+x]=d[x];
+  }
+  for(let x=0;x<w;x++){
+    for(let y=0;y<h;y++) f[y]=F[y*w+x];
+    edt1d(f,d,v,z,h);
+    for(let y=0;y<h;y++) F[y*w+x]=d[y];
+  }
+}
+const HIRES=1024,LORES=560;
+/* signed distance to the shape, in board px.
+   the mask is rasterised with antialiasing so partial cells give the boundary
+   a sub-pixel position: coverage 0.5 is exactly on the edge. without that
+   correction every contour inherits the staircase of the raster. */
+function fieldOf(polysBoard,res){
+  const gw=Math.min(res,Math.round(board.w)),gh=Math.max(32,Math.round(gw*board.h/board.w));
+  const k=gw/board.w;
+  const c=document.createElement('canvas');c.width=gw;c.height=gh;
+  const g=c.getContext('2d');
+  g.fillStyle='#000';g.fillRect(0,0,gw,gh);
+  g.fillStyle='#fff';g.beginPath();
+  polysBoard.forEach(p=>{
+    g.moveTo(p[0][0]*k,p[0][1]*k);
+    for(let i=1;i<p.length;i++) g.lineTo(p[i][0]*k,p[i][1]*k);
+    g.closePath();
+  });
+  g.fill();
+  const px=g.getImageData(0,0,gw,gh).data;
+  const N=gw*gh;
+  const cov=new Float32Array(N);
+  const A=new Float64Array(N),B=new Float64Array(N);
+  for(let i=0;i<N;i++){
+    const a=px[i*4]/255;
+    cov[i]=a;
+    A[i]=a>=0.5?0:INF;     /* distance out to the shape   */
+    B[i]=a>=0.5?INF:0;     /* distance in to the ground   */
+  }
+  edt2d(A,gw,gh);edt2d(B,gw,gh);
+  const sdf=new Float32Array(N);
+  for(let i=0;i<N;i++){
+    const a=cov[i];
+    if(a>0.002&&a<0.998) sdf[i]=(0.5-a)/k;              /* sub-pixel edge */
+    else{
+      const d=a>=0.5?-(Math.sqrt(B[i])-0.5):(Math.sqrt(A[i])-0.5);
+      sdf[i]=d/k;                                       /* into board px  */
+    }
+  }
+  return {sdf:sdf,gw:gw,gh:gh,k:k};
+}
+/* every iso level in one pass over the grid: a cell only tests the levels
+   that actually fall inside its corner range */
+function isoLinesMulti(F,gw,gh,levels){
+  const L=levels.length,buckets=[];
+  for(let i=0;i<L;i++) buckets.push([]);
+  const lower=(v)=>{                 /* first index with levels[i] >= v */
+    let lo=0,hi=L;
+    while(lo<hi){const mid=(lo+hi)>>1;if(levels[mid]<v)lo=mid+1;else hi=mid;}
+    return lo;
+  };
+  for(let y=0;y<gh-1;y++){
+    const r0=y*gw,r1=r0+gw;
+    for(let x=0;x<gw-1;x++){
+      const a=F[r0+x],b=F[r0+x+1],c=F[r1+x+1],d=F[r1+x];
+      let mn=a,mx=a;
+      if(b<mn)mn=b;if(b>mx)mx=b;
+      if(c<mn)mn=c;if(c>mx)mx=c;
+      if(d<mn)mn=d;if(d>mx)mx=d;
+      for(let li=lower(mn);li<L;li++){
+        const iso=levels[li];
+        if(iso>mx) break;
+        let m=0;
+        if(a<iso)m|=1;if(b<iso)m|=2;if(c<iso)m|=4;if(d<iso)m|=8;
+        if(m===0||m===15) continue;
+        const T=[x+(iso-a)/((b-a)||1e-9),y],
+              R=[x+1,y+(iso-b)/((c-b)||1e-9)],
+              Bo=[x+(iso-d)/((c-d)||1e-9),y+1],
+              Le=[x,y+(iso-a)/((d-a)||1e-9)];
+        const S=buckets[li];
+        switch(m){
+          case 1: case 14: S.push([Le,T]);break;
+          case 2: case 13: S.push([T,R]);break;
+          case 3: case 12: S.push([Le,R]);break;
+          case 4: case 11: S.push([R,Bo]);break;
+          case 6: case 9:  S.push([T,Bo]);break;
+          case 7: case 8:  S.push([Le,Bo]);break;
+          case 5: S.push([Le,T]);S.push([R,Bo]);break;
+          case 10:S.push([T,R]);S.push([Le,Bo]);break;
+        }
+      }
+    }
+  }
+  return buckets.map(chain);
+}
+function isoLines(F,gw,gh,iso){return isoLinesMulti(F,gw,gh,[iso])[0];}
+/* stitch the loose cell segments into continuous closed contours */
+function chain(segs){
+  const key=p=>(Math.round(p[0]*2048)/2048)+','+(Math.round(p[1]*2048)/2048);
+  const map=new Map();
+  segs.forEach((s,i)=>{
+    [0,1].forEach(e=>{
+      const k=key(s[e]);
+      if(!map.has(k))map.set(k,[]);
+      map.get(k).push({i:i,e:e});
+    });
+  });
+  const used=new Uint8Array(segs.length),out=[];
+  const grab=k=>{
+    const list=map.get(k);
+    if(!list) return null;
+    for(let j=0;j<list.length;j++) if(!used[list[j].i]) return list[j];
+    return null;
+  };
+  for(let i=0;i<segs.length;i++){
+    if(used[i]) continue;
+    used[i]=1;
+    const line=[segs[i][0].slice(),segs[i][1].slice()];
+    for(;;){
+      const nx=grab(key(line[line.length-1]));
+      if(!nx) break;
+      used[nx.i]=1;
+      line.push(segs[nx.i][1-nx.e].slice());
+    }
+    for(;;){
+      const nx=grab(key(line[0]));
+      if(!nx) break;
+      used[nx.i]=1;
+      line.unshift(segs[nx.i][1-nx.e].slice());
+    }
+    if(line.length>3) out.push(line);
+  }
+  return out;
+}
+/* ================= exact offsets for convex shapes =================
+   a convex outline offset by d is every edge shifted by d, joined by true
+   arcs about the original corners. no raster, no noise. this is what an
+   Illustrator Offset Path with round joins produces. */
+function isConvex(p){
+  const n=p.length-1;
+  if(n<3) return false;
+  let sgn=0;
+  for(let i=0;i<n;i++){
+    const a=p[i],b=p[(i+1)%n],c=p[(i+2)%n];
+    const z=(b[0]-a[0])*(c[1]-b[1])-(b[1]-a[1])*(c[0]-b[0]);
+    if(Math.abs(z)<1e-9) continue;
+    const s=z>0?1:-1;
+    if(sgn===0) sgn=s; else if(s!==sgn) return false;
+  }
+  return sgn!==0;
+}
+function convexOffset(p,d,jn){
+  let n=p.length-1;
+  let pts=p.slice(0,n);
+  if(signedArea(pts)<0) pts=pts.slice().reverse();   /* force ccw */
+  n=pts.length;
+  const segs=[];                                     /* {type:'L'|'A',...} */
+  const out=[];
+  for(let i=0;i<n;i++){
+    const A=pts[(i-1+n)%n],B=pts[i],C=pts[(i+1)%n];
+    const e0x=B[0]-A[0],e0y=B[1]-A[1],l0=Math.hypot(e0x,e0y)||1;
+    const e1x=C[0]-B[0],e1y=C[1]-B[1],l1=Math.hypot(e1x,e1y)||1;
+    /* outward normals of a ccw polygon (y down): rotate edge by -90 */
+    const n0=[e0y/l0,-e0x/l0],n1=[e1y/l1,-e1x/l1];
+    const p0=[B[0]+n0[0]*d,B[1]+n0[1]*d];
+    const p1=[B[0]+n1[0]*d,B[1]+n1[1]*d];
+    const cross=n0[0]*n1[1]-n0[1]*n1[0];
+    if(Math.abs(cross)<1e-9&&n0[0]*n1[0]+n0[1]*n1[1]>0){out.push({pt:p0});continue;}
+    if(d*cross>0&&jn==='round'){                       /* gap opens: arc */
+      out.push({pt:p0,arcTo:p1,c:B,r:Math.abs(d),ccw:d>0});
+    }else{                                             /* lines meet: miter */
+      const den=cross;
+      /* intersection of line(p0,dir e0) and line(p1,dir e1) */
+      const dx=p1[0]-p0[0],dy=p1[1]-p0[1];
+      const t=(dx*e1y-dy*e1x)/((e0x*e1y-e0y*e1x)||1e-12);
+      out.push({pt:[p0[0]+e0x*t,p0[1]+e0y*t]});
+    }
+  }
+  return out;
+}
+/* corner list -> mixed L/curve segment path */
+function cornersToPath(cs){
+  const segs=[];
+  const first=cs[0].pt;
+  segs.push({t:'M',p:first});
+  for(let i=0;i<cs.length;i++){
+    const c=cs[i];
+    if(i>0) segs.push({t:'L',p:c.pt});
+    if(c.arcTo) arcSegs(segs,c.c,c.r,c.pt,c.arcTo,c.ccw);
+  }
+  segs.push({t:'Z'});
+  return segs;
+}
+function arcSegs(segs,c,r,from,to,ccw){
+  let a0=Math.atan2(from[1]-c[1],from[0]-c[0]);
+  let a1=Math.atan2(to[1]-c[1],to[0]-c[0]);
+  let sweep=a1-a0;
+  if(ccw){while(sweep<0)sweep+=TAU;while(sweep>TAU)sweep-=TAU;}
+  else{while(sweep>0)sweep-=TAU;while(sweep<-TAU)sweep+=TAU;}
+  const parts=Math.max(1,Math.ceil(Math.abs(sweep)/(Math.PI/2)));
+  const da=sweep/parts;
+  for(let k=0;k<parts;k++){
+    const s=a0+da*k,e=s+da,kk=4/3*Math.tan((e-s)/4);
+    const x1=c[0]+r*Math.cos(s),y1=c[1]+r*Math.sin(s);
+    const x4=c[0]+r*Math.cos(e),y4=c[1]+r*Math.sin(e);
+    segs.push({t:'C',
+      c1:[x1-kk*r*Math.sin(s),y1+kk*r*Math.cos(s)],
+      c2:[x4+kk*r*Math.sin(e),y4-kk*r*Math.cos(e)],
+      p:[x4,y4]});
+  }
+}
+
+/* ================= clean curves out of traced contours =================
+   raster contours arrive as ~2000 noisy points. blur the noise out, keep
+   only the points that matter, then run a smooth curve through them. */
+function gaussClosed(p,sigma){
+  const n=p.length;
+  if(n<8||sigma<=0) return p;
+  const R=Math.ceil(sigma*3),w=[];
+  let ws=0;
+  for(let k=-R;k<=R;k++){const g=Math.exp(-(k*k)/(2*sigma*sigma));w.push(g);ws+=g;}
+  const out=new Array(n);
+  for(let i=0;i<n;i++){
+    let x=0,y=0;
+    for(let k=-R;k<=R;k++){const q=p[((i+k)%n+n)%n],g=w[k+R];x+=q[0]*g;y+=q[1]*g;}
+    out[i]=[x/ws,y/ws];
+  }
+  return out;
+}
+function rdp(pts,eps){
+  if(pts.length<3) return pts;
+  const a=pts[0],b=pts[pts.length-1];
+  let idx=-1,dmax=0;
+  const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy)||1e-12;
+  for(let i=1;i<pts.length-1;i++){
+    const d=Math.abs((pts[i][0]-a[0])*dy-(pts[i][1]-a[1])*dx)/L;
+    if(d>dmax){dmax=d;idx=i;}
+  }
+  if(dmax>eps){
+    const l=rdp(pts.slice(0,idx+1),eps),r=rdp(pts.slice(idx),eps);
+    return l.slice(0,-1).concat(r);
+  }
+  return [a,b];
+}
+function rdpClosed(p,eps){
+  const n=p.length;
+  let far=0,dm=-1;
+  for(let i=1;i<n;i++){const d=Math.hypot(p[i][0]-p[0][0],p[i][1]-p[0][1]);if(d>dm){dm=d;far=i;}}
+  const A=rdp(p.slice(0,far+1),eps),B=rdp(p.slice(far).concat([p[0]]),eps);
+  const out=A.slice(0,-1).concat(B.slice(0,-1));
+  return out.length>=3?out:p;
+}
+/* closed catmull-rom through the kept points -> cubic beziers */
+function curveSegs(k){
+  const n=k.length,segs=[{t:'M',p:k[0]}];
+  for(let i=0;i<n;i++){
+    const p0=k[(i-1+n)%n],p1=k[i],p2=k[(i+1)%n],p3=k[(i+2)%n];
+    segs.push({t:'C',
+      c1:[p1[0]+(p2[0]-p0[0])/6,p1[1]+(p2[1]-p0[1])/6],
+      c2:[p2[0]-(p3[0]-p1[0])/6,p2[1]-(p3[1]-p1[1])/6],
+      p:p2});
+  }
+  segs.push({t:'Z'});
+  return segs;
+}
+function beautify(pts){
+  /* more points = finer trace = more high-frequency noise to remove */
+  const sigma=Math.min(6,Math.max(2,pts.length/260));
+  const s=gaussClosed(pts,sigma);
+  const k=rdpClosed(s,0.45);
+  return curveSegs(k);
+}
+function polySegs(p){
+  const segs=[{t:'M',p:p[0]}];
+  for(let i=1;i<p.length;i++){
+    if(i===p.length-1&&p[i][0]===p[0][0]&&p[i][1]===p[0][1]) break;
+    segs.push({t:'L',p:p[i]});
+  }
+  segs.push({t:'Z'});
+  return segs;
+}
+function segsToD(segs){
+  let d='';
+  const f=v=>v.toFixed(2);
+  segs.forEach(s=>{
+    if(s.t==='M') d+='M'+f(s.p[0])+' '+f(s.p[1]);
+    else if(s.t==='L') d+='L'+f(s.p[0])+' '+f(s.p[1]);
+    else if(s.t==='C') d+='C'+f(s.c1[0])+' '+f(s.c1[1])+' '+f(s.c2[0])+' '+f(s.c2[1])+' '+f(s.p[0])+' '+f(s.p[1]);
+    else d+='Z';
+  });
+  return d;
+}
+function segsTrace(g,segs){
+  segs.forEach(s=>{
+    if(s.t==='M') g.moveTo(s.p[0],s.p[1]);
+    else if(s.t==='L') g.lineTo(s.p[0],s.p[1]);
+    else if(s.t==='C') g.bezierCurveTo(s.c1[0],s.c1[1],s.c2[0],s.c2[1],s.p[0],s.p[1]);
+    else g.closePath();
+  });
+}
+
+/* ================= the two makers ================= */
+function buildOffsets(){
+  const src0=toBoard(shapeOf(srcA),P.ashape,0,0);
+  const rings=[];
+  const n=Math.max(1,Math.round(P.count));
+  const step=P.stroke*P.spacing;      /* spacing is a multiple of the stroke */
+  const levels=[];
+  if(dir==='out'){for(let i=1;i<=n;i++) levels.push(i*step);}
+  else if(dir==='in'){for(let i=1;i<=n;i++) levels.push(-i*step);}
+  else{for(let i=1;i<=n;i++){levels.push(i*step);levels.push(-i*step);}}
+  levels.sort((a,b)=>a-b);
+  const span=Math.max(1e-6,levels.length?Math.max(Math.abs(levels[0]),
+              Math.abs(levels[levels.length-1])):1);
+  /* the source shape stays exact vector geometry */
+  src0.forEach(p=>rings.push({segs:polySegs(p),t:0}));
+  if(!levels.length) return rings;
+
+  const convex=src0.length===1&&isConvex(src0[0]);
+  lastMethod=convex?'exact':'traced';
+  if(convex){
+    const area0=Math.abs(signedArea(src0[0].slice(0,-1)));
+    levels.forEach(lv=>{
+      const cs=convexOffset(src0[0],lv,join);
+      if(lv<0){
+        /* past the inradius the offset inverts: corners cross over and the
+           area flips or collapses. drop it. */
+        const pts=cs.map(c=>c.pt);
+        const a=signedArea(pts);
+        if(a<=0||Math.abs(a)<area0*0.002) return;
+        for(let i=0;i<pts.length;i++){
+          const q=pts[(i+1)%pts.length];
+          if(Math.hypot(q[0]-pts[i][0],q[1]-pts[i][1])<0.05) return;
+        }
+      }
+      rings.push({segs:cornersToPath(cs),t:Math.abs(lv)/span});
+    });
+    return rings;
+  }
+  const F=fieldOf(src0,HIRES);
+  const sets=isoLinesMulti(F.sdf,F.gw,F.gh,levels);
+  sets.forEach((set,i)=>{
+    const t=Math.abs(levels[i])/span;
+    set.forEach(l=>{
+      const p=l.map(q=>[q[0]/F.k,q[1]/F.k]);
+      rings.push({segs:beautify(p),t:t});
+    });
+  });
+  return rings;
+}
+function easeT(t){
+  const e=P.ease/100;
+  if(e===0) return t;
+  return e>0?Math.pow(t,1+e*2.2):1-Math.pow(1-t,1+(-e)*2.2);
+}
+function buildBlend(){
+  const A=toBoard(shapeOf(srcA),P.ashape,0,0);
+  const Bb=toBoard(shapeOf(srcB),P.ashape,0,0);
+  const steps=Math.max(2,Math.round(P.steps));
+  const R=Math.min(board.w,board.h)*0.5;
+  const dx=P.bx/100*R,dy=P.by/100*R;
+  const cB=centroid(Bb[0]);
+  const bPoly=xform(Bb[0],cB[0],cB[1],P.bscale/100,P.brot*Math.PI/180,dx,dy);
+  const out=[];
+  if(bmode==='field'){
+    /* lerp the two distance fields: topology can change cleanly */
+    const FA=fieldOf(A,HIRES),FB=fieldOf([bPoly],HIRES);
+    const N=FA.sdf.length,mix=new Float32Array(N);
+    for(let k=0;k<steps;k++){
+      const t=easeT(k/(steps-1));
+      for(let i=0;i<N;i++) mix[i]=FA.sdf[i]*(1-t)+FB.sdf[i]*t;
+      isoLines(mix,FA.gw,FA.gh,0).forEach(l=>{
+        const p=l.map(q=>[q[0]/FA.k,q[1]/FA.k]);
+        out.push({segs:beautify(p),t:k/(steps-1)});
+      });
+    }
+    return out;
+  }
+  /* outline blend: match vertices, then interpolate */
+  const N=720;
+  let a=resampleAngular(A[0],N),b=resampleAngular(bPoly,N),mode='angular';
+  if(!(angularFits(a,A[0])&&angularFits(b,bPoly))){
+    const m=bestAlign(resampleClosed(A[0],N),resampleClosed(bPoly,N));
+    a=m.a;b=m.b;mode='arclength';
+  }
+  lastMatch=mode;
+  for(let k=0;k<steps;k++){
+    const u=k/(steps-1),t=easeT(u),p=[];
+    for(let i=0;i<N;i++)
+      p.push([a[i][0]+(b[i][0]-a[i][0])*t,a[i][1]+(b[i][1]-a[i][1])*t]);
+    p.push(p[0].slice());
+    /* keep polygon corners crisp: simplify, no curve fitting */
+    out.push({segs:polySegs(rdpClosed(p,0.08).concat([p[0]])),t:u});
+  }
+  return out;
+}
+function signedArea(p){
+  let s=0;
+  for(let i=0;i<p.length;i++){
+    const q=p[(i+1)%p.length];
+    s+=p[i][0]*q[1]-q[0]*p[i][1];
+  }
+  return s/2;
+}
+const ccw=p=>signedArea(p)<0?p.slice().reverse():p;
+function rms(p,c){
+  let s=0;
+  for(let i=0;i<p.length;i++) s+=(p[i][0]-c[0])*(p[i][0]-c[0])+(p[i][1]-c[1])*(p[i][1]-c[1]);
+  return Math.max(1e-6,Math.sqrt(s/p.length));
+}
+/* sample the outline at even angles from its centre. for any star-convex
+   shape this makes the correspondence between two outlines automatic, which
+   is what stops the interpolation from folding over itself. */
+function resampleAngular(p,n){
+  const c=centroid(p),out=[];
+  for(let i=0;i<n;i++){
+    const a=i/n*TAU,dx=Math.cos(a),dy=Math.sin(a);
+    let best=0;
+    for(let k=0;k<p.length-1;k++){
+      const x1=p[k][0]-c[0],y1=p[k][1]-c[1];
+      const ex=p[k+1][0]-p[k][0],ey=p[k+1][1]-p[k][1];
+      const den=dx*ey-dy*ex;
+      if(Math.abs(den)<1e-12) continue;
+      const u=(x1*dy-y1*dx)/den;
+      if(u<-1e-9||u>1+1e-9) continue;
+      const t=(x1*ey-y1*ex)/den;
+      if(t>best) best=t;
+    }
+    out.push([c[0]+dx*best,c[1]+dy*best]);
+  }
+  return out;
+}
+/* did the angular sampling actually capture the shape? */
+function angularFits(sampled,orig){
+  const a=Math.abs(signedArea(sampled)),b=Math.abs(signedArea(orig));
+  return b>1e-6&&a/b>0.92;
+}
+/* fallback for shapes that are not star-convex: arc length + best rotation.
+   centre and normalise first, or B's translation dominates the cost. */
+function bestAlign(a0,b0){
+  const a=ccw(a0),b=ccw(b0),n=a.length;
+  const ca=centroid(a),cb=centroid(b);
+  const ra=rms(a,ca),rb=rms(b,cb);
+  const an=a.map(q=>[(q[0]-ca[0])/ra,(q[1]-ca[1])/ra]);
+  const bn=b.map(q=>[(q[0]-cb[0])/rb,(q[1]-cb[1])/rb]);
+  let best=0,bestC=Infinity;
+  for(let off=0;off<n;off++){
+    let s=0;
+    for(let i=0;i<n;i+=3){
+      const j=(i+off)%n;
+      const dx=an[i][0]-bn[j][0],dy=an[i][1]-bn[j][1];
+      s+=dx*dx+dy*dy;
+    }
+    if(s<bestC){bestC=s;best=off;}
+  }
+  return {a:a,b:b.slice(best).concat(b.slice(0,best))};
+}
+
+/* ================= render ================= */
+let cache=null,dirty=true,lastMatch='',lastMethod='';
+const invalidate=()=>{dirty=true;};
+function geometry(){
+  if(!dirty&&cache) return cache;
+  const t0=performance.now();
+  cache=facet==='offset'?buildOffsets():buildBlend();
+  cache.ms=Math.round(performance.now()-t0);
+  dirty=false;
+  return cache;
+}
+/* one ink. everything else is stroke weight and opacity. */
+function renderContent(g){
+  g.fillStyle=SHEET();g.fillRect(0,0,board.w,board.h);
+  const rings=geometry();
+  g.lineJoin=join;g.lineCap='round';g.miterLimit=12;
+  g.globalAlpha=P.alpha/100;
+  const trace=r=>segsTrace(g,r.segs);
+  if(fillmode==='alt'){
+    /* every contour as a subpath of one even-odd path: real alternating
+       bands with holes, not solid fills stacked on top of each other */
+    g.beginPath();
+    rings.forEach(trace);
+    g.fillStyle=INK();g.fill('evenodd');
+  }else if(fillmode==='all'){
+    rings.forEach(r=>{g.beginPath();trace(r);g.fillStyle=INK();g.fill();});
+  }
+  rings.forEach(r=>{
+    g.beginPath();trace(r);
+    g.strokeStyle=INK();
+    g.lineWidth=P.stroke;
+    g.stroke();
+  });
+  g.globalAlpha=1;
+  return rings;
+}
+function fit(){
+  dpr=Math.min(window.devicePixelRatio||1,2);
+  const r=cv.parentElement.getBoundingClientRect();
+  cv.width=Math.round(r.width*dpr);cv.height=Math.round(r.height*dpr);
+  const pad=28;
+  view.s=Math.min((r.width-pad*2)/board.w,(r.height-pad*2)/board.h);
+  view.ox=(r.width-board.w*view.s)/2;view.oy=(r.height-board.h*view.s)/2;
+  draw();
+}
+new ResizeObserver(fit).observe(document.querySelector('main'));
+function draw(){
+  const W=cv.width/dpr,H=cv.height/dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.translate(view.ox,view.oy);ctx.scale(view.s,view.s);
+  ctx.beginPath();ctx.rect(0,0,board.w,board.h);ctx.clip();
+  const rings=renderContent(ctx);
+  ctx.restore();
+  let pts=0;rings.forEach(r=>pts+=r.segs.length);
+  hud.textContent=facet.toUpperCase()+' \u00b7 '+srcA+(facet==='blend'?' \u2192 '+srcB:'')
+    +' \u00b7 '+rings.length+' contours \u00b7 '+pts+' nodes'
+    +(facet==='offset'&&lastMethod?' \u00b7 '+lastMethod+' '+join:'')
+    +(facet==='offset'?' \u00b7 '+dir+' '+(P.stroke*P.spacing).toFixed(1)+'px apart, '
+                        +(P.stroke*P.spacing-P.stroke).toFixed(1)+'px gap \u00d7'+Math.round(P.count)
+                      :' \u00b7 '+bmode+' '+Math.round(P.steps)+' steps'
+                        +(bmode==='shape'?' \u00b7 '+lastMatch:''))
+    +' \u00b7 '+(cache&&cache.ms!=null?cache.ms+'ms':'');
+}
+
+/* ================= chrome ================= */
+const segOn=(id,val)=>document.querySelectorAll('#'+id+' button')
+  .forEach(b=>b.classList.toggle('on',b.dataset.v===val));
+function applyFacet(){
+  document.querySelectorAll('[data-f]').forEach(el=>{el.hidden=el.dataset.f!==facet;});
+}
+function syncSegs(){
+  segOn('facet',facet);segOn('srcA',srcA);segOn('srcA2',srcA);
+  segOn('srcB',srcB);segOn('srcB2',srcB);segOn('dir',dir);
+  segOn('bmode',bmode);segOn('fillmode',fillmode);
+  segOn('invert',invert?'on':'off');
+  segOn('rhythm',String(P.spacing));segOn('join',join);
+  applyFacet();
+}
+document.getElementById('facet').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  push();facet=b.dataset.v;syncSegs();invalidate();draw();};
+['srcA','srcA2'].forEach(id=>{
+  document.getElementById(id).onclick=e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.v==='upload'&&!uploaded){document.getElementById('file').click();return;}
+    push();srcA=b.dataset.v;syncSegs();invalidate();draw();};
+});
+['srcB','srcB2'].forEach(id=>{
+  document.getElementById(id).onclick=e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.v==='upload'&&!uploaded){document.getElementById('file').click();return;}
+    push();srcB=b.dataset.v;syncSegs();invalidate();draw();};
+});
+document.getElementById('dir').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  push();dir=b.dataset.v;segOn('dir',dir);invalidate();draw();};
+document.getElementById('join').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  push();join=b.dataset.v;segOn('join',join);invalidate();draw();};
+document.getElementById('bmode').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  push();bmode=b.dataset.v;segOn('bmode',bmode);invalidate();draw();};
+document.getElementById('fillmode').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  push();fillmode=b.dataset.v;segOn('fillmode',fillmode);draw();};
+document.getElementById('invert').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  push();invert=b.dataset.v==='on';segOn('invert',b.dataset.v);draw();};
+document.getElementById('reset').onclick=()=>{push();Object.assign(P,DEF);syncAll();invalidate();draw();};
+
+/* ================= export ================= */
+function download(url,name){
+  const a=document.createElement('a');a.href=url;a.download=name;
+  document.body.appendChild(a);a.click();a.remove();
+}
+function exportPNG(){
+  const sc=2,oc=document.createElement('canvas');
+  oc.width=board.w*sc;oc.height=board.h*sc;
+  const g=oc.getContext('2d');g.scale(sc,sc);
+  renderContent(g);
+  download(oc.toDataURL('image/png'),facet+'-lab.png');
+}
+function svgText(){
+  const rings=geometry();
+  const ink=INK();
+  let body='';
+  const label=facet==='offset'?'offset':'step';
+  const op=P.alpha<100?' opacity="'+(P.alpha/100).toFixed(2)+'"':'';
+  const dOf=r=>segsToD(r.segs);
+  /* one even-odd compound path, so Illustrator gets real holes */
+  if(fillmode==='alt')
+    body+='<path id="bands" d="'+rings.map(dOf).join(' ')+'" fill="'+ink+
+          '" fill-rule="evenodd"'+op+'/>';
+  /* then one named group per contour, so they arrive as tidy layers */
+  rings.forEach((r,i)=>{
+    const n=String(i+1).padStart(2,'0');
+    body+='<g id="'+label+'-'+n+'"><path d="'+dOf(r)+'" fill="'+
+      (fillmode==='all'?ink:'none')+'" stroke="'+ink+
+      '" stroke-width="'+P.stroke.toFixed(2)+
+      '" stroke-linejoin="'+join+'" stroke-miterlimit="12" stroke-linecap="round"'+op+'/></g>';
+  });
+  /* no sheet rect when the ink is black: you want it transparent on import */
+  const sheet=invert?'<rect id="sheet" width="'+board.w+'" height="'+board.h+
+    '" fill="#000000"/>':'';
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="'+board.w+'" height="'+board.h+
+    '" viewBox="0 0 '+board.w+' '+board.h+'">'+sheet+
+    '<g id="'+facet+'">'+body+'</g></svg>';
+}
+function exportSVG(){
+  download(URL.createObjectURL(new Blob([svgText()],{type:'image/svg+xml'})),facet+'-lab.svg');
+}
+function copySVG(){
+  const t=svgText();
+  const done=()=>{const old=hud.textContent;hud.textContent='SVG copied \u2014 paste straight into Figma';
+    setTimeout(()=>{hud.textContent=old;},1400);};
+  if(navigator.clipboard&&navigator.clipboard.writeText)
+    navigator.clipboard.writeText(t).then(done,()=>{});
+  else{
+    const ta=document.createElement('textarea');
+    ta.value=t;document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');done();}catch(e){}
+    ta.remove();
+  }
+}
+document.getElementById('copysvg').onclick=copySVG;
+
+/* ================= randomize: Mexico 68 ================= */
+function randomizeAll(){
+  push();
+  const R=Math.random,ri=(a,b)=>a+Math.floor(R()*(b-a+1)),rf=(a,b)=>a+R()*(b-a);
+  const pk=a=>a[Math.floor(R()*a.length)];
+  const bold=uploaded?['circle','square','hex','tri','upload','upload']:['circle','circle','square','hex','tri','cross'];
+  facet=R()<0.6?'offset':'blend';
+  srcA=pk(bold);
+  invert=R()<0.25;
+  if(facet==='offset'){
+    /* stroke and gap read as one rhythm: stripe = gap, or 1:2 */
+    P.stroke=+rf(6,22).toFixed(1);
+    P.spacing=pk([2,2,2,3,1.5]);
+    dir=pk(['out','out','both','in']);
+    join=pk(['miter','miter','round']);
+    P.ashape=dir==='in'?ri(60,88):ri(18,40);
+    P.count=ri(6,16);
+    fillmode=pk(['alt','alt','none']);
+    if(fillmode==='alt'){P.stroke=+rf(4,14).toFixed(1);P.spacing=2;}
+  }else{
+    const pairs=[['circle','square'],['square','circle'],['hex','circle'],['tri','hex'],
+                 ['circle','tri'],['square','hex'],['cross','circle']];
+    const pr=pk(pairs);srcA=pr[0];srcB=pr[1];
+    if(uploaded&&R()<0.5) srcA='upload';
+    bmode=R()<0.75?'shape':'field';
+    P.steps=ri(8,18);
+    P.ease=pk([0,0,-35,35]);
+    P.ashape=ri(22,40);
+    P.bscale=pk([100,100,70,130,50]);
+    P.brot=pk([0,0,45,90,180,30]);
+    const spread=R()<0.35;
+    P.bx=spread?ri(40,85)*(R()<0.5?-1:1):ri(-10,10);
+    P.by=spread?ri(-30,30):ri(-8,8);
+    P.stroke=+rf(2,10).toFixed(1);
+    fillmode=pk(['none','none','alt']);
+  }
+  P.alpha=100;
+  syncSegs();syncAll();invalidate();draw();
+}
+document.getElementById('randomize').onclick=randomizeAll;
+document.getElementById('rhythm').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  push();setVal('spacing',+b.dataset.v,{force:true});};
+document.getElementById('exppng').onclick=exportPNG;
+document.getElementById('expsvg').onclick=exportSVG;
+
+addEventListener('keydown',e=>{
+  const tag=e.target.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA') return;
+  const k=e.key.toLowerCase();
+  if((e.metaKey||e.ctrlKey)&&k==='z'){e.preventDefault();undo();return;}
+  if(k==='e')exportPNG();
+  else if(k==='r')randomizeAll();
+  else if(k==='s')exportSVG();
+  else if(k==='c')copySVG();
+  else if(k==='u')document.getElementById('file').click();
+});
+addEventListener('pointerup',()=>{armed=true;});
+window.addEventListener('error',ev=>{
+  hud.textContent='ERROR: '+ev.message+' @'+ev.lineno;hud.style.color='#ff5c3a';});
+
+window.__lab={polysFromSVG:polysFromSVG,takeSVG:takeSVG};
+syncSegs();
+syncAll();
+fit();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+      font-size: 11px;
+      color: #ffffff;
+      background: #000000;
+      padding: 12px;
+      min-height: 100vh;
+      line-height: 1.4;
+    }
+
+    /* ASCII Art Header */
+    .ascii-header {
+      color: #ffffff;
+      font-size: 6px;
+      line-height: 1.0;
+      margin-bottom: 8px;
+      white-space: pre;
+      letter-spacing: 0;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+      text-align: center;
+    }
+
+    .divider {
+      color: #666666;
+      margin: 10px 0;
+      font-size: 11px;
+      letter-spacing: 0;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .header-info {
+      display: flex;
+      justify-content: space-between;
+      color: #ffffff;
+      font-size: 11px;
+      padding: 0 4px;
+    }
+
+    .release-info {
+      color: #ffffff;
+      font-size: 11px;
+      margin: 10px 0;
+      padding: 6px 0;
+      border-top: 1px dashed #555555;
+      border-bottom: 1px dashed #555555;
+      text-align: center;
+    }
+
+    /* Status Bar */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: transparent;
+      border: 1px dashed #555555;
+      margin-bottom: 12px;
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      background: #555555;
+    }
+
+    .status-indicator.active {
+      background: #ffffff;
+    }
+
+    .status-text {
+      color: #ffffff;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 12px;
+      border-bottom: 1px dashed #555555;
+    }
+
+    .tab {
+      padding: 8px 14px;
+      font-size: 11px;
+      cursor: pointer;
+      color: #888888;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      border: none;
+      background: none;
+      transition: color 0.1s;
+      position: relative;
+    }
+
+    .tab:hover {
+      color: #cccccc;
+    }
+
+    .tab.active {
+      color: #ffffff;
+    }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #ffffff;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 14px;
+    }
+
+    .section-header {
+      color: #ffffff;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-header::before {
+      content: '|';
+      color: #888888;
+    }
+
+    .section-header::after {
+      content: '----------------------------';
+      color: #444444;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Textarea */
+    textarea {
+      width: 100%;
+      padding: 12px;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      border: 1px dashed #555555;
+      background: transparent;
+      color: #ffffff;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #ffffff;
+    }
+
+    textarea::placeholder {
+      color: #555555;
+    }
+
+    .prompt-area {
+      height: 100px;
+    }
+
+    .spec-area {
+      height: 140px;
+    }
+
+    /* Buttons */
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    button {
+      flex: 1;
+      padding: 10px 14px;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+      font-size: 11px;
+      letter-spacing: 0;
+      border: 1px dashed #555555;
+      cursor: pointer;
+      transition: all 0.1s;
+      text-transform: uppercase;
+      background: transparent;
+      color: #ffffff;
+    }
+
+    button:hover {
+      border-color: #ffffff;
+    }
+
+    button.primary {
+      background: transparent;
+      color: #ffffff;
+      border-color: #888888;
+    }
+
+    button.primary:hover {
+      border-color: #ffffff;
+    }
+
+    button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* Quick Actions Grid */
+    .quick-grid {
+      border: 1px dashed #555555;
+    }
+
+    .quick-item {
+      padding: 12px 14px;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.1s;
+      border-bottom: 1px dashed #333333;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .quick-item:last-child {
+      border-bottom: none;
+    }
+
+    .quick-item:hover {
+      border-color: #ffffff;
+    }
+
+    .quick-prefix {
+      color: #666666;
+      font-size: 11px;
+    }
+
+    .quick-name {
+      color: #ffffff;
+      font-size: 11px;
+      flex: 1;
+    }
+
+    .quick-desc {
+      color: #666666;
+      font-size: 11px;
+      text-align: right;
+    }
+
+    /* Loading */
+    .loading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px dashed #888888;
+      background: transparent;
+      margin-bottom: 10px;
+      color: #ffffff;
+      font-size: 11px;
+    }
+
+    .loading-spinner {
+      animation: blink 0.4s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Footer */
+    .footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 6px 12px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #ffffff;
+      border-top: 1px dashed #555555;
+      background: #000;
+    }
+
+    /* File listing style */
+    .file-info {
+      color: #ffffff;
+      font-size: 11px;
+      display: flex;
+      gap: 16px;
+      margin-top: 10px;
+      padding-left: 12px;
+      border-left: 1px dashed #555555;
+    }
+
+    .file-info span {
+      color: #ffffff;
+    }
+
+    /* Effects Options */
+    .options-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .option-label {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 11px;
+      color: #888888;
+    }
+
+    .color-input {
+      width: 100%;
+      height: 28px;
+      border: 1px dashed #555555;
+      background: transparent;
+      cursor: pointer;
+      padding: 2px;
+    }
+
+    .color-input::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .color-input::-webkit-color-swatch {
+      border: none;
+    }
+
+    .text-input {
+      width: 100%;
+      padding: 6px 10px;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+      font-size: 11px;
+      border: 1px dashed #555555;
+      background: transparent;
+      color: #ffffff;
+    }
+
+    .text-input:focus {
+      outline: none;
+      border-color: #ffffff;
+    }
+
+    .text-input::placeholder {
+      color: #555555;
+    }
+
+    select.text-input {
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      padding-right: 28px;
+      cursor: pointer;
+    }
+
+    select.text-input option {
+      background: #111111;
+      color: #ffffff;
+    }
+
+    .effect-hint {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border: 1px dashed #444444;
+      color: #666666;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .tab-desc {
+      color: #888888;
+      font-size: 10px;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .tabs {
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 8px 10px;
+    }
+
+  </style>
+</head>
+<body>
+  <pre class="ascii-header">                                         .-'''-.                                          
+ .-.   .-.   .-.                        '   _    \                       .-.   .-.   .-.  
+/_/ \ /_/ \ /_/ \     __  __   ___    /   /` '.   \         .           / \_\ / \_\ / \_\ 
+\ \  \\ \  \\ \  \   |  |/  `.'   `. .   |     \  '       .'|          /  / //  / //  / / 
+ \ \  \\ \  \\ \  \  |   .-.  .-.   '|   '      |  '  .| <  |         /  / //  / //  / /  
+  \ \  \\ \  \\ \  \ |  |  |  |  |  |\    \     / / .' |_ | |        /  / //  / //  / /   
+   >->  `>->  `>->  `|  |  |  |  |  | `.   ` ..' /.'     || | .'''-.'  <-<'  <-<'  <-<    
+  / /  // /  // /  / |  |  |  |  |  |    '-...-'`'--.  .-'| |/.'''. \\  \ \\  \ \\  \ \   
+ / /  // /  // /  /  |  |  |  |  |  |               |  |  |  /    | | \  \ \\  \ \\  \ \  
+/_/  //_/  //_/  /   |__|  |__|  |__|               |  |  | |     | |  \  \_\\  \_\\  \_\ 
+\ \ / \ \ / \ \ /                                   |  '.'| |     | |   \ / / \ / / \ / / 
+ `-`   `-`   `-`                                    |   / | '.    | '.   '-'   '-'   '-'  
+                                                    `'-'  '---'   '---'                   </pre>
+
+  <div class="divider">|---|---|---|---|---|---|---|---|---|---|</div>
+
+  <div class="header-info">
+    <span>GEN.DESIGN PRODIGY</span>
+    <span>v1.0.0</span>
+  </div>
+
+  <div class="release-info">
+    TYPE: FIGMA PLUGIN | GROUP: B.O.S.(S.)
+  </div>
+
+  <div class="status-bar">
+    <div class="status-indicator" id="statusDot"></div>
+    <div class="status-text" id="statusText">INITIALIZING...</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('json')">▧ JSON</div>
+    <div class="tab" onclick="switchTab('quick')">▸ QUICK</div>
+    <div class="tab" onclick="switchTab('effects')">◈ EFFECTS</div>
+    <div class="tab" onclick="switchTab('scatter')">⁂ SCATTER</div>
+    <div class="tab" onclick="switchTab('trans')">⇄ MORPH</div>
+    <div class="tab" onclick="switchTab('textpath')">∿ PATH</div>
+  </div>
+
+  <!-- JSON Tab -->
+  <div class="tab-content active" id="tab-json">
+    <div class="section">
+      <div class="section-header">SPEC INPUT</div>
+      <textarea id="specInput" class="spec-area" placeholder='{ "type": "frame", ... }'></textarea>
+      <div class="actions">
+        <button onclick="clearSpec()">| CLEAR |</button>
+        <button class="primary" onclick="executeSpec()" id="executeBtn">| EXECUTE |</button>
+      </div>
+    </div>
+
+    <div class="file-info">
+      <div>SIZE: <span id="specSize">0</span></div>
+      <div>NODES: <span id="specNodes">0</span></div>
+    </div>
+  </div>
+
+  <!-- Quick Tab -->
+  <div class="tab-content" id="tab-quick">
+    <div class="section">
+      <div class="section-header">COMPONENTS</div>
+      <div class="quick-grid">
+        <div class="quick-item" onclick="createButton()">
+          <span class="quick-prefix">|--</span>
+          <span class="quick-name">BUTTON</span>
+          <span class="quick-desc">primary cta</span>
+        </div>
+        <div class="quick-item" onclick="createCard()">
+          <span class="quick-prefix">|--</span>
+          <span class="quick-name">CARD</span>
+          <span class="quick-desc">container</span>
+        </div>
+        <div class="quick-item" onclick="createHero()">
+          <span class="quick-prefix">|--</span>
+          <span class="quick-name">HERO</span>
+          <span class="quick-desc">section header</span>
+        </div>
+        <div class="quick-item" onclick="createHeader()">
+          <span class="quick-prefix">|--</span>
+          <span class="quick-name">NAV</span>
+          <span class="quick-desc">navigation</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Effects Tab -->
+  <div class="tab-content" id="tab-effects">
+    <div class="section">
+      <div class="section-header">TEXT EFFECTS</div>
+      <div class="quick-grid">
+        <div class="quick-item" onclick="applyEffect('alternateCase')">
+          <span class="quick-prefix">|--</span>
+          <span class="quick-name">ALTERNATE CASE</span>
+          <span class="quick-desc">aLtErNaTe</span>
+        </div>
+        <div class="quick-item" onclick="applyEffect('alternateColor')">
+          <span class="quick-prefix">|--</span>
+          <span class="quick-name">ALTERNATE COLOR</span>
+          <span class="quick-desc">every 2nd</span>
+        </div>
+        <div class="quick-item" onclick="applyEffect('alternateFont')">
+          <span class="quick-prefix">|--</span>
+          <span class="quick-name">ALTERNATE FONT</span>
+          <span class="quick-desc">mixed type</span>
+        </div>
+        <div class="quick-item" onclick="applyEffect('randomCase')">
+          <span class="quick-prefix">|--</span>
+          <span class="quick-name">RANDOM CASE</span>
+          <span class="quick-desc">RaNdOm</span>
+        </div>
+        <div class="quick-item" onclick="applyEffect('rainbow')">
+          <span class="quick-prefix">|--</span>
+          <span class="quick-name">RAINBOW</span>
+          <span class="quick-desc">spectrum</span>
+        </div>
+        <div class="quick-item" onclick="applyEffect('gradient')">
+          <span class="quick-prefix">|--</span>
+          <span class="quick-name">GRADIENT TEXT</span>
+          <span class="quick-desc">fade l→r</span>
+        </div>
+        <div class="quick-item" onclick="applyEffect('wave')">
+          <span class="quick-prefix">|--</span>
+          <span class="quick-name">WAVE SIZE</span>
+          <span class="quick-desc">size wave</span>
+        </div>
+        <div class="quick-item" onclick="applyEffect('glitch')">
+          <span class="quick-prefix">|--</span>
+          <span class="quick-name">GLITCH</span>
+          <span class="quick-desc">̷c̵o̷r̸r̴u̷p̸t̷</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">OPTIONS</div>
+      <div class="options-row">
+        <label class="option-label">
+          <span>Primary Color</span>
+          <input type="color" id="effectColor1" value="#ffffff" class="color-input">
+        </label>
+        <label class="option-label">
+          <span>Secondary Color</span>
+          <input type="color" id="effectColor2" value="#666666" class="color-input">
+        </label>
+      </div>
+      <div class="options-row">
+        <label class="option-label">
+          <span>Alt Font</span>
+          <input type="text" id="effectAltFont" value="Arial" class="text-input" placeholder="Font family">
+        </label>
+      </div>
+    </div>
+
+    <div class="effect-hint">
+      <span>→ SELECT A TEXT LAYER FIRST</span>
+    </div>
+  </div>
+
+  <!-- Scatter Tab -->
+  <div class="tab-content" id="tab-scatter">
+    <div class="section">
+      <div class="section-header">STROKE SCATTER</div>
+      <p class="tab-desc">Clone elements along a path with randomization. Select source element(s) first, then a vector path last.</p>
+      
+      <div class="options-row">
+        <label class="option-label">
+          <span>Distance</span>
+          <input type="number" id="scatterDistance" value="20" min="1" class="text-input" placeholder="px between points">
+        </label>
+        <label class="option-label">
+          <span>Density</span>
+          <input type="number" id="scatterDensity" value="1" min="1" max="10" class="text-input" placeholder="copies per point">
+        </label>
+      </div>
+
+      <div class="options-row">
+        <label class="option-label">
+          <span>Position Offset</span>
+          <input type="number" id="scatterOffset" value="0" min="0" class="text-input" placeholder="random offset px">
+        </label>
+        <label class="option-label">
+          <span>Max Rotation</span>
+          <input type="number" id="scatterRotation" value="0" min="0" max="360" class="text-input" placeholder="degrees">
+        </label>
+      </div>
+
+      <div class="options-row">
+        <label class="option-label">
+          <span>Scale Min %</span>
+          <input type="number" id="scatterScaleMin" value="100" min="1" max="500" class="text-input" placeholder="min scale">
+        </label>
+        <label class="option-label">
+          <span>Scale Max %</span>
+          <input type="number" id="scatterScaleMax" value="100" min="1" max="500" class="text-input" placeholder="max scale">
+        </label>
+      </div>
+
+      <div class="actions">
+        <button class="primary" onclick="applyScatter()">| SCATTER |</button>
+      </div>
+    </div>
+
+    <div class="effect-hint">
+      <span>→ SELECT SOURCE(S) + PATH (path last)</span>
+    </div>
+  </div>
+
+  <!-- Translation/Morph Tab -->
+  <div class="tab-content" id="tab-trans">
+    <div class="section">
+      <div class="section-header">TRANSLATION MORPH</div>
+      <p class="tab-desc">Create stepped copies with gradual color, scale, rotation, and position transitions.</p>
+      
+      <div class="options-row">
+        <label class="option-label">
+          <span>Steps</span>
+          <input type="number" id="transSteps" value="10" min="1" max="100" class="text-input" placeholder="copies">
+        </label>
+      </div>
+
+      <div class="options-row">
+        <label class="option-label">
+          <span>Back Color</span>
+          <input type="color" id="transBackColor" value="#00ffff" class="color-input">
+        </label>
+        <label class="option-label">
+          <span>Front Color</span>
+          <input type="color" id="transFrontColor" value="#ff00ff" class="color-input">
+        </label>
+      </div>
+
+      <div class="options-row">
+        <label class="option-label">
+          <span>Back Stroke W</span>
+          <input type="number" id="transBackStroke" value="8" min="0" step="0.5" class="text-input" placeholder="start width">
+        </label>
+        <label class="option-label">
+          <span>Front Stroke W</span>
+          <input type="number" id="transFrontStroke" value="1" min="0" step="0.5" class="text-input" placeholder="end width">
+        </label>
+      </div>
+
+      <div class="options-row">
+        <label class="option-label">
+          <span>Rotation °</span>
+          <input type="number" id="transRotation" value="0" class="text-input" placeholder="total degrees">
+        </label>
+        <label class="option-label">
+          <span>Final Scale %</span>
+          <input type="number" id="transScale" value="50" min="1" max="500" class="text-input" placeholder="end scale">
+        </label>
+      </div>
+
+      <div class="options-row">
+        <label class="option-label">
+          <span>Move X</span>
+          <input type="number" id="transMoveX" value="100" class="text-input" placeholder="total X offset">
+        </label>
+        <label class="option-label">
+          <span>Move Y</span>
+          <input type="number" id="transMoveY" value="0" class="text-input" placeholder="total Y offset">
+        </label>
+      </div>
+
+      <div class="actions">
+        <button class="primary" onclick="applyTranslation()">| MORPH |</button>
+      </div>
+    </div>
+
+    <div class="effect-hint">
+      <span>→ SELECT SHAPE(S) TO MORPH</span>
+    </div>
+  </div>
+
+  <!-- Text on Path Tab -->
+  <div class="tab-content" id="tab-textpath">
+    <div class="section">
+      <div class="section-header">TEXT ON PATH</div>
+      <p class="tab-desc">Place text characters along a vector curve. Select a text layer and a path together.</p>
+      
+      <div class="options-row">
+        <label class="option-label">
+          <span>Alignment</span>
+          <select id="textpathAlign" class="text-input">
+            <option value="left">Left</option>
+            <option value="center" selected>Center</option>
+            <option value="right">Right</option>
+          </select>
+        </label>
+        <label class="option-label">
+          <span>Offset %</span>
+          <input type="number" id="textpathOffset" value="0" min="-100" max="100" class="text-input" placeholder="start offset">
+        </label>
+      </div>
+
+      <div class="options-row">
+        <label class="option-label">
+          <span>Letter Spacing</span>
+          <input type="number" id="textpathSpacing" value="0" min="-20" max="100" class="text-input" placeholder="extra spacing">
+        </label>
+        <label class="option-label">
+          <span>Vertical Offset</span>
+          <input type="number" id="textpathVertical" value="0" class="text-input" placeholder="perpendicular offset">
+        </label>
+      </div>
+
+      <div class="options-row">
+        <label class="option-label" style="flex-direction: row; align-items: center; gap: 8px;">
+          <input type="checkbox" id="textpathFlip" style="width: auto;">
+          <span>Flip Direction</span>
+        </label>
+      </div>
+
+      <div class="actions">
+        <button class="primary" onclick="applyTextOnPath()">| PLACE TEXT |</button>
+      </div>
+    </div>
+
+    <div class="effect-hint">
+      <span>→ SELECT TEXT LAYER + PATH</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>B.O.S.(S.) SINCE 2026</span>
+    <span>||| NFO |||</span>
+  </div>
+
+  <script>
+    // ========================================================================
+    // Tab Switching
+    // ========================================================================
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+      
+      event.target.classList.add('active');
+      document.getElementById('tab-' + tabName).classList.add('active');
+    }
+
+    // ========================================================================
+    // Communication with Plugin
+    // ========================================================================
+
+    function postMessage(type, data) {
+      data = data || {};
+      parent.postMessage({ pluginMessage: Object.assign({ type: type }, data) }, '*');
+    }
+
+    function executeSpec() {
+      var input = document.getElementById('specInput');
+      try {
+        var spec = JSON.parse(input.value);
+        postMessage('execute-spec', { spec: spec });
+        setStatus('EXECUTING...', false);
+      } catch (e) {
+        alert('PARSE ERROR: ' + e.message);
+      }
+    }
+
+    function clearSpec() {
+      document.getElementById('specInput').value = '';
+      updateSpecInfo();
+    }
+
+    function updateSpecInfo() {
+      var val = document.getElementById('specInput').value;
+      document.getElementById('specSize').textContent = val.length + ' B';
+      try {
+        var obj = JSON.parse(val);
+        var count = countNodes(obj);
+        document.getElementById('specNodes').textContent = count;
+      } catch (e) {
+        document.getElementById('specNodes').textContent = '-';
+      }
+    }
+
+    function countNodes(obj) {
+      var count = 1;
+      if (obj.children) {
+        for (var i = 0; i < obj.children.length; i++) {
+          count += countNodes(obj.children[i]);
+        }
+      }
+      return count;
+    }
+
+    document.getElementById('specInput').addEventListener('input', updateSpecInfo);
+
+    function setStatus(text, connected) {
+      document.getElementById('statusText').textContent = text;
+      document.getElementById('statusDot').className = 'status-indicator' + (connected ? ' active' : '');
+    }
+
+    // ========================================================================
+    // Text Effects
+    // ========================================================================
+
+    function hexToRgbNormalized(hex) {
+      hex = hex.replace('#', '');
+      return {
+        r: parseInt(hex.substring(0, 2), 16) / 255,
+        g: parseInt(hex.substring(2, 4), 16) / 255,
+        b: parseInt(hex.substring(4, 6), 16) / 255
+      };
+    }
+
+    function applyEffect(effectType) {
+      var color1 = document.getElementById('effectColor1').value;
+      var color2 = document.getElementById('effectColor2').value;
+      var altFont = document.getElementById('effectAltFont').value || 'Arial';
+
+      var options = {
+        color1: hexToRgbNormalized(color1),
+        color2: hexToRgbNormalized(color2),
+        altFont: altFont
+      };
+
+      setStatus('APPLYING ' + effectType.toUpperCase() + '...', false);
+      postMessage('apply-effect', { effect: effectType, options: options });
+    }
+
+    // ========================================================================
+    // Quick Actions
+    // ========================================================================
+
+    function createButton() {
+      var spec = {
+        type: 'frame',
+        name: 'Button/Primary',
+        autoLayout: {
+          mode: 'HORIZONTAL',
+          gap: 8,
+          paddingTop: 10,
+          paddingBottom: 10,
+          paddingLeft: 20,
+          paddingRight: 20,
+          primaryAxisAlignItems: 'CENTER',
+          counterAxisAlignItems: 'CENTER'
+        },
+        fills: [{ type: 'SOLID', color: { r: 0.8, g: 0.8, b: 0.8 } }],
+        children: [{
+          type: 'frame',
+          name: 'label',
+          text: {
+            characters: 'EXECUTE',
+            fontSize: 12,
+            fontFamily: 'Share Tech Mono',
+            fontWeight: 400,
+            letterSpacing: 1,
+            fills: [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }]
+          }
+        }]
+      };
+      postMessage('execute-spec', { spec: spec });
+      setStatus('CREATING...', false);
+    }
+
+    function createCard() {
+      var spec = {
+        type: 'frame',
+        name: 'Card',
+        size: { width: 300 },
+        autoLayout: {
+          mode: 'VERTICAL',
+          gap: 10,
+          paddingTop: 14,
+          paddingRight: 14,
+          paddingBottom: 14,
+          paddingLeft: 14
+        },
+        fills: [{ type: 'SOLID', color: { r: 0.05, g: 0.05, b: 0.05 } }],
+        strokes: [{ type: 'SOLID', color: { r: 0.3, g: 0.3, b: 0.3 } }],
+        strokeWeight: 1,
+        children: [
+          {
+            type: 'frame',
+            name: 'title',
+            text: {
+              characters: 'CARD TITLE',
+              fontSize: 14,
+              fontFamily: 'Share Tech Mono',
+              fontWeight: 400,
+              letterSpacing: 1,
+              fills: [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]
+            }
+          },
+          {
+            type: 'frame',
+            name: 'description',
+            text: {
+              characters: 'Card description text content.',
+              fontSize: 12,
+              fontFamily: 'Share Tech Mono',
+              fills: [{ type: 'SOLID', color: { r: 0.6, g: 0.6, b: 0.6 } }]
+            }
+          }
+        ]
+      };
+      postMessage('execute-spec', { spec: spec });
+      setStatus('CREATING...', false);
+    }
+
+    function createHero() {
+      var spec = {
+        type: 'frame',
+        name: 'Section/Hero',
+        size: { width: 1920, height: 1080 },
+        autoLayout: {
+          mode: 'VERTICAL',
+          gap: 14,
+          paddingTop: 100,
+          paddingRight: 100,
+          paddingBottom: 100,
+          paddingLeft: 100,
+          primaryAxisAlignItems: 'CENTER',
+          counterAxisAlignItems: 'CENTER'
+        },
+        fills: [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }],
+        children: [
+          {
+            type: 'frame',
+            name: 'eyebrow',
+            text: {
+              characters: '||| INTRODUCING |||',
+              fontSize: 12,
+              fontFamily: 'Share Tech Mono',
+              letterSpacing: 2,
+              fills: [{ type: 'SOLID', color: { r: 0.6, g: 0.6, b: 0.6 } }]
+            }
+          },
+          {
+            type: 'frame',
+            name: 'title',
+            text: {
+              characters: 'DESIGN AT THE SPEED OF THOUGHT',
+              fontSize: 64,
+              fontFamily: 'Share Tech Mono',
+              fontWeight: 400,
+              letterSpacing: -1,
+              textAlignHorizontal: 'CENTER',
+              fills: [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]
+            }
+          }
+        ]
+      };
+      postMessage('execute-spec', { spec: spec });
+      setStatus('CREATING...', false);
+    }
+
+    function createHeader() {
+      var spec = {
+        type: 'frame',
+        name: 'Navigation/Header',
+        size: { width: 1920, height: 50 },
+        autoLayout: {
+          mode: 'HORIZONTAL',
+          gap: 0,
+          paddingTop: 0,
+          paddingRight: 20,
+          paddingBottom: 0,
+          paddingLeft: 20,
+          primaryAxisAlignItems: 'SPACE_BETWEEN',
+          counterAxisAlignItems: 'CENTER'
+        },
+        fills: [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }],
+        strokes: [{ type: 'SOLID', color: { r: 0.2, g: 0.2, b: 0.2 } }],
+        strokeWeight: 1,
+        children: [
+          {
+            type: 'frame',
+            name: 'logo',
+            text: {
+              characters: '||| MOTH |||',
+              fontSize: 13,
+              fontFamily: 'Share Tech Mono',
+              fontWeight: 400,
+              letterSpacing: 2,
+              fills: [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]
+            }
+          },
+          {
+            type: 'frame',
+            name: 'nav',
+            autoLayout: {
+              mode: 'HORIZONTAL',
+              gap: 28,
+              primaryAxisAlignItems: 'CENTER',
+              counterAxisAlignItems: 'CENTER'
+            },
+            children: [
+              { type: 'frame', name: 'link', text: { characters: 'FEATURES', fontSize: 11, fontFamily: 'Share Tech Mono', letterSpacing: 1, fills: [{ type: 'SOLID', color: { r: 0.6, g: 0.6, b: 0.6 } }] } },
+              { type: 'frame', name: 'link', text: { characters: 'DOCS', fontSize: 11, fontFamily: 'Share Tech Mono', letterSpacing: 1, fills: [{ type: 'SOLID', color: { r: 0.6, g: 0.6, b: 0.6 } }] } },
+              { type: 'frame', name: 'link', text: { characters: 'ABOUT', fontSize: 11, fontFamily: 'Share Tech Mono', letterSpacing: 1, fills: [{ type: 'SOLID', color: { r: 0.6, g: 0.6, b: 0.6 } }] } }
+            ]
+          }
+        ]
+      };
+      postMessage('execute-spec', { spec: spec });
+      setStatus('CREATING...', false);
+    }
+
+    // ========================================================================
+    // Scatter Effect (from Illustrator sdstroke_scatter.js)
+    // ========================================================================
+
+    function applyScatter() {
+      var options = {
+        distance: parseFloat(document.getElementById('scatterDistance').value) || 20,
+        density: parseInt(document.getElementById('scatterDensity').value) || 1,
+        offset: parseFloat(document.getElementById('scatterOffset').value) || 0,
+        rotation: parseFloat(document.getElementById('scatterRotation').value) || 0,
+        scaleMin: parseFloat(document.getElementById('scatterScaleMin').value) || 100,
+        scaleMax: parseFloat(document.getElementById('scatterScaleMax').value) || 100
+      };
+
+      setStatus('SCATTERING...', false);
+      postMessage('apply-scatter', { options: options });
+    }
+
+    // ========================================================================
+    // Translation/Morph Effect (from Illustrator sdstroke_trans.js)
+    // ========================================================================
+
+    function applyTranslation() {
+      var backColor = document.getElementById('transBackColor').value;
+      var frontColor = document.getElementById('transFrontColor').value;
+
+      var options = {
+        steps: parseInt(document.getElementById('transSteps').value) || 10,
+        backColor: hexToRgbNormalized(backColor),
+        frontColor: hexToRgbNormalized(frontColor),
+        backStrokeWidth: parseFloat(document.getElementById('transBackStroke').value) || 8,
+        frontStrokeWidth: parseFloat(document.getElementById('transFrontStroke').value) || 1,
+        rotation: parseFloat(document.getElementById('transRotation').value) || 0,
+        scale: parseFloat(document.getElementById('transScale').value) || 100,
+        moveX: parseFloat(document.getElementById('transMoveX').value) || 0,
+        moveY: parseFloat(document.getElementById('transMoveY').value) || 0
+      };
+
+      setStatus('MORPHING...', false);
+      postMessage('apply-translation', { options: options });
+    }
+
+    // ========================================================================
+    // Text on Path Effect
+    // ========================================================================
+
+    function applyTextOnPath() {
+      var options = {
+        spacing: parseFloat(document.getElementById('textpathSpacing').value) || 0,
+        offset: parseFloat(document.getElementById('textpathOffset').value) || 0,
+        align: document.getElementById('textpathAlign').value || 'center',
+        flipDirection: document.getElementById('textpathFlip').checked,
+        verticalOffset: parseFloat(document.getElementById('textpathVertical').value) || 0
+      };
+
+      setStatus('PLACING TEXT...', false);
+      postMessage('apply-text-on-path', { options: options });
+    }
+
+    // ========================================================================
+    // Message Handler
+    // ========================================================================
+
+    window.onmessage = function(event) {
+      var msg = event.data.pluginMessage;
+      if (!msg) return;
+
+      switch (msg.type) {
+        case 'status':
+          setStatus(msg.text, msg.connected);
+          break;
+      }
+    };
+
+    // ========================================================================
+    // Initialize
+    // ========================================================================
+
+    setStatus('READY', true);
+    updateSpecInfo();
+  </script>
+</body>
+</html>

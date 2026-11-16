@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>RING LAB — simple</title>
+<style>
+  :root{--ink:#f2f2f0;--bg:#0d0d0c;--panel:#141413;--line:#262624;--dim:#78786f;--accent:#d6ff3f}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{background:var(--bg);color:var(--ink);font:400 11px/1.35 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.03em;
+    display:grid;grid-template-rows:1fr auto;grid-template-columns:minmax(0,1fr);width:100vw;user-select:none;-webkit-user-select:none}
+  main{position:relative;overflow:hidden;background:#000;min-width:0}
+  svg#stage{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .bar{display:flex;align-items:center;gap:8px;padding:12px 14px;border-top:1px solid var(--line);background:var(--panel);flex-wrap:wrap;min-width:0;row-gap:8px}
+  .bar h1{margin:0 14px 0 0;font-size:11px;letter-spacing:.22em;font-weight:500}
+  .bar button{background:none;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:9.5px;letter-spacing:.13em;padding:10px 14px;cursor:pointer}
+  .bar button:hover{border-color:var(--ink)}
+  .bar button.pri{background:var(--accent);color:#0d0d0c;border-color:var(--accent);font-weight:500;padding:10px 22px}
+  .bar .k{color:var(--dim);margin-left:8px}
+  .bar .pri .k{color:#0d0d0c;opacity:.55}
+  .bar .styles{display:flex;flex-wrap:wrap;gap:0;margin-left:6px;border:1px solid var(--line);flex:1 1 auto;min-width:0}
+  .bar .styles button{border:0;border-right:1px solid var(--line);padding:10px 8px;font-size:9px}
+  .bar .styles button:last-child{border-right:0}
+  .bar .styles button.on{background:var(--ink);color:#0d0d0c}
+  .bar .styles button.on .k{color:#0d0d0c;opacity:.5}
+  .bar .seed{color:var(--dim);font-variant-numeric:tabular-nums}
+  .bar .seed input{background:#0d0d0c;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:10px;width:72px;padding:4px 6px;text-align:right;outline:none;margin-left:6px}
+  .bar .seed input:focus{border-color:var(--accent)}
+  .toast{position:absolute;right:14px;top:12px;background:var(--accent);color:#0d0d0c;font-size:9.5px;letter-spacing:.14em;padding:7px 10px;opacity:0;transition:opacity .15s;pointer-events:none}
+  .toast.show{opacity:1}
+  .hud{position:absolute;left:14px;bottom:12px;color:#6b6b62;font-size:9.5px;letter-spacing:.1em;pointer-events:none;line-height:1.7}
+</style>
+</head>
+<body>
+<main id="main">
+  <svg id="stage" xmlns="http://www.w3.org/2000/svg">
+    <defs id="defs"></defs>
+    <g id="world">
+      <rect id="cardBg" rx="28" ry="28" fill="#000" stroke="#2a2a27"/>
+      <g id="ring" fill="none" stroke-linejoin="round" clip-path="url(#clipCard)"></g>
+      <g id="furnG"></g>
+    </g>
+  </svg>
+  <div class="hud" id="hud"></div>
+  <div class="toast" id="toast"></div>
+</main>
+<div class="bar">
+  <h1>RING LAB · SIMPLE</h1>
+  <button class="pri" id="bRand">RANDOMIZE <span class="k">SPACE</span></button>
+  <button id="bBack">◂ PREVIOUS <span class="k">←</span></button>
+  <span class="styles" id="styles">
+    <button data-s="">ANY <span class="k">0</span></button><button data-s="ring">RING <span class="k">1</span></button><button data-s="radiate">RADIATE <span class="k">2</span></button><button data-s="blend">BLEND <span class="k">3</span></button><button data-s="rays">RAYS <span class="k">4</span></button><button data-s="waves">WAVES <span class="k">5</span></button><button data-s="hatch">HATCH <span class="k">6</span></button><button data-s="moire">MOIRÉ <span class="k">7</span></button><button data-s="contours">CONTOURS <span class="k">8</span></button><button data-s="confluence">CONFL. <span class="k">9</span></button>
+  </span></button><button data-s="ring">RING <span class="k">1</span></button><button data-s="knot">3D RING <span class="k">2</span></button><button data-s="wire">WIRE <span class="k">3</span></button><button data-s="sheet">SHEET <span class="k">4</span></button><button data-s="blend">BLEND <span class="k">5</span></button><button data-s="contours">CONTOURS <span class="k">6</span></button><button data-s="ribbon">RIBBON <span class="k">7</span></button><button data-s="kiss">KISS <span class="k">8</span></button><button data-s="radiate">RADIATE <span class="k">9</span></button><button data-s="rays">RAYS <span class="k">R</span></button><button data-s="waves">WAVES <span class="k">W</span></button><button data-s="hatch">HATCH <span class="k">H</span></button><button data-s="moire">MOIRÉ <span class="k">M</span></button><button data-s="confluence">CONFL. <span class="k">C</span></button>
+  </span></button><button data-s="ring">RING <span class="k">1</span></button><button data-s="knot">3D RING <span class="k">2</span></button><button data-s="sheet">SHEET <span class="k">3</span></button><button data-s="blend">BLEND <span class="k">4</span></button><button data-s="contours">CONTOURS <span class="k">5</span></button><button data-s="ribbon">RIBBON <span class="k">6</span></button><button data-s="kiss">KISS <span class="k">7</span></button><button data-s="radiate">RADIATE <span class="k">8</span></button><button data-s="rays">RAYS <span class="k">9</span></button><button data-s="waves">WAVES <span class="k">W</span></button><button data-s="hatch">HATCH <span class="k">H</span></button><button data-s="moire">MOIRÉ <span class="k">M</span></button><button data-s="confluence">CONFL. <span class="k">C</span></button>
+  </span></button><button data-s="ring">RING <span class="k">1</span></button><button data-s="kiss">KISS <span class="k">2</span></button><button data-s="radiate">RADIATE <span class="k">3</span></button><button data-s="blend">BLEND <span class="k">4</span></button><button data-s="rays">RAYS <span class="k">5</span></button><button data-s="waves">WAVES <span class="k">6</span></button><button data-s="hatch">HATCH <span class="k">7</span></button><button data-s="moire">MOIRÉ <span class="k">8</span></button><button data-s="contours">CONTOURS <span class="k">9</span></button><button data-s="ribbon">RIBBON <span class="k">B</span></button><button data-s="confluence">CONFL. <span class="k">C</span></button>
+  </span></button><button data-s="ring">RING <span class="k">1</span></button><button data-s="radiate">RADIATE <span class="k">2</span></button><button data-s="blend">BLEND <span class="k">3</span></button><button data-s="rays">RAYS <span class="k">4</span></button><button data-s="waves">WAVES <span class="k">5</span></button><button data-s="hatch">HATCH <span class="k">6</span></button><button data-s="moire">MOIRÉ <span class="k">7</span></button><button data-s="contours">CONTOURS <span class="k">8</span></button><button data-s="ribbon">RIBBON <span class="k">9</span></button><button data-s="confluence">CONFL. <span class="k">C</span></button>
+  </span></button><button data-s="ring">RING <span class="k">1</span></button><button data-s="offset">OFFSET <span class="k">2</span></button><button data-s="blend">BLEND <span class="k">3</span></button><button data-s="burst">BURST <span class="k">4</span></button><button data-s="waves">WAVES <span class="k">5</span></button>
+  </span>
+  <button id="bCopy">COPY SVG <span class="k">⌘C</span></button>
+  <button id="bDl">DOWNLOAD <span class="k">⌘S</span></button>
+  <button id="bOpen">FULL LAB</button>
+  <button id="bSize">SIZE <span class="k">⇧F</span></button>
+  <span class="seed">seed <input id="seed" inputmode="numeric"></span>
+</div>
+
+<script src="ring.js"></script>
+<script src="furniture.js"></script>
+<script>
+// ── Seeded RNG so a seed reproduces a card exactly ──────────────────────
+function rng(seed) { let t = seed >>> 0; return () => { t += 0x6D2B79F5; let r = Math.imul(t ^ (t >>> 15), 1 | t); r ^= r + Math.imul(r ^ (r >>> 7), 61 | r); return ((r ^ (r >>> 14)) >>> 0) / 4294967296; }; }
+
+// ── Harmonious 3–4 stop palettes ─────────────────────────────────────────
+function hsl(h, s, l) { h = ((h % 360) + 360) % 360; s /= 100; l /= 100; const k = (n) => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
+  const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); return '#' + [f(0), f(8), f(4)].map((v) => Math.round(v * 255).toString(16).padStart(2, '0')).join('').toUpperCase(); }
+const FIXED = [
+  ['#1F4E79', '#7FA7C9', '#F1D3C2', '#5B3A29'],   // navy → slate → sand → umber
+  ['#2F6690', '#A8B5C7', '#E7C9B5'],
+  ['#3E7CB1', '#C9D6E8', '#F2F2F0'],
+  ['#1F2A36', '#3E7CB1', '#F2B134'],
+  ['#F2B134', '#FBE7B5', '#C9D6E8', '#3E7CB1'],
+  ['#5B3A29', '#8C7A6B', '#E7C9B5', '#F1D3C2'],
+];
+function palette(R) {
+  if (R() < 0.45) return FIXED[Math.floor(R() * FIXED.length)].slice();
+  const n = R() < 0.5 ? 3 : 4, h0 = R() * 360;
+  const kind = R();
+  const spread = kind < 0.5 ? 30 + R() * 40 : kind < 0.8 ? 90 + R() * 40 : 150 + R() * 30;   // analogous / triadic-ish / complementary
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1);
+    out.push(hsl(h0 + spread * (t - 0.5), 55 + R() * 30, 28 + t * 50 + (R() - 0.5) * 10));
+  }
+  return R() < 0.5 ? out : out.reverse();
+}
+
+// ── Styles ───────────────────────────────────────────────────────────────
+// ring      the OG / a loop (lissajous)
+// offset    contour rings of a soft rounded shape
+// blend     line blend: a straight line morphing into the ring, or ring ↔ circle
+// burst     sunburst rays, centre on or off the card
+// waves     parallel sines, bulging through the middle
+// ring      the OG / a loop
+// radiate   concentric rings from the centre, all the way off the card
+// blend     line → ring, ring → circle
+// rays      straight lines from an off-card origin, running off the edges
+// waves     a few long slow sines
+// hatch     straight hatching clipped to the inside of the ring
+// moire     two offset ring sets a few degrees apart → interference
+// contours  parallel offsets of the OG ring itself
+// confluence  Alt 3: arcs off one edge collapsing onto an axis
+const STYLES = ['ring', 'ring', 'ring', 'ring', 'radiate', 'blend', 'rays', 'waves', 'hatch', 'moire', 'contours', 'confluence'];
+const STYLE_KEYS = ['', 'ring', 'radiate', 'blend', 'rays', 'waves', 'hatch', 'moire', 'contours', 'confluence'];
+let lockStyle = null;
+
+function generate(seed) {
+  const R = rng(seed);
+  const pick = (a) => a[Math.floor(R() * a.length)];
+  const rnd = (a, b, s = 1) => Math.round((a + R() * (b - a)) / s) * s;
+  const style = lockStyle || pick(STYLES);
+  const pal = palette(R);
+  const angle = pick([0, 0, 30, 45, 60, 90, 120, 135, 150]);
+  const common = (extra, w) => Object.assign({
+    stroke: { w, cap: 'round' },
+    color: { mode: 'linear', stops: pal, three: pal.length >= 3, angle, chunks: 48, reverse: false, offset: 0 },
+    depth: { on: false },
+  }, extra);
+
+  if (style === 'radiate') {
+    const shape = pick(['circle', 'circle', 'super']);
+    const gap = pick([18, 22, 28, 34, 42]);
+    const r0 = pick([30, 50, 70, 100]);
+    const aspect = shape === 'circle' ? 1 : pick([0.66, 0.75]);
+    // enough rings that the outermost clears the far corner (centre→corner ≈ 477px),
+    // measured on the narrow axis: offset grows the short radius by gap each step
+    // card half-extents are 403 x 254; the outer ring must beat both, with margin
+    const needX = 403 + 40 - r0, needY = 254 + 40 - r0 * aspect;
+    const n = Math.ceil(Math.max(needX, needY) / gap) + 1;
+    const w = pick([1, 1.5, 1.5, 2]);
+    return common({
+      family: 'offset',
+      offset: { shape, e: 2.8, n, gap, cx: 403, cy: 254, w: r0 * 2, h: r0 * 2 * aspect, rot: 0, oneSided: true },
+      _meta: { style, scaleMode: 'bleed', scale: n, pal, angle },
+    }, w);
+  }
+
+  if (style === 'blend') {
+    const kind = pick(['line→ring', 'line→ring', 'ring→circle']);
+    const n = pick([6, 8, 10, 12]), w = pick([1.5, 2, 2, 2.5]);
+    const ring = { kind: 'lissajous', a: 2, b: 5, delta: 0, cx: 403, cy: 254, w: pick([560, 620, 680]), h: pick([340, 380, 420]), rot: 0 };
+    let A, B;
+    if (kind === 'line→ring') { A = { kind: 'line', ang: 0, off: pick([-1, 1]) * 0.6, cx: 403, cy: 254, w: 1100, h: 560, rot: 0 }; B = ring; }
+    else { A = ring; const d = pick([160, 200, 240]); B = { kind: 'circle', cx: 403, cy: 254, w: d, h: d, rot: 0 }; }
+    return common({ family: 'blend', blend: { n, ease: 1, A, B }, _meta: { style: `blend · ${kind}`, scaleMode: 'fit', scale: n, pal, angle } }, w);
+  }
+
+  if (style === 'rays') {
+    // origin outside the card; fan aimed so the rays cross it and leave the far side
+    const org = pick([
+      { cx: -260, cy: 254, a0: -28, a1: 28 },       // left, straight across
+      { cx: 1066, cy: 254, a0: 152, a1: 208 },      // right
+      { cx: -220, cy: -160, a0: 8, a1: 62 },        // top-left corner
+      { cx: 1026, cy: 668, a0: 188, a1: 242 },      // bottom-right corner
+      { cx: 403, cy: -420, a0: 58, a1: 122 },       // above, raining down
+      { cx: -300, cy: 560, a0: -46, a1: 2 },        // bottom-left, sweeping up
+    ]);
+    const n = pick([7, 9, 11, 14, 18]);
+    const w = pick([1, 1.5, 1.5, 2, 2.5]);
+    return common({
+      family: 'burst',
+      burst: { cx: org.cx, cy: org.cy, n, a0: org.a0, a1: org.a1, r0: 0, r1: 2400, bulge: pick([0, 0, 0, 0.04, -0.04]), twist: 0, wobble: 0 },
+      _meta: { style, scaleMode: 'bleed', scale: n, pal, angle },
+    }, w);
+  }
+
+  if (style === 'hatch') {
+    const spacing = pick([8, 10, 12, 14, 18]), ang = pick([0, 45, 90, 135, 30, 60, 120]);
+    const ring = R() < 0.7;
+    const shape = ring
+      ? { kind: 'lissajous', a: 2, b: 5, delta: 0, cx: 403, cy: 254, w: pick([640, 700, 760]), h: pick([400, 430, 470]), rot: 0 }
+      : { kind: 'super', e: 2.8, cx: 403, cy: 254, w: pick([360, 420, 480]), h: pick([260, 300, 340]), rot: 0 };
+    return common({ family: 'hatch', hatch: { ang, spacing, shape, inside: true }, _meta: { style: `hatch · ${ring ? 'ring' : 'oval'}`, scaleMode: 'fit', scale: spacing, pal, angle } }, pick([1, 1, 1.5, 1.5, 2]));
+  }
+
+  if (style === 'moire') {
+    const kind = pick(['circle', 'circle', 'lines']);
+    const gap = pick([7, 8, 10, 12]);
+    const w = pick([0.5, 0.75, 0.75, 1]);
+    let mo, label;
+    if (kind === 'lines') {
+      mo = { kind: 'lines', cx: 403, cy: 254, ang: pick([0, 90, 45, -30, 60]), gap, gap2: 1, rot2: pick([2, 3, 4, 6]), dx: 0, dy: 0, reach: 560 };
+      label = `moire · lines ${mo.rot2}°`;
+    } else {
+      const mode = pick(['twin', 'twin', 'beat']);
+      if (mode === 'twin') { const d = pick([30, 45, 60, 90]); const a = pick([0, 0, 90, 30]) * Math.PI / 180;
+        mo = { kind: 'circle', cx: 403 - Math.cos(a) * d / 2, cy: 254 - Math.sin(a) * d / 2, ang: 0, gap, gap2: 1, rot2: 0, dx: Math.cos(a) * d, dy: Math.sin(a) * d, reach: 620 }; label = `moire · twin ${d}px`; }
+      else { mo = { kind: 'circle', cx: 403, cy: 254, ang: 0, gap, gap2: pick([1.04, 1.06, 1.09]), rot2: 0, dx: 0, dy: 0, reach: 620 }; label = `moire · beat ×${mo.gap2}`; }
+    }
+    return common({ family: 'moire', moire: mo, _meta: { style: label, scaleMode: 'bleed', scale: gap, pal, angle } }, w);
+  }
+
+  if (style === 'contours') {
+    // parallel offsets of the OG itself. Gaps stay under the ring's tightest
+    // radius of curvature so the offsets don't cusp.
+    const n = pick([3, 4, 5, 6]), gap = pick([6, 8, 10, 12]);
+    const sc = pick([0.9, 1, 1.1, 1.35]);
+    return common({
+      family: 'offset',
+      curve: { a: 2, b: 5, delta: 0, rot: 0 },
+      offset: { shape: 'lissajous', e: 2.5, n, gap, cx: 403, cy: 254, w: 787 * sc, h: 486 * sc, rot: 0, oneSided: false },
+      _meta: { style, scaleMode: sc > 1 ? 'big' : 'fit', scale: Math.round(sc * 100), pal, angle },
+    }, pick([1.5, 2, 2, 2.5]));
+  }
+
+  if (style === 'confluence') {
+    const n = pick([4, 5, 6, 7]), side = pick(['left', 'right']);
+    return common({
+      family: 'confluence',
+      conf: { side, ox: -9, ay: 0, n, profile: pick(['arc', 'arc', 'merge']), rMin: pick([80, 100, 130]), rMax: pick([560, 640, 720]), pow: pick([1, 1, 1.4]), radii: null,
+              entry: 120, entryStep: pick([80, 100]), join: pick([340, 400]), joinStep: pick([0, 40, 70]), tension: 0.55, lean: 0, bottom: true, interleave: 0, axis: true, axisFrom: 'origin' },
+      _meta: { style: `confluence · ${side}`, scaleMode: 'bleed', scale: n, pal, angle },
+    }, pick([2, 2.5, 3, 4]));
+  }
+
+  if (style === 'waves') {
+    const n = pick([3, 4, 5, 6, 7]), w = pick([1.5, 2, 2, 2.5, 3]);
+    return common({
+      family: 'waves',
+      waves: { n, ang: 0, amp: pick([24, 32, 40, 52]), len: pick([700, 850, 1000]), drift: pick([0, 0, 6, 10]), spread: pick([30, 38, 46, 56]), bulge: pick([0.5, 0.7]), cx: 403, cy: 254 },
+      _meta: { style, scaleMode: 'fit', scale: n, pal, angle },
+    }, w);
+  }
+
+  // ── ring (the OG) ──
+  // Curves that read as a ring / loop / knot. OG weighted.
+  const curve = pick([
+    { a: 2, b: 5, delta: 0 }, { a: 2, b: 5, delta: 0 }, { a: 2, b: 5, delta: 0 },
+    { a: 1, b: 2, delta: 90 }, { a: 2, b: 3, delta: 0 }, { a: 2, b: 3, delta: 90 },
+    { a: 3, b: 4, delta: 0 }, { a: 3, b: 5, delta: 0 }, { a: 1, b: 3, delta: 90 }, { a: 3, b: 2, delta: 90 },
+  ]);
+  const scaleMode = pick(['fit', 'fit', 'big', 'big', 'huge']);
+  const scale = scaleMode === 'fit' ? rnd(78, 100, 1) : scaleMode === 'big' ? rnd(118, 150, 1) : rnd(165, 230, 1);
+  const aspect = pick([1, 1, 1, 0.85, 1.15, 0.7]);
+  const n = pick([1, 1, 2, 3, 3, 5, 7]);
+  const gap = n === 1 ? 0 : pick([4, 6, 8, 10, 14]);
+  const join = n > 2 && R() < 0.45 ? { amt: rnd(0.6, 1, 0.05), m: pick([1, 2, 2, curve.b]), psi: rnd(-180, 180, 15), pow: rnd(1, 2.2, 0.1) } : { amt: 0, m: 2, psi: 0, pow: 1 };
+  const w = pick([1.5, 2, 2, 2.5, 3, 4]);
+
+  return {
+    family: 'lissajous',
+    curve: Object.assign({ rot: pick([0, 0, 0, 0, rnd(-20, 20, 5)]) }, curve),
+    box: { cx: 403, cy: 254, w: 787 * scale / 100, h: 486 * scale / 100 * aspect },
+    strands: { n, gap, phase: n > 1 && gap === 0 ? 5 : 0, scale: 0, twist: 0, ramp: 0 },
+    env: join, spiral: { grow: 0, turns: 1 }, trim: { start: 0, end: 1 },
+    stroke: { w, cap: 'round' },
+    color: { mode: 'linear', stops: pal, three: pal.length >= 3, angle, chunks: 48, reverse: false, offset: 0 },
+    depth: { on: false },
+    _meta: { style: 'ring', scaleMode, scale, pal, angle },
+  };
+}
+
+// linear gradient with N stops (ring.js gradientDef uses 2–3; do our own)
+function gradDef(S) {
+  const a = S.color.angle * Math.PI / 180, x1 = 50 - Math.cos(a) * 50, y1 = 50 - Math.sin(a) * 50, x2 = 50 + Math.cos(a) * 50, y2 = 50 + Math.sin(a) * 50;
+  const ss = S.color.stops;
+  return `<linearGradient id="ringGrad" x1="${x1.toFixed(2)}%" y1="${y1.toFixed(2)}%" x2="${x2.toFixed(2)}%" y2="${y2.toFixed(2)}%">` +
+    ss.map((c, i) => `<stop offset="${(i / (ss.length - 1) * 100).toFixed(1)}%" stop-color="${c}"/>`).join('') + `</linearGradient>`;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────
+const $ = (id) => document.getElementById(id);
+const W = 806, H = 508, RAD = 28;
+let seed = 0, S = null, history = [], bigView = false;
+function render() {
+  const parts = Ring.paint(S, Ring.build(S));
+  const paths = parts.map((p) => p.dot ? '' : `<path d="${p.d}" stroke="url(#ringGrad)" stroke-width="${p.w}"${p.cap ? ` stroke-linecap="${p.cap}"` : ''}${p.opacity < 1 ? ` stroke-opacity="${p.opacity.toFixed(3)}"` : ''}/>`).join('');
+  $('defs').innerHTML = gradDef(S) + `<clipPath id="clipCard"><rect width="${W}" height="${H}" rx="${RAD}" ry="${RAD}"/></clipPath>`;
+  $('cardBg').setAttribute('width', W); $('cardBg').setAttribute('height', H);
+  $('ring').setAttribute('stroke-linecap', 'round');
+  $('ring').innerHTML = paths;
+  $('furnG').innerHTML = furnitureSVG('#262626', { chip: true });
+  $('seed').value = seed;
+  const m = S._meta;
+  const desc = S.family === 'lissajous'
+    ? `${S.curve.a}:${S.curve.b} δ${S.curve.delta}° · ${S.strands.n} strand${S.strands.n > 1 ? 's' : ''}${S.env.amt ? ' · join' : ''} · ${m.scaleMode} ${m.scale}%`
+    : `${m.style} · ${Ring.build(S).length} lines`;
+  $('hud').innerHTML = `${desc} · ${S.stroke.w}pt${lockStyle ? ` · <span style="color:var(--accent)">locked ${lockStyle}</span>` : ''}<br>${m.pal.join(' ')} @ ${m.angle}°`;
+  fit();
+}
+function fit() {
+  const r = $('main').getBoundingClientRect(), pad = 60;
+  // 60% smaller than fill — reads closer to a card in the hand. Shift-F toggles full size.
+  const k = Math.min((r.width - pad * 2) / W, (r.height - pad * 2) / H) * (bigView ? 1 : 0.4);
+  $('world').setAttribute('transform', `translate(${(r.width - W * k) / 2} ${(r.height - H * k) / 2}) scale(${k})`);
+}
+function go(s) { seed = s >>> 0; S = generate(seed); render(); }
+function randomize() { history.push(seed); if (history.length > 200) history.shift(); go((Math.random() * 0xFFFFFFFF) >>> 0); }
+function back() { if (history.length) go(history.pop()); }
+
+// ── Export: strokes + one gradient, card-sized, clipped ──────────────────
+function svgOut() {
+  const parts = Ring.paint(S, Ring.build(S));
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" fill="none">`,
+    `  <defs>${gradDef(S)}<clipPath id="card"><rect width="${W}" height="${H}" rx="${RAD}" ry="${RAD}"/></clipPath></defs>`,
+    `  <!-- ring lab simple · seed ${seed} · ${S._meta.style} · ${S.stroke.w}pt · ${S._meta.pal.join(' ')} @ ${S._meta.angle}deg -->`,
+    `  <g id="ring" stroke="url(#ringGrad)" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#card)">`,
+    parts.filter((p) => !p.dot).map((p) => `    <path d="${p.d}" stroke-width="${p.w}"${p.cap ? ` stroke-linecap="${p.cap}"` : ''}${p.opacity < 1 ? ` stroke-opacity="${p.opacity.toFixed(3)}"` : ''}/>`).join('\n'),
+    `  </g>`,
+    `</svg>`,
+  ].join('\n');
+}
+function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 1400); }
+async function copySVG() { try { await navigator.clipboard.writeText(svgOut()); toast('SVG COPIED'); } catch { toast('COPY FAILED'); } }
+function download() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([svgOut()], { type: 'image/svg+xml' })); a.download = `ring_simple_${seed}.svg`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 500); toast('DOWNLOADED'); }
+
+$('bRand').onclick = randomize;
+$('bSize').onclick = () => { bigView = !bigView; fit(); };
+function setLock(v) { lockStyle = v || null; document.querySelectorAll('#styles button').forEach((b) => b.classList.toggle('on', (b.dataset.s || null) === lockStyle)); randomize(); }
+$('styles').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) setLock(b.dataset.s); });
+document.querrySelectorAll_ = null; $('bBack').onclick = back; $('bCopy').onclick = copySVG; $('bDl').onclick = download;
+$('bOpen').onclick = () => { localStorage.setItem('ring-lab.state.v1', JSON.stringify({ S: Object.assign({}, S, { place: { scale: S._meta.scale, aspect: S.box.h / 486 / (S.box.w / 787) } }), view: { card: true, clip: true, dark: true, smooth: true } })); location.href = 'index.html'; };
+$('seed').addEventListener('change', () => { const v = parseInt($('seed').value, 10); if (!isNaN(v)) { history.push(seed); go(v); } });
+$('seed').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('seed').blur(); e.stopPropagation(); });
+window.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  const meta = e.metaKey || e.ctrlKey;
+  if (meta && e.key.toLowerCase() === 'c') { e.preventDefault(); copySVG(); }
+  else if (meta && e.key.toLowerCase() === 's') { e.preventDefault(); download(); }
+  else if (e.key === ' ' || e.key.toLowerCase() === 'r') { e.preventDefault(); randomize(); }
+  else if (e.key === 'ArrowLeft') back();
+  else if (e.key === 'F') { bigView = !bigView; fit(); }
+  else if ('0123456789'.includes(e.key)) setLock(STYLE_KEYS[+e.key]);
+});
+window.addEventListener('resize', fit);
+new ResizeObserver(fit).observe(document.querySelector('.bar'));
+
+document.querySelector('#styles button[data-s=""]').classList.add('on');
+const q = new URLSearchParams(location.search).get('seed');
+go(q ? parseInt(q, 10) : (Math.random() * 0xFFFFFFFF) >>> 0);
+</script>
+</body>
+</html>

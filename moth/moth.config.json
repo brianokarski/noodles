@@ -1,0 +1,78 @@
+{
+  "$schema": "./nova.schema.json",
+  "version": "1.0.0",
+  "brand": {
+    "name": "Your Brand",
+    "personality": {
+      "axes": {
+        "formal_playful": 0.5,
+        "traditional_modern": 0.5,
+        "serious_friendly": 0.5,
+        "luxury_accessible": 0.5,
+        "corporate_rebellious": 0.5
+      },
+      "keywords": ["innovative", "trustworthy", "bold"]
+    }
+  },
+  "agent": {
+    "creativity": 0.7,
+    "adherence": 0.9,
+    "verbosity": "detailed",
+    "explorationDepth": 3,
+    "variationCount": {
+      "ideation": 12,
+      "refinement": 4
+    }
+  },
+  "figma": {
+    "fileKey": "",
+    "accessToken": "${FIGMA_ACCESS_TOKEN}",
+    "teamId": "",
+    "projectId": "",
+    "pages": {
+      "tokens": "🎨 Tokens",
+      "components": "🧩 Components",
+      "patterns": "📐 Patterns",
+      "playground": "🎪 Playground"
+    }
+  },
+  "tokens": {
+    "source": "./src/tokens/primitives.json",
+    "output": {
+      "figma": true,
+      "css": true,
+      "json": true
+    },
+    "transforms": ["figma-variables", "css-custom-properties"]
+  },
+  "grid": {
+    "baseUnit": 4,
+    "columns": {
+      "mobile": 4,
+      "tablet": 8,
+      "desktop": 12
+    },
+    "gutters": {
+      "mobile": 16,
+      "tablet": 24,
+      "desktop": 32
+    },
+    "margins": {
+      "mobile": 16,
+      "tablet": 40,
+      "desktop": 80
+    }
+  },
+  "motion": {
+    "reducedMotion": true,
+    "defaultDuration": 200,
+    "defaultEasing": "ease-out-quart"
+  },
+  "constraints": {
+    "minContrast": 4.5,
+    "maxLineLength": 75,
+    "touchTargetMin": 44,
+    "focusVisible": true
+  }
+}
+

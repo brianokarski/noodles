@@ -1,0 +1,188 @@
+{
+  "$meta": {
+    "name": "Moth Motion Curves",
+    "description": "Easing functions that define the character of movement",
+    "version": "1.0.0"
+  },
+
+  "curves": {
+    "$description": "Cubic-bezier curves organized by intent",
+    
+    "standard": {
+      "$description": "General-purpose curves for most transitions",
+      
+      "ease": {
+        "name": "Standard Ease",
+        "value": "cubic-bezier(0.4, 0.0, 0.2, 1)",
+        "figma": [0.4, 0.0, 0.2, 1],
+        "description": "Balanced curve for general use"
+      },
+      "easeIn": {
+        "name": "Ease In",
+        "value": "cubic-bezier(0.4, 0.0, 1, 1)",
+        "figma": [0.4, 0.0, 1, 1],
+        "description": "Acceleration — element leaving the screen"
+      },
+      "easeOut": {
+        "name": "Ease Out",
+        "value": "cubic-bezier(0.0, 0.0, 0.2, 1)",
+        "figma": [0.0, 0.0, 0.2, 1],
+        "description": "Deceleration — element entering the screen"
+      },
+      "easeInOut": {
+        "name": "Ease In Out",
+        "value": "cubic-bezier(0.4, 0.0, 0.2, 1)",
+        "figma": [0.4, 0.0, 0.2, 1],
+        "description": "Symmetric curve for elements moving in view"
+      }
+    },
+
+    "expressive": {
+      "$description": "Curves with more personality for emphasis",
+      
+      "spring": {
+        "name": "Spring",
+        "value": "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+        "figma": [0.175, 0.885, 0.32, 1.275],
+        "description": "Slight overshoot for playful feel"
+      },
+      "bounce": {
+        "name": "Bounce",
+        "value": "cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+        "figma": [0.68, -0.55, 0.265, 1.55],
+        "description": "Strong overshoot for emphasis"
+      },
+      "elastic": {
+        "name": "Elastic",
+        "value": "cubic-bezier(0.175, 0.885, 0.32, 1.1)",
+        "figma": [0.175, 0.885, 0.32, 1.1],
+        "description": "Subtle elastic movement"
+      }
+    },
+
+    "dramatic": {
+      "$description": "Curves for impactful transitions",
+      
+      "slowStart": {
+        "name": "Slow Start",
+        "value": "cubic-bezier(0.7, 0.0, 0.2, 1)",
+        "figma": [0.7, 0.0, 0.2, 1],
+        "description": "Dramatic pause before movement"
+      },
+      "quickStart": {
+        "name": "Quick Start",
+        "value": "cubic-bezier(0.0, 0.0, 0.1, 1)",
+        "figma": [0.0, 0.0, 0.1, 1],
+        "description": "Immediate response, slow settle"
+      },
+      "anticipation": {
+        "name": "Anticipation",
+        "value": "cubic-bezier(0.68, -0.2, 0.265, 1.2)",
+        "figma": [0.68, -0.2, 0.265, 1.2],
+        "description": "Pull back before forward motion"
+      }
+    },
+
+    "functional": {
+      "$description": "Utility curves for specific use cases",
+      
+      "linear": {
+        "name": "Linear",
+        "value": "linear",
+        "figma": [0, 0, 1, 1],
+        "description": "Constant rate — use for opacity and color"
+      },
+      "snap": {
+        "name": "Snap",
+        "value": "cubic-bezier(0.2, 0.0, 0.0, 1)",
+        "figma": [0.2, 0.0, 0.0, 1],
+        "description": "Quick snap into place"
+      },
+      "smooth": {
+        "name": "Smooth",
+        "value": "cubic-bezier(0.25, 0.1, 0.25, 1)",
+        "figma": [0.25, 0.1, 0.25, 1],
+        "description": "CSS default ease equivalent"
+      }
+    }
+  },
+
+  "springs": {
+    "$description": "Spring physics configurations for natural motion",
+    
+    "gentle": {
+      "stiffness": 100,
+      "damping": 15,
+      "mass": 1,
+      "description": "Soft, relaxed movement"
+    },
+    "default": {
+      "stiffness": 200,
+      "damping": 20,
+      "mass": 1,
+      "description": "Standard spring feel"
+    },
+    "snappy": {
+      "stiffness": 300,
+      "damping": 30,
+      "mass": 1,
+      "description": "Quick, responsive spring"
+    },
+    "bouncy": {
+      "stiffness": 400,
+      "damping": 10,
+      "mass": 1,
+      "description": "Playful with overshoot"
+    },
+    "stiff": {
+      "stiffness": 500,
+      "damping": 40,
+      "mass": 1,
+      "description": "Precise, minimal bounce"
+    }
+  },
+
+  "usage": {
+    "$description": "Guidelines for curve selection",
+    
+    "byIntent": {
+      "enter": "standard.easeOut",
+      "exit": "standard.easeIn",
+      "move": "standard.ease",
+      "emphasis": "expressive.spring",
+      "celebration": "expressive.bounce",
+      "feedback": "functional.snap",
+      "color": "functional.linear",
+      "opacity": "functional.linear"
+    },
+    
+    "byComponent": {
+      "modal": {
+        "enter": "standard.easeOut",
+        "exit": "standard.easeIn"
+      },
+      "dropdown": {
+        "enter": "expressive.spring",
+        "exit": "functional.snap"
+      },
+      "toast": {
+        "enter": "expressive.spring",
+        "exit": "standard.easeIn"
+      },
+      "button": {
+        "hover": "functional.snap",
+        "active": "functional.snap",
+        "focus": "standard.ease"
+      },
+      "tooltip": {
+        "enter": "standard.easeOut",
+        "exit": "functional.snap"
+      },
+      "drawer": {
+        "enter": "standard.easeOut",
+        "exit": "standard.easeIn"
+      }
+    }
+  }
+}
+

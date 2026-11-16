@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PILL PAINTER</title>
+<style>
+  :root{
+    --ink:#f2f2f0;
+    --bg:#0a0a0a;
+    --panel:#111110;
+    --line:#242422;
+    --dim:#77776f;
+    --accent:#d6ff3f;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font:400 12px/1.35 ui-monospace,"SF Mono",Menlo,monospace;
+    letter-spacing:.04em;
+    display:grid;
+    grid-template-columns:250px 1fr;
+    overflow:hidden;
+  }
+
+  /* ---------- panel ---------- */
+  aside{
+    border-right:1px solid var(--line);
+    background:var(--panel);
+    display:flex;flex-direction:column;
+    overflow-y:auto;
+  }
+  .brand{
+    padding:18px 16px 14px;
+    border-bottom:1px solid var(--line);
+  }
+  .brand h1{
+    margin:0;font-size:13px;letter-spacing:.22em;font-weight:500;
+  }
+  .brand p{margin:6px 0 0;color:var(--dim);font-size:10.5px;letter-spacing:.06em}
+
+  section.grp{padding:14px 16px;border-bottom:1px solid var(--line)}
+  .grp > h2{
+    margin:0 0 12px;font-size:9.5px;letter-spacing:.24em;
+    color:var(--dim);font-weight:500;text-transform:uppercase;
+  }
+
+  .row{margin-bottom:13px}
+  .row:last-child{margin-bottom:0}
+  .row label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .row label span:first-child{color:var(--dim);font-size:10.5px}
+  .row label output{font-variant-numeric:tabular-nums;font-size:10.5px}
+
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:16px;background:transparent;cursor:ew-resize;
+  }
+  input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--line)}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:9px;height:16px;margin-top:-8px;
+    background:var(--ink);border:0;border-radius:1px;
+  }
+  input[type=range]:focus-visible{outline:1px solid var(--accent);outline-offset:4px}
+
+  .seg{display:grid;grid-auto-flow:column;border:1px solid var(--line)}
+  .seg button{
+    appearance:none;background:transparent;border:0;border-right:1px solid var(--line);
+    color:var(--dim);font:inherit;font-size:10px;letter-spacing:.1em;
+    padding:7px 4px;cursor:pointer;
+  }
+  .seg button:last-child{border-right:0}
+  .seg button[aria-pressed=true]{background:var(--ink);color:#0a0a0a}
+
+  .swatches{display:flex;gap:6px;flex-wrap:wrap}
+  .swatches button{
+    width:24px;height:24px;border-radius:50%;border:1px solid var(--line);cursor:pointer;padding:0;
+  }
+  .swatches button[aria-pressed=true]{box-shadow:0 0 0 1px var(--bg),0 0 0 2px var(--accent)}
+
+  .acts{display:grid;gap:6px;padding:14px 16px}
+  .acts button{
+    appearance:none;background:transparent;border:1px solid var(--line);color:var(--ink);
+    font:inherit;font-size:10px;letter-spacing:.14em;padding:9px;cursor:pointer;text-align:left;
+  }
+  .acts button:hover{border-color:var(--ink)}
+  .acts button.pri{background:var(--ink);color:#0a0a0a;border-color:var(--ink)}
+  .acts .kbd{float:right;color:var(--dim)}
+  .acts button.pri .kbd{color:#0a0a0a;opacity:.5}
+
+  footer{margin-top:auto;padding:14px 16px;color:var(--dim);font-size:10px;line-height:1.7}
+
+  /* ---------- stage ---------- */
+  main{position:relative;overflow:hidden}
+  canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
+  .hud{
+    position:absolute;left:16px;bottom:14px;color:var(--dim);font-size:10px;
+    letter-spacing:.12em;pointer-events:none;font-variant-numeric:tabular-nums;
+  }
+  .hint{
+    position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:10px;
+    pointer-events:none;transition:opacity .45s ease;
+  }
+  .hint.off{opacity:0}
+  .hint em{font-style:normal;letter-spacing:.3em;font-size:11px;color:#5b5b55}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand">
+    <h1>PILL PAINTER</h1>
+    <p>horizontal bars · evenly spaced</p>
+  </div>
+
+  <section class="grp">
+    <h2>Pill</h2>
+    <div class="row">
+      <label><span>length</span><output id="oLen"></output></label>
+      <input type="range" id="len" min="6" max="260" step="1" value="86">
+    </div>
+    <div class="row">
+      <label><span>thickness</span><output id="oThick"></output></label>
+      <input type="range" id="thick" min="2" max="80" step="1" value="18">
+    </div>
+    <div class="row">
+      <label><span>corner</span><output id="oRad"></output></label>
+      <input type="range" id="rad" min="0" max="100" step="1" value="100">
+    </div>
+  </section>
+
+  <section class="grp">
+    <h2>Spacing</h2>
+    <div class="row">
+      <label><span>step</span><output id="oStep"></output></label>
+      <input type="range" id="step" min="4" max="200" step="1" value="34">
+    </div>
+    <div class="row">
+      <label><span>path smoothing</span><output id="oSmooth"></output></label>
+      <input type="range" id="smooth" min="0" max="90" step="1" value="20">
+    </div>
+    <div class="row">
+      <label><span>jitter</span><output id="oJit"></output></label>
+      <input type="range" id="jit" min="0" max="40" step="1" value="0">
+    </div>
+  </section>
+
+  <section class="grp">
+    <h2>Step along</h2>
+    <div class="seg" id="modeSeg">
+      <button data-mode="rows" aria-pressed="true">ROWS ↕</button>
+      <button data-mode="path">PATH</button>
+    </div>
+  </section>
+
+  <section class="grp">
+    <h2>Paint</h2>
+    <div class="swatches" id="fg"></div>
+    <div class="row" style="margin-top:13px">
+      <label><span>opacity</span><output id="oAlpha"></output></label>
+      <input type="range" id="alpha" min="5" max="100" step="1" value="100">
+    </div>
+    <div class="row">
+      <label><span>taper</span><output id="oTaper"></output></label>
+      <input type="range" id="taper" min="0" max="100" step="1" value="0">
+    </div>
+  </section>
+
+  <div class="acts">
+    <button id="undo">UNDO <span class="kbd">⌘Z</span></button>
+    <button id="clear">CLEAR <span class="kbd">⇧C</span></button>
+    <button id="png" class="pri">EXPORT PNG <span class="kbd">E</span></button>
+    <button id="svg">EXPORT SVG <span class="kbd">S</span></button>
+  </div>
+
+  <footer>
+    drag up / down to stack bars<br>
+    hold ⇧ to lock a vertical column<br>
+    [ ] length · − = step
+  </footer>
+</aside>
+
+<main>
+  <canvas id="c"></canvas>
+  <div class="hud" id="hud">0 pills · 0 strokes</div>
+  <div class="hint" id="hint"><em>D R A G   T O   P A I N T</em></div>
+</main>
+
+<script>
+(() => {
+  const cv = document.getElementById('c');
+  const ctx = cv.getContext('2d');
+  const hud = document.getElementById('hud');
+  const hint = document.getElementById('hint');
+
+  const COLORS = ['#ffffff','#d6ff3f','#ff5c3a','#3f8cff','#ff9ed2','#111110'];
+  const BG = '#0a0a0a';
+
+  const S = {
+    len:86, thick:18, rad:100, step:34, smooth:20, jit:0,
+    mode:'rows', color:'#ffffff', alpha:100, taper:0
+  };
+
+  /* strokes: array of { pills:[{x,y,a,len,thick,rad,color,alpha}] } */
+  let strokes = [];
+  let active = null;      // in-progress stroke
+  let cursor = null;      // smoothed pen position
+  let anchor = null;      // last stamp position (for arc-length stepping)
+  let carry = 0;          // leftover distance
+  let travelled = 0;      // arc length of current stroke
+  let shiftLock = null;   // straight-line origin
+  let pen = null;         // raw pointer position
+  let dpr = 1;
+
+  /* ---------- canvas sizing ---------- */
+  function resize(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const r = cv.getBoundingClientRect();
+    cv.width = Math.round(r.width * dpr);
+    cv.height = Math.round(r.height * dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    render();
+  }
+  new ResizeObserver(resize).observe(cv.parentElement);
+
+  /* ---------- drawing ---------- */
+  function roundRect(x,y,w,h,r){
+    r = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x,y,w,h,r);
+    else {
+      ctx.moveTo(x+r,y);
+      ctx.arcTo(x+w,y,x+w,y+h,r);
+      ctx.arcTo(x+w,y+h,x,y+h,r);
+      ctx.arcTo(x,y+h,x,y,r);
+      ctx.arcTo(x,y,x+w,y,r);
+      ctx.closePath();
+    }
+  }
+
+  function stamp(p){
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.a);
+    ctx.globalAlpha = p.alpha;
+    ctx.fillStyle = p.color;
+    const r = (Math.min(p.len,p.thick)/2) * (p.rad/100);
+    roundRect(-p.len/2, -p.thick/2, p.len, p.thick, r);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function render(){
+    const w = cv.width/dpr, h = cv.height/dpr;
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = BG;
+    ctx.fillRect(0,0,w,h);
+    for (const s of strokes) for (const p of s.pills) stamp(p);
+    if (active) for (const p of active.pills) stamp(p);
+    updateHud();
+  }
+
+  function updateHud(){
+    const n = strokes.reduce((a,s)=>a+s.pills.length,0) + (active?active.pills.length:0);
+    hud.textContent = `${n} bars · ${strokes.length + (active?1:0)} strokes`;
+  }
+
+  /* ---------- stamping along the path ---------- */
+  function emit(x,y,segLen){
+    const t = S.taper/100;
+    const fade = t ? Math.max(0.08, 1 - t * Math.min(1, travelled/900)) : 1;
+    const j = S.jit;
+    const jx = j ? (Math.random()-.5)*j : 0;
+    const jy = j ? (Math.random()-.5)*j : 0;
+    const ja = j ? (Math.random()-.5)*(j/40)*Math.PI/2 : 0;
+    const p = {
+      x:x+jx, y:y+jy,
+      a: ja,                    // always horizontal
+      len: S.len * fade,
+      thick: S.thick * fade,
+      rad: S.rad,
+      color: S.color,
+      alpha: S.alpha/100
+    };
+    active.pills.push(p);
+    stamp(p);
+    travelled += segLen;
+  }
+
+  function extend(tx,ty){
+    // walk anchor -> target, stamping a horizontal bar every S.step.
+    // ROWS: step measured on vertical travel only, so rows are evenly
+    // spaced up/down no matter how much the pen wanders sideways.
+    const ax = anchor.x, ay = anchor.y;
+    const dx = tx-ax, dy = ty-ay;
+    const total = S.mode === 'rows' ? Math.abs(dy) : Math.hypot(dx,dy);
+    anchor = {x:tx, y:ty};
+    if (total < 0.001) return;             // no measured travel -> no stamp
+    let next = S.step - carry;             // travel until the next stamp
+    while (next <= total){
+      const f = next / total;              // fraction along this segment
+      emit(ax + dx*f, ay + dy*f, S.step);
+      next += S.step;
+    }
+    carry = total - (next - S.step);       // leftover toward the next stamp
+  }
+
+  /* ---------- pointer ---------- */
+  const pos = e => {
+    const r = cv.getBoundingClientRect();
+    return {x:e.clientX-r.left, y:e.clientY-r.top};
+  };
+
+  cv.addEventListener('pointerdown', e => {
+    cv.setPointerCapture(e.pointerId);
+    e.preventDefault();
+    const p = pos(e);
+    active = {pills:[]};
+    cursor = {...p};
+    anchor = {...p};
+    pen = {...p};
+    carry = 0;
+    travelled = 0;
+    shiftLock = e.shiftKey ? {...p} : null;
+    hint.classList.add('off');
+    emit(p.x, p.y, 0);       // first bar lands the instant you press
+    updateHud();
+  });
+
+  cv.addEventListener('pointermove', e => {
+    if (!active) return;
+    e.preventDefault();
+    const evs = (e.getCoalescedEvents ? e.getCoalescedEvents() : []);
+    for (const ev of (evs.length ? evs : [e])){
+      pen = pos(ev);
+      if (shiftLock){
+        // straight column: rebuild from the press point every move
+        active.pills.length = 0;
+        anchor = {...shiftLock};
+        cursor = {...shiftLock};
+        carry = 0; travelled = 0;
+        render();
+        emit(shiftLock.x, shiftLock.y, 0);
+        extend(shiftLock.x, pen.y);
+        continue;
+      }
+      // exponential smoothing, capped so the stamp never lags far behind
+      const k = 1 - (S.smooth/100) * 0.75;
+      cursor.x += (pen.x - cursor.x) * k;
+      cursor.y += (pen.y - cursor.y) * k;
+      extend(cursor.x, cursor.y);
+    }
+    updateHud();
+  });
+
+  function endStroke(){
+    if (!active) return;
+    if (pen && !shiftLock) extend(pen.x, pen.y);   // catch up to the real pen
+    if (active.pills.length) strokes.push(active);
+    active = null; shiftLock = null; pen = null;
+    render();
+  }
+  cv.addEventListener('pointerup', endStroke);
+  cv.addEventListener('pointercancel', endStroke);
+
+  /* ---------- controls ---------- */
+  const bind = (id, key, fmt) => {
+    const el = document.getElementById(id);
+    const out = document.getElementById('o'+id[0].toUpperCase()+id.slice(1));
+    const sync = () => { S[key] = +el.value; out.textContent = fmt(+el.value); };
+    el.addEventListener('input', sync);
+    sync();
+    return el;
+  };
+  const px = v => v+'px', pc = v => v+'%';
+  const ctl = {
+    len:   bind('len','len',px),
+    thick: bind('thick','thick',px),
+    rad:   bind('rad','rad',pc),
+    step:  bind('step','step',px),
+    smooth:bind('smooth','smooth',pc),
+    jit:   bind('jit','jit',px),
+    alpha: bind('alpha','alpha',pc),
+    taper: bind('taper','taper',pc),
+  };
+
+  document.getElementById('modeSeg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    S.mode = b.dataset.mode;
+    [...b.parentNode.children].forEach(x => x.setAttribute('aria-pressed', x===b));
+  });
+
+  const fg = document.getElementById('fg');
+  COLORS.forEach((c,i) => {
+    const b = document.createElement('button');
+    b.style.background = c;
+    b.setAttribute('aria-pressed', i===0);
+    b.title = c;
+    b.onclick = () => {
+      S.color = c;
+      [...fg.children].forEach(x => x.setAttribute('aria-pressed', x===b));
+    };
+    fg.appendChild(b);
+  });
+
+  document.getElementById('undo').onclick  = () => { strokes.pop(); render(); };
+  document.getElementById('clear').onclick = () => { strokes = []; render(); };
+
+  function download(url, name){
+    const a = document.createElement('a');
+    a.href = url; a.download = name; a.click();
+  }
+  document.getElementById('png').onclick = () =>
+    download(cv.toDataURL('image/png'), 'pill-painter.png');
+
+  document.getElementById('svg').onclick = () => {
+    const w = cv.width/dpr, h = cv.height/dpr;
+    let out = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`;
+    out += `<rect width="${w}" height="${h}" fill="${BG}"/>`;
+    for (const s of strokes) for (const p of s.pills){
+      const r = (Math.min(p.len,p.thick)/2)*(p.rad/100);
+      out += `<rect x="${(-p.len/2).toFixed(2)}" y="${(-p.thick/2).toFixed(2)}"`
+           + ` width="${p.len.toFixed(2)}" height="${p.thick.toFixed(2)}" rx="${r.toFixed(2)}"`
+           + ` fill="${p.color}"${p.alpha<1?` fill-opacity="${p.alpha.toFixed(2)}"`:''}`
+           + ` transform="translate(${p.x.toFixed(2)} ${p.y.toFixed(2)}) rotate(${(p.a*180/Math.PI).toFixed(2)})"/>`;
+    }
+    out += '</svg>';
+    download(URL.createObjectURL(new Blob([out],{type:'image/svg+xml'})), 'pill-painter.svg');
+  };
+
+  /* ---------- keys ---------- */
+  const nudge = (el, d) => {
+    el.value = Math.max(+el.min, Math.min(+el.max, +el.value + d));
+    el.dispatchEvent(new Event('input'));
+  };
+  addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT') return;
+    const k = e.key;
+    if ((e.metaKey||e.ctrlKey) && k.toLowerCase()==='z'){ e.preventDefault(); strokes.pop(); render(); return; }
+    if (k === 'C' ){ strokes=[]; render(); }
+    else if (k === '[' ) nudge(ctl.len,-6);
+    else if (k === ']' ) nudge(ctl.len, 6);
+    else if (k === '-' ) nudge(ctl.step,-2);
+    else if (k === '=' ) nudge(ctl.step, 2);
+    else if (k.toLowerCase() === 'e') document.getElementById('png').click();
+    else if (k.toLowerCase() === 's') document.getElementById('svg').click();
+    else if (k === 'Tab'){ e.preventDefault();
+      document.querySelector(`[data-mode="${S.mode==='rows'?'path':'rows'}"]`).click();
+    }
+  });
+
+  resize();
+})();
+</script>
+</body>
+</html>

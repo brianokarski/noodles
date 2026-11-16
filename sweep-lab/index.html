@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>SWEEP LAB — line objects</title>
+<style>
+  :root{
+    --ink:#f2f2f0; --bg:#0d0d0c; --panel:#141413; --line:#262624;
+    --dim:#78786f; --accent:#d6ff3f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{
+    background:var(--bg);color:var(--ink);
+    font:400 11px/1.35 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.03em;
+    display:grid;grid-template-columns:252px 1fr;
+    user-select:none;-webkit-user-select:none;
+  }
+  aside{border-right:1px solid var(--line);background:var(--panel);overflow-y:auto;display:flex;flex-direction:column}
+  .brand{padding:13px 14px 11px;border-bottom:1px solid var(--line)}
+  .brand h1{margin:0;font-size:12px;letter-spacing:.22em;font-weight:500}
+  .brand p{margin:5px 0 0;color:var(--dim);font-size:9.5px}
+  section{padding:12px 14px;border-bottom:1px solid var(--line)}
+  section>h2{margin:0 0 10px;font-size:9px;letter-spacing:.24em;color:var(--dim);font-weight:500}
+  section>h3{margin:11px 0 6px;font-size:8.5px;letter-spacing:.2em;color:#5a5a53;font-weight:400}
+
+  .ctl{margin-bottom:11px}
+  .ctl:last-child{margin-bottom:0}
+  .ctl .top{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+  .ctl .chk{flex:none;width:12px;height:12px;border:1px solid #3a3a35;background:none;
+    cursor:pointer;padding:0;border-radius:2px}
+  .ctl .chk.on{background:var(--accent);border-color:var(--accent)}
+  .ctl .lbl{flex:1;color:var(--dim);font-size:10px;cursor:ew-resize;padding:2px 0}
+  .ctl .lbl:hover{color:var(--ink)}
+  .ctl .box{display:flex;align-items:baseline;gap:2px;border:1px solid var(--line);
+    background:#0d0d0c;padding:3px 5px;min-width:58px;justify-content:flex-end}
+  .ctl .box:focus-within{border-color:var(--accent)}
+  .ctl input{background:none;border:0;color:var(--ink);font:inherit;font-size:10.5px;
+    text-align:right;width:40px;padding:0;font-variant-numeric:tabular-nums;outline:none}
+  .ctl .u{color:var(--dim);font-size:9.5px}
+  .ctl .track{position:relative;height:16px;cursor:ew-resize;touch-action:none}
+  .ctl .track::before{content:'';position:absolute;left:0;right:0;top:7px;height:3px;
+    background:#2c2c28;border-radius:2px}
+  .ctl .fill{position:absolute;left:0;top:7px;height:3px;background:#4d5231;border-radius:2px}
+  .ctl .knob{position:absolute;top:1px;width:12px;height:14px;margin-left:-6px;border-radius:3px;
+    background:var(--ink)}
+  .ctl .track:hover .knob,.ctl.live .knob{background:var(--accent)}
+
+  .seg{display:grid;grid-auto-flow:column;border:1px solid var(--line)}
+  .seg button{background:none;border:0;border-right:1px solid var(--line);color:var(--dim);
+    font:inherit;font-size:9.5px;letter-spacing:.06em;padding:8px 2px;cursor:pointer;white-space:nowrap}
+  .seg button:last-child{border-right:0}
+  .seg button:hover{color:var(--ink)}
+  .seg button.on{background:var(--ink);color:#0d0d0c}
+
+  .pal{display:flex;gap:5px;flex-wrap:wrap;flex:1}
+  .cline{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .cline b{font-weight:400;color:var(--dim);font-size:10px;width:14px}
+  .pal button{width:22px;height:22px;border-radius:3px;border:1px solid #33332f;padding:0;cursor:pointer}
+  .pal button.on{box-shadow:0 0 0 1px var(--panel),0 0 0 2px var(--accent)}
+
+  .acts{padding:12px 14px;display:grid;gap:6px}
+  .acts button{background:none;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:9.5px;
+    letter-spacing:.13em;padding:9px;cursor:pointer;text-align:left}
+  .acts button:hover{border-color:var(--ink)}
+  .acts button.pri{background:var(--accent);color:#0d0d0c;border-color:var(--accent);font-weight:500}
+  .acts .k{float:right;color:var(--dim)}
+  .acts .pri .k{color:#0d0d0c;opacity:.55}
+  footer{margin-top:auto;padding:12px 14px;color:var(--dim);font-size:9.5px;line-height:1.7;border-top:1px solid var(--line)}
+
+  main{position:relative;overflow:hidden;background:#000}
+  canvas#c{position:absolute;inset:0;width:100%;height:100%}
+  .hud{position:absolute;left:12px;bottom:10px;color:#6b6b62;font-size:9.5px;letter-spacing:.12em;
+    pointer-events:none;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand">
+    <h1>SWEEP LAB</h1>
+    <p>one curve, swept into an object</p>
+  </div>
+
+  <section>
+    <h2>PRESETS</h2>
+    <div class="seg" id="presets" style="margin-bottom:6px">
+      <button data-p="torus">TORUS</button>
+      <button data-p="disc">DISC</button>
+      <button data-p="spiral">SPIRAL</button>
+      <button data-p="sphere">SPHERE</button>
+    </div>
+    <div class="seg" id="presets2">
+      <button data-p="ribbon">RIBBON</button>
+      <button data-p="rosette">ROSETTE</button>
+      <button data-p="moire">MOIRE</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>OBJECT</h2>
+    <h3>SWEEP</h3>
+    <div class="seg" id="family" style="margin-bottom:10px">
+      <button data-v="torus" class="on">TORUS</button>
+      <button data-v="sphere">SPHERE</button>
+      <button data-v="ribbon">RIBBON</button>
+      <button data-v="fan">FAN</button>
+    </div>
+    <h3>CURVE</h3>
+    <div class="seg" id="curve" style="margin-bottom:12px">
+      <button data-v="circle" class="on">CIRCLE</button>
+      <button data-v="squircle">SQUIRCLE</button>
+      <button data-v="lens">LENS</button>
+      <button data-v="tri">TRI</button>
+    </div>
+    <div class="ctls" data-keys="count,sweep,twist,taper,radius,lift"></div>
+  </section>
+
+  <section>
+    <h2>VIEW</h2>
+    <div class="seg" id="look" style="margin-bottom:12px">
+      <button data-v="axis">STRAIGHT ON</button>
+      <button data-v="side">SIDE</button>
+      <button data-v="three">THREE-QUARTER</button>
+    </div>
+    <div class="ctls" data-keys="tilt,turn,persp,size"></div>
+  </section>
+
+  <section>
+    <h2>STROKE</h2>
+    <div class="ctls" data-keys="w1"></div>
+    <h3>COLOUR</h3>
+    <div class="seg" id="gmode" style="margin-bottom:10px">
+      <button data-v="flat" class="on">SOLID</button>
+      <button data-v="line">ALONG LINE</button>
+      <button data-v="sweep">ACROSS SWEEP</button>
+    </div>
+    <div class="cline"><b>A</b><div class="pal" data-slot="inkA"></div></div>
+    <div class="cline"><b>B</b><div class="pal" data-slot="inkB"></div></div>
+    <div class="ctls" data-keys="gshift,gcycles" style="margin-top:10px"></div>
+    <h3>REVEAL</h3>
+    <div class="ctls" data-keys="draw"></div>
+    <h3>MIRROR</h3>
+    <div class="seg" id="mirror">
+      <button data-v="none" class="on">NONE</button>
+      <button data-v="x">LEFT&ndash;RIGHT</button>
+      <button data-v="xy">FOURFOLD</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>SECOND SWEEP</h2>
+    <div class="ctls" data-keys="ghost,gscale"></div>
+  </section>
+
+  <section>
+    <h2>PAGE</h2>
+    <div class="pal" data-slot="bg"></div>
+  </section>
+
+  <div class="acts">
+    <button id="rand">RANDOMIZE <span class="k">R</span></button>
+    <button id="reset">RESET DIALS</button>
+    <button id="stopAnim">STOP ANIMATION</button>
+    <button id="expsvg">EXPORT SVG <span class="k">S</span></button>
+    <button id="exppng" class="pri">EXPORT PNG <span class="k">E</span></button>
+  </div>
+
+  <footer>
+    every line is the same curve.<br>
+    COUNT is how many, SWEEP is how<br>
+    far they travel, TWIST turns each<br>
+    one a little more than the last.<br>
+    ALONG LINE runs A&rarr;B down each<br>
+    line; ACROSS SWEEP runs it through<br>
+    the family. SHIFT slides it.<br>
+    SPIRAL LIFT climbs the axis: aligned<br>
+    STRAIGHT ON, a helix when tilted.<br>
+    animate TILT to watch it open.<br>
+    drag the canvas to look around it.
+  </footer>
+</aside>
+
+<main>
+  <canvas id="c"></canvas>
+  <div class="hud" id="hud"></div>
+</main>
+
+<script>
+(function(){
+"use strict";
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),hud=document.getElementById('hud');
+const TAU=Math.PI*2;
+
+const SWATCH=['#000000','#ffffff','#b9b9b9','#5a5a5a','#2a55c9','#7fa4ff','#d8c27a','#1f6f5c','#c3452b','#0b1020'];
+let colors={inkA:'#000000',inkB:'#b9b9b9',bg:'#ffffff'};
+let gmode='flat';
+
+const SPEC={
+  count:['lines',2,240,1,'',0],
+  sweep:['sweep',5,360,1,'\u00b0',0],
+  twist:['twist',-360,360,1,'\u00b0',0],
+  taper:['scale change',-80,80,1,'%',0],
+  radius:['ring radius',0,100,1,'%',0],
+  lift:['spiral lift',-150,150,1,'%',0],
+  tilt:['tilt',-90,90,0.5,'\u00b0',1],
+  turn:['turn',-180,180,0.5,'\u00b0',1],
+  persp:['perspective',0,100,1,'%',0],
+  size:['size',20,140,1,'%',0],
+  w1:['stroke width',0.2,20,0.1,'px',1],
+  gshift:['gradient shift',0,100,1,'%',0],
+  gcycles:['gradient cycles',1,8,1,'',0],
+  draw:['draw on',0,100,0.5,'%',1],
+  ghost:['offset',0,90,0.5,'\u00b0',1],
+  gscale:['scale',50,150,1,'%',0]
+};
+const DEF={count:48,sweep:360,twist:0,taper:0,radius:55,lift:0,
+           tilt:-22,turn:18,persp:35,size:78,
+           w1:2.2,gshift:0,gcycles:1,draw:100,
+           ghost:0,gscale:100};
+const P=Object.assign({},DEF);
+let family='torus',curve='circle',mirror='none';
+let board={w:1400,h:1400};
+let view={s:1,ox:0,oy:0},dpr=1,hist=[];
+
+const stateStr=()=>JSON.stringify({P:P,family:family,curve:curve,mirror:mirror,colors:colors,gmode:gmode});
+function push(){hist.push(stateStr());if(hist.length>60)hist.shift();}
+function undo(){const h=hist.pop();if(!h)return;const o=JSON.parse(h);
+  Object.assign(P,o.P);family=o.family;curve=o.curve;mirror=o.mirror;colors=o.colors;gmode=o.gmode;
+  syncSegs();syncAll();draw();}
+
+/* ================= dials ================= */
+const UI={};
+function fmt(k,v){const d=SPEC[k][5];return d?v.toFixed(d):String(Math.round(v));}
+function clampStep(k,v){
+  const [,mn,mx,st]=SPEC[k];
+  v=Math.max(mn,Math.min(mx,v));
+  return +(Math.round(v/st)*st).toFixed(4);
+}
+function setVal(k,v,o){
+  o=o||{};
+  const nv=clampStep(k,v);
+  if(nv===P[k]&&!o.force) return;
+  P[k]=nv;paintCtl(k);
+  if(!o.silent) draw();
+}
+function paintCtl(k){
+  const u=UI[k];if(!u)return;
+  const [,mn,mx]=SPEC[k];
+  const t=(P[k]-mn)/(mx-mn);
+  u.fill.style.width=(t*100)+'%';u.knob.style.left=(t*100)+'%';
+  if(document.activeElement!==u.input) u.input.value=fmt(k,P[k]);
+}
+let armed=true;
+function pushOnce(){if(armed){push();armed=false;}}
+function buildCtl(k){
+  const [label,mn,mx,st]=SPEC[k];
+  const el=document.createElement('div');
+  el.className='ctl';
+  el.innerHTML='<div class="top"><button class="chk" title="animate"></button>'+
+    '<div class="lbl">'+label+'</div>'+
+    '<div class="box"><input inputmode="decimal" spellcheck="false"><span class="u">'+SPEC[k][4]+'</span></div></div>'+
+    '<div class="track"><div class="fill"></div><div class="knob"></div></div>';
+  const input=el.querySelector('input'),track=el.querySelector('.track'),lbl=el.querySelector('.lbl');
+  UI[k]={el:el,input:input,fill:el.querySelector('.fill'),knob:el.querySelector('.knob')};
+  const factor=e=>e.shiftKey?0.1:(e.altKey?10:1);
+  const commit=()=>{const n=parseFloat(input.value);if(isFinite(n))setVal(k,n,{force:true});paintCtl(k);};
+  input.addEventListener('focus',()=>input.select());
+  input.addEventListener('change',commit);
+  input.addEventListener('blur',commit);
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){commit();input.blur();e.preventDefault();}
+    else if(e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();
+      pushOnce();setVal(k,P[k]+(e.key==='ArrowUp'?1:-1)*st*(e.shiftKey?10:1),{force:true});}
+    else if(e.key==='Escape'){input.value=fmt(k,P[k]);input.blur();}
+    e.stopPropagation();
+  });
+  track.addEventListener('pointerdown',e=>{
+    e.preventDefault();track.setPointerCapture(e.pointerId);
+    pushOnce();el.classList.add('live');
+    const r=track.getBoundingClientRect();
+    const fromX=x=>mn+((x-r.left)/r.width)*(mx-mn);
+    let last=fromX(e.clientX);
+    setVal(k,last,{force:true});
+    const move=ev=>{const rawv=fromX(ev.clientX),f=factor(ev);
+      if(f===1){setVal(k,rawv);last=rawv;}else{setVal(k,P[k]+(rawv-last)*f);last=rawv;}};
+    const up=()=>{track.removeEventListener('pointermove',move);
+      track.removeEventListener('pointerup',up);el.classList.remove('live');armed=true;};
+    track.addEventListener('pointermove',move);
+    track.addEventListener('pointerup',up);
+  });
+  lbl.addEventListener('pointerdown',e=>{
+    e.preventDefault();lbl.setPointerCapture(e.pointerId);
+    pushOnce();el.classList.add('live');
+    let px=e.clientX,start=P[k],acc=0;
+    const move=ev=>{acc+=(ev.clientX-px)*st*factor(ev);px=ev.clientX;setVal(k,start+acc);};
+    const up=()=>{lbl.removeEventListener('pointermove',move);
+      lbl.removeEventListener('pointerup',up);el.classList.remove('live');armed=true;};
+    lbl.addEventListener('pointermove',move);
+    lbl.addEventListener('pointerup',up);
+  });
+  el.addEventListener('wheel',e=>{e.preventDefault();pushOnce();
+    setVal(k,P[k]+(e.deltaY<0?1:-1)*st*(e.shiftKey?10:1));},{passive:false});
+  el.querySelector('.chk').onclick=function(){
+    if(anim[k]){delete anim[k];this.classList.remove('on');}
+    else{const [,a,b]=SPEC[k];anim[k]={u:(P[k]-a)/(b-a),dir:1};this.classList.add('on');startAnim();}
+  };
+  paintCtl(k);
+  return el;
+}
+const anim={};
+let rafId=null,lastTs=0;
+function startAnim(){if(rafId==null){lastTs=0;rafId=requestAnimationFrame(tick);}}
+function tick(ts){
+  if(!lastTs)lastTs=ts;
+  const dt=Math.min(.1,(ts-lastTs)/1000);lastTs=ts;
+  const keys=Object.keys(anim);
+  if(!keys.length){rafId=null;return;}
+  keys.forEach(k=>{const a=anim[k],[,mn,mx]=SPEC[k];
+    /* turn wraps; everything else bounces */
+    if(k==='turn'){a.u+=dt/12;if(a.u>1)a.u-=1;}
+    else{a.u+=(dt/7)*a.dir;if(a.u>1){a.u=2-a.u;a.dir=-1;}if(a.u<0){a.u=-a.u;a.dir=1;}}
+    setVal(k,mn+a.u*(mx-mn),{force:true,silent:true});});
+  draw();
+  rafId=requestAnimationFrame(tick);
+}
+function stopAnim(){
+  Object.keys(anim).forEach(k=>delete anim[k]);
+  document.querySelectorAll('.ctl .chk.on').forEach(c=>c.classList.remove('on'));
+}
+document.querySelectorAll('.ctls').forEach(host=>{
+  host.dataset.keys.split(',').forEach(k=>host.appendChild(buildCtl(k.trim())));
+});
+const syncAll=()=>Object.keys(SPEC).forEach(paintCtl);
+
+/* ================= the object ================= */
+const N=360;                       /* points per curve */
+function baseCurve(){
+  const pts=new Array(N+1);
+  for(let i=0;i<=N;i++){
+    const t=i/N*TAU;
+    let x=Math.cos(t),y=Math.sin(t);
+    if(curve==='squircle'){
+      const n=4,c=Math.cos(t),s=Math.sin(t);
+      x=Math.sign(c)*Math.pow(Math.abs(c),2/n);
+      y=Math.sign(s)*Math.pow(Math.abs(s),2/n);
+    }else if(curve==='lens'){
+      /* a true lens: two equal circular arcs meeting at (-1,0) and (1,0) */
+      const bulge=0.42;
+      const R=(1+bulge*bulge)/(2*bulge),cy=R-bulge;
+      const half=Math.asin(1/R);
+      const u=i/N;
+      if(u<0.5){
+        /* upper arc: centre sits below, arc bows up to y=-bulge, left->right */
+        const a=-Math.PI/2+(u/0.5-0.5)*2*half;
+        x=R*Math.cos(a);y=cy+R*Math.sin(a);
+      }else{
+        /* lower arc: centre sits above, arc bows down to y=+bulge, right->left */
+        const a=Math.PI/2+((u-0.5)/0.5-0.5)*2*half;
+        x=R*Math.cos(a);y=-cy+R*Math.sin(a);
+      }
+    }else if(curve==='tri'){
+      const r=0.92/Math.cos(((t+Math.PI/2)%(TAU/3))-Math.PI/3);
+      const rr=0.55+0.45*Math.min(1,r);
+      x=Math.cos(t)*rr*1.08;y=Math.sin(t)*rr*1.08;
+    }
+    pts[i]=[x,y,0];
+  }
+  return pts;
+}
+const rotX=(p,a)=>{const c=Math.cos(a),s=Math.sin(a);return [p[0],p[1]*c-p[2]*s,p[1]*s+p[2]*c];};
+const rotY=(p,a)=>{const c=Math.cos(a),s=Math.sin(a);return [p[0]*c+p[2]*s,p[1],-p[0]*s+p[2]*c];};
+const rotZ=(p,a)=>{const c=Math.cos(a),s=Math.sin(a);return [p[0]*c-p[1]*s,p[0]*s+p[1]*c,p[2]];};
+
+/* pose copy k of n in object space */
+function pose(p,k,n,ring){
+  const t=n>1?k/(n-1):0;
+  const sw=P.sweep*Math.PI/180;
+  const a=(t-0.5)*sw;
+  const tw=t*P.twist*Math.PI/180;
+  const sc=1+(P.taper/100)*(t-0.5)*2;
+  let q=[p[0]*sc,p[1]*sc,p[2]*sc];
+  q=rotZ(q,tw);
+  /* spiral lift: each copy climbs a little further along the object's own
+     axis. looking straight down that axis the climb projects to nothing,
+     so the lines sit aligned; tilt the object and the helix shows. */
+  const lift=(P.lift/100)*(t-0.5)*2;
+  if(family==='torus'){
+    /* the curve sits in the x/z plane, offset out along x, spun about y */
+    q=[q[0]*0.45+ring,0,q[1]*0.45];
+    q=rotY(q,a);
+    q=[q[0],q[1]+lift*0.8,q[2]];
+  }else if(family==='sphere'){
+    /* rings of latitude: radius follows the sine of the sweep */
+    const lat=a;
+    const r=Math.cos(lat),y=Math.sin(lat);
+    q=[q[0]*r*0.98,y*0.98+lift*0.6,q[1]*r*0.98];
+  }else if(family==='ribbon'){
+    /* stacked along z; the sweep bends the stack into an arc */
+    q=[q[0]*0.72,q[1]*0.72,0];
+    const R=1.0/Math.max(0.15,sw/Math.PI);
+    q=[q[0],q[1]+R,q[2]];
+    q=rotX(q,a);
+    const meanY=sw>1e-6?R*Math.sin(sw/2)/(sw/2):R;
+    q=[q[0]+lift*0.9,q[1]-meanY,q[2]];
+  }else{
+    /* fan: hinged on the x axis, pages rotate open about it */
+    q=[q[0],q[1]*0.5+ring*0.5,0];
+    q=rotX(q,a);
+    q=[q[0]+lift*0.9,q[1],q[2]];
+  }
+  return q;
+}
+function project(q,S){
+  const tl=P.tilt*Math.PI/180,tn=P.turn*Math.PI/180;
+  let r=rotY(q,tn);r=rotX(r,tl);
+  const pr=P.persp/100*0.75;
+  const s=1/(1+r[2]*pr*0.5);
+  return {x:board.w/2+r[0]*S*s,y:board.h/2+r[1]*S*s,z:r[2],s:s};
+}
+function buildSweep(spinOffset,scaleMul){
+  const base=baseCurve();
+  const n=Math.max(2,Math.round(P.count));
+  const S=Math.min(board.w,board.h)*0.5*(P.size/100)*scaleMul;
+  const ring=P.radius/100;
+  const out=[];
+  for(let k=0;k<n;k++){
+    const t=n>1?k/(n-1):0;
+    const pts=new Array(N+1);
+    let zsum=0;
+    for(let i=0;i<=N;i++){
+      let q=pose(base[i],k,n,ring);
+      if(spinOffset) q=rotY(q,spinOffset);
+      const pr=project(q,S);
+      pts[i]=pr;zsum+=pr.z;
+    }
+    out.push({pts:pts,t:t,z:zsum/(N+1)});
+  }
+  return out;
+}
+
+/* ================= render ================= */
+function hexRGB(h){return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+function mix(a,b,t){return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
+const rgb=c=>'rgb('+Math.round(c[0])+','+Math.round(c[1])+','+Math.round(c[2])+')';
+/* colour at fraction u (0..1) of a line, for copy t (0..1) of the family */
+function inkAt(u,t){
+  if(gmode==='flat') return colors.inkA;
+  const A=hexRGB(colors.inkA),B=hexRGB(colors.inkB);
+  let s=gmode==='line'?u:t;
+  s=(s*P.gcycles+P.gshift/100)%1;
+  const tri=s<0.5?s*2:2-s*2;           /* A -> B -> A so cycles join */
+  return rgb(mix(A,B,P.gcycles===1&&gmode==='sweep'?s:tri));
+}
+const CH=24;                            /* colour chunks per line */
+function drawFamily(g,fam,ghostAlpha){
+  /* far to near, so the near lines sit on top */
+  const order=fam.slice().sort((a,b)=>b.z-a.z);
+  const drawAmt=P.draw/100;
+  g.globalAlpha=ghostAlpha;
+  g.lineWidth=P.w1;
+  order.forEach(c=>{
+    const e=Math.max(0,Math.min(1,drawAmt*1.35-c.t*0.35));
+    if(e<=0) return;
+    const end=Math.max(2,Math.round(e*N));
+    if(gmode!=='line'){
+      g.strokeStyle=inkAt(0,c.t);
+      g.beginPath();
+      g.moveTo(c.pts[0].x,c.pts[0].y);
+      for(let i=1;i<=end;i++) g.lineTo(c.pts[i].x,c.pts[i].y);
+      g.stroke();
+      return;
+    }
+    /* gradient travels along the line: draw it in short overlapping runs */
+    const per=Math.max(2,Math.ceil(N/CH));
+    for(let s=0;s<end;s+=per){
+      const s1=Math.min(end,s+per);
+      if(s1<=s) continue;
+      g.strokeStyle=inkAt((s+s1)/2/N,c.t);
+      g.beginPath();
+      g.moveTo(c.pts[s].x,c.pts[s].y);
+      for(let i=s+1;i<=s1;i++) g.lineTo(c.pts[i].x,c.pts[i].y);
+      g.stroke();
+    }
+  });
+}
+function renderContent(g){
+  g.fillStyle=colors.bg;g.fillRect(0,0,board.w,board.h);
+  g.lineCap='round';g.lineJoin='round';
+  const fam=buildSweep(0,1);
+  const ghost=P.ghost>0?buildSweep(P.ghost*Math.PI/180,P.gscale/100):null;
+  const passes=mirror==='none'?[[1,1]]:mirror==='x'?[[1,1],[-1,1]]:[[1,1],[-1,1],[1,-1],[-1,-1]];
+  passes.forEach(([sx,sy])=>{
+    g.save();
+    g.translate(board.w/2,board.h/2);g.scale(sx,sy);g.translate(-board.w/2,-board.h/2);
+    if(ghost) drawFamily(g,ghost,1);
+    drawFamily(g,fam,1);
+    g.restore();
+  });
+  g.globalAlpha=1;
+  return fam;
+}
+function fit(){
+  dpr=Math.min(window.devicePixelRatio||1,2);
+  const r=cv.parentElement.getBoundingClientRect();
+  cv.width=Math.round(r.width*dpr);cv.height=Math.round(r.height*dpr);
+  const pad=28;
+  view.s=Math.min((r.width-pad*2)/board.w,(r.height-pad*2)/board.h);
+  view.ox=(r.width-board.w*view.s)/2;view.oy=(r.height-board.h*view.s)/2;
+  draw();
+}
+new ResizeObserver(fit).observe(document.querySelector('main'));
+function draw(){
+  const W=cv.width/dpr,H=cv.height/dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.translate(view.ox,view.oy);ctx.scale(view.s,view.s);
+  ctx.beginPath();ctx.rect(0,0,board.w,board.h);ctx.clip();
+  const fam=renderContent(ctx);
+  ctx.restore();
+  hud.textContent=family.toUpperCase()+' \u00b7 '+curve+' \u00b7 '+fam.length+' lines \u00b7 sweep '
+    +Math.round(P.sweep)+'\u00b0'+(P.twist?' twist '+Math.round(P.twist)+'\u00b0':'')
+    +' \u00b7 tilt '+P.tilt.toFixed(0)+'\u00b0 turn '+P.turn.toFixed(0)+'\u00b0'
+    +(P.lift?' \u00b7 lift '+Math.round(P.lift)+'%':'')
+    +(P.ghost>0?' \u00b7 second sweep +'+P.ghost.toFixed(1)+'\u00b0':'')
+    +(mirror!=='none'?' \u00b7 mirror '+mirror:'');
+}
+
+/* drag to orbit */
+let orbit=null;
+cv.addEventListener('pointerdown',e=>{
+  cv.setPointerCapture(e.pointerId);pushOnce();
+  orbit={x:e.clientX,y:e.clientY,tn:P.turn,tl:P.tilt};
+});
+cv.addEventListener('pointermove',e=>{
+  if(!orbit)return;
+  setVal('turn',orbit.tn+(e.clientX-orbit.x)*0.3,{force:true,silent:true});
+  setVal('tilt',orbit.tl-(e.clientY-orbit.y)*0.3,{force:true,silent:true});
+  draw();
+});
+cv.addEventListener('pointerup',()=>{orbit=null;armed=true;});
+cv.addEventListener('pointercancel',()=>{orbit=null;armed=true;});
+
+/* ================= chrome ================= */
+const segOn=(id,val)=>document.querySelectorAll('#'+id+' button')
+  .forEach(b=>b.classList.toggle('on',b.dataset.v===val));
+function syncSegs(){segOn('family',family);segOn('curve',curve);segOn('mirror',mirror);segOn('gmode',gmode);paintPal();}
+document.getElementById('family').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  push();family=b.dataset.v;segOn('family',family);draw();};
+document.getElementById('curve').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  push();curve=b.dataset.v;segOn('curve',curve);draw();};
+document.getElementById('mirror').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  push();mirror=b.dataset.v;segOn('mirror',mirror);draw();};
+/* canned viewpoints: straight down the object's axis, the lift disappears */
+const LOOKS={
+  axis:{torus:[-90,0],sphere:[-90,0],ribbon:[0,90],fan:[0,90]},
+  side:{torus:[0,0],sphere:[0,0],ribbon:[0,0],fan:[0,0]},
+  three:{torus:[-32,26],sphere:[-24,30],ribbon:[-16,34],fan:[-28,22]}
+};
+document.getElementById('look').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  push();const v=LOOKS[b.dataset.v][family];
+  setVal('tilt',v[0],{force:true,silent:true});setVal('turn',v[1],{force:true,silent:true});
+  syncAll();draw();};
+function paintPal(){
+  document.querySelectorAll('.pal[data-slot]').forEach(g=>{
+    [...g.children].forEach(b=>b.classList.toggle('on',b.dataset.c===colors[g.dataset.slot]));
+  });
+}
+document.querySelectorAll('.pal[data-slot]').forEach(g=>{
+  SWATCH.forEach(c=>{
+    const b=document.createElement('button');
+    b.style.background=c;b.dataset.c=c;
+    b.onclick=()=>{push();colors[g.dataset.slot]=c;paintPal();draw();};
+    g.appendChild(b);
+  });
+});
+document.getElementById('gmode').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  push();gmode=b.dataset.v;segOn('gmode',gmode);draw();};
+document.getElementById('reset').onclick=()=>{push();Object.assign(P,DEF);syncAll();draw();};
+document.getElementById('stopAnim').onclick=stopAnim;
+
+/* ================= presets ================= */
+const PRESETS={
+  torus: {family:'torus',curve:'circle',mirror:'none',
+          p:{count:48,sweep:360,twist:0,taper:0,radius:55,tilt:-22,turn:18,persp:35,
+             w1:2.2,ghost:0}},
+  disc:  {family:'torus',curve:'circle',mirror:'none',
+          p:{count:72,sweep:360,twist:0,taper:0,radius:22,tilt:-58,turn:0,persp:20,
+             w1:2.2,ghost:0}},
+  spiral:{family:'torus',curve:'circle',mirror:'none',
+          p:{count:64,sweep:360,twist:0,taper:0,radius:50,lift:70,tilt:-90,turn:0,persp:30,
+             w1:2.2,ghost:0}},
+  sphere:{family:'sphere',curve:'circle',mirror:'none',
+          p:{count:40,sweep:170,twist:0,taper:0,radius:50,tilt:-18,turn:24,persp:30,
+             w1:2.2,ghost:0}},
+  ribbon:{family:'ribbon',curve:'lens',mirror:'none',
+          p:{count:64,sweep:140,twist:0,taper:0,radius:60,tilt:-12,turn:22,persp:38,
+             w1:2.2,ghost:0}},
+  rosette:{family:'torus',curve:'lens',mirror:'none',
+          p:{count:36,sweep:360,twist:0,taper:0,radius:42,tilt:-50,turn:0,persp:20,
+             w1:2.2,ghost:0}},
+  shell: {family:'fan',curve:'circle',mirror:'none',
+          p:{count:56,sweep:200,twist:0,taper:-55,radius:60,tilt:-30,turn:12,persp:40,
+             w1:2.2,ghost:0}},
+  moire: {family:'torus',curve:'circle',mirror:'none',
+          p:{count:90,sweep:360,twist:0,taper:0,radius:48,tilt:-64,turn:0,persp:15,
+             w1:2.0,ghost:2.5,gscale:98}}
+};
+function applyPreset(name){
+  const pr=PRESETS[name];if(!pr)return;
+  push();
+  Object.assign(P,DEF,pr.p);
+  family=pr.family;curve=pr.curve;mirror=pr.mirror;
+  syncSegs();syncAll();draw();
+}
+['presets','presets2'].forEach(id=>{
+  document.getElementById(id).onclick=e=>{const b=e.target.closest('button');if(!b)return;
+    applyPreset(b.dataset.p);};
+});
+function randomize(){
+  push();
+  const R=Math.random,ri=(a,b)=>a+Math.floor(R()*(b-a+1)),pk=a=>a[Math.floor(R()*a.length)];
+  family=pk(['torus','torus','sphere','ribbon','fan']);
+  curve=pk(['circle','circle','circle','squircle','lens','tri']);
+  P.count=pk([24,36,48,64,90,120]);
+  P.sweep=family==='torus'?360:pk([120,160,200,240,300,360]);
+  P.twist=R()<0.55?0:pk([45,90,180,-90,360]);
+  P.taper=R()<0.6?0:pk([-55,-35,35,55]);
+  P.radius=ri(20,75);
+  P.lift=R()<0.5?0:pk([-90,-50,40,70,110]);
+  P.tilt=ri(-70,10);P.turn=ri(-40,40);P.persp=ri(10,55);
+  P.ghost=R()<0.3?+(1+R()*4).toFixed(1):0;
+  mirror=R()<0.2?pk(['x','xy']):'none';
+  syncSegs();syncAll();draw();
+}
+document.getElementById('rand').onclick=randomize;
+
+/* ================= export ================= */
+function download(url,name){
+  const a=document.createElement('a');a.href=url;a.download=name;
+  document.body.appendChild(a);a.click();a.remove();
+}
+function exportPNG(){
+  const sc=2,oc=document.createElement('canvas');
+  oc.width=board.w*sc;oc.height=board.h*sc;
+  const g=oc.getContext('2d');g.scale(sc,sc);
+  renderContent(g);
+  download(oc.toDataURL('image/png'),'sweep-'+family+'.png');
+}
+function exportSVG(){
+  const fam=buildSweep(0,1);
+  const ghost=P.ghost>0?buildSweep(P.ghost*Math.PI/180,P.gscale/100):null;
+  const passes=mirror==='none'?[[1,1]]:mirror==='x'?[[1,1],[-1,1]]:[[1,1],[-1,1],[1,-1],[-1,-1]];
+  let body='';
+  const seg=(pts,s0,s1)=>{
+    let d='M'+pts[s0].x.toFixed(2)+' '+pts[s0].y.toFixed(2);
+    for(let k=s0+1;k<=s1;k++) d+='L'+pts[k].x.toFixed(2)+' '+pts[k].y.toFixed(2);
+    return d;
+  };
+  const emit=(f,tag)=>{
+    const order=f.slice().sort((a,b)=>b.z-a.z);
+    let s='<g id="'+tag+'" fill="none" stroke-width="'+P.w1.toFixed(2)+
+      '" stroke-linecap="round" stroke-linejoin="round">';
+    order.forEach((c,i)=>{
+      const e=Math.max(0,Math.min(1,(P.draw/100)*1.35-c.t*0.35));
+      if(e<=0) return;
+      const end=Math.max(2,Math.round(e*N));
+      if(gmode!=='line'){
+        s+='<path d="'+seg(c.pts,0,end)+'" stroke="'+inkAt(0,c.t)+'"/>';
+      }else{
+        const per=Math.max(2,Math.ceil(N/CH));
+        s+='<g id="'+tag+'-line-'+(i+1)+'">';
+        for(let a=0;a<end;a+=per){
+          const b=Math.min(end,a+per);if(b<=a)continue;
+          s+='<path d="'+seg(c.pts,a,b)+'" stroke="'+inkAt((a+b)/2/N,c.t)+'"/>';
+        }
+        s+='</g>';
+      }
+    });
+    return s+'</g>';
+  };
+  passes.forEach(([sx,sy],i)=>{
+    const tr=(sx===1&&sy===1)?'':' transform="translate('+(sx===-1?board.w:0)+' '+(sy===-1?board.h:0)+') scale('+sx+' '+sy+')"';
+    body+='<g'+tr+'>'+(ghost?emit(ghost,'second-'+i):'')+emit(fam,'sweep-'+i)+'</g>';
+  });
+  const out='<svg xmlns="http://www.w3.org/2000/svg" width="'+board.w+'" height="'+board.h+
+    '" viewBox="0 0 '+board.w+' '+board.h+'"><rect width="'+board.w+'" height="'+board.h+
+    '" fill="'+colors.bg+'"/>'+body+'</svg>';
+  download(URL.createObjectURL(new Blob([out],{type:'image/svg+xml'})),'sweep-'+family+'.svg');
+}
+document.getElementById('exppng').onclick=exportPNG;
+document.getElementById('expsvg').onclick=exportSVG;
+
+addEventListener('keydown',e=>{
+  const tag=e.target.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA') return;
+  const k=e.key.toLowerCase();
+  if((e.metaKey||e.ctrlKey)&&k==='z'){e.preventDefault();undo();return;}
+  if(k==='e')exportPNG();
+  else if(k==='s')exportSVG();
+  else if(k==='r')randomize();
+});
+addEventListener('pointerup',()=>{armed=true;});
+window.addEventListener('error',ev=>{
+  hud.textContent='ERROR: '+ev.message+' @'+ev.lineno;hud.style.color='#ff5c3a';});
+
+syncSegs();
+syncAll();
+fit();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root{
+    --ink:#f2f2f0; --bg:#0d0d0c; --panel:#141413; --line:#262624;
+    --dim:#78786f; --accent:#d6ff3f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{
+    background:var(--bg);color:var(--ink);
+    font:400 11px/1.35 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.03em;
+    display:flex;flex-direction:column;
+    user-select:none;-webkit-user-select:none;
+  }
+
+  .chips{display:flex;gap:0;padding:14px;border-bottom:1px solid var(--line);min-height:64px;align-items:center}
+  .hud{border-top:1px solid var(--line);padding-top:9px !important}
+  .acts{margin-top:auto}
+  .chips .chip{flex:1;height:36px;border-radius:0;position:relative}
+  .chips .chip:first-child{border-radius:6px 0 0 6px}
+  .chips .chip:last-child{border-radius:0 6px 6px 0}
+  .chips .empty{flex:1;color:var(--dim);font-size:10px;text-align:center;letter-spacing:.1em}
+
+  .dials{padding:10px 14px 12px}
+  .dials h2{margin:0 0 4px;font-size:9px;letter-spacing:.24em;color:var(--dim);font-weight:500}
+  .ctl{margin:12px 0}
+  .ctl .top{display:flex;align-items:baseline;gap:6px;margin-bottom:5px}
+  .ctl .lbl{flex:1;color:var(--dim);font-size:10px;cursor:ew-resize}
+  .ctl .lbl:hover{color:var(--ink)}
+  .ctl output{font-variant-numeric:tabular-nums;font-size:10.5px}
+  .ctl .track{position:relative;height:20px;cursor:ew-resize;touch-action:none;border-radius:3px}
+  .ctl .track .band{position:absolute;left:0;right:0;top:8px;height:4px;border-radius:2px;background:#2c2c28}
+  .ctl.hue .track .band{background:linear-gradient(90deg,
+    hsl(180,80%,55%),hsl(240,80%,55%),hsl(300,80%,55%),hsl(0,80%,55%),
+    hsl(60,80%,55%),hsl(120,80%,55%),hsl(180,80%,55%))}
+  .ctl .knob{position:absolute;top:3px;width:12px;height:14px;margin-left:-6px;border-radius:3px;
+    background:var(--ink);box-shadow:0 0 0 1.5px #0d0d0c}
+  .ctl .track:hover .knob{background:var(--accent)}
+  .ctl .zero{position:absolute;top:6px;width:1px;height:8px;background:#57574f;left:50%}
+
+  .spin,.variants{padding:10px 14px 12px;border-top:1px solid var(--line)}
+  .spin h2,.variants h2{margin:0 0 8px;font-size:9px;letter-spacing:.24em;color:var(--dim);font-weight:500}
+  .segrow{display:grid;grid-auto-flow:column;border:1px solid var(--line)}
+  .segrow button{background:none;border:0;border-right:1px solid var(--line);color:var(--dim);
+    font:inherit;font-size:9.5px;padding:8px 2px;cursor:pointer;white-space:nowrap}
+  .segrow button:last-child{border-right:0}
+  .segrow button:hover{color:var(--ink);background:#1b1b19}
+  .vrow{display:flex;gap:10px;margin-bottom:8px}
+  .vrow label{color:var(--dim);font-size:10px;display:flex;align-items:center;gap:5px}
+  .vrow input{width:44px;background:#0d0d0c;border:1px solid var(--line);color:var(--ink);
+    font:inherit;font-size:10.5px;padding:4px 5px;outline:none;text-align:right}
+  .vrow input:focus{border-color:var(--accent)}
+  .variants>button{width:100%;background:none;border:1px solid var(--line);color:var(--ink);
+    font:inherit;font-size:9.5px;letter-spacing:.1em;padding:8px;cursor:pointer;text-align:left}
+  .variants>button:hover{border-color:var(--ink)}
+  .acts{padding:12px 14px;display:grid;gap:6px;border-top:1px solid var(--line)}
+  .acts button{background:none;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:9.5px;
+    letter-spacing:.13em;padding:8px 9px;cursor:pointer;text-align:left}
+  .acts button:hover{border-color:var(--ink)}
+  .acts button.pri{background:var(--accent);color:#0d0d0c;border-color:var(--accent);font-weight:500}
+  .hud{padding:0 14px 10px;color:var(--dim);font-size:9.5px;letter-spacing:.1em}
+  body{display:flex;flex-direction:column}
+</style>
+</head>
+<body>
+<div class="chips" id="chips"><div class="empty">select something with color</div></div>
+
+<div class="dials">
+  <h2>SHIFT</h2>
+  <div class="ctl hue" data-k="dh" data-min="-180" data-max="180" data-fmt="deg">
+    <div class="top"><div class="lbl">hue rotate</div><output>0&deg;</output></div>
+    <div class="track"><div class="band"></div><div class="zero"></div><div class="knob"></div></div>
+  </div>
+  <div class="ctl" data-k="ds" data-min="-100" data-max="100" data-fmt="pct">
+    <div class="top"><div class="lbl">saturation</div><output>0%</output></div>
+    <div class="track"><div class="band"></div><div class="zero"></div><div class="knob"></div></div>
+  </div>
+  <div class="ctl" data-k="dl" data-min="-50" data-max="50" data-fmt="pct">
+    <div class="top"><div class="lbl">lightness</div><output>0%</output></div>
+    <div class="track"><div class="band"></div><div class="zero"></div><div class="knob"></div></div>
+  </div>
+</div>
+
+<div class="spin">
+  <h2>SPIN</h2>
+  <div class="segrow">
+    <button data-spin="-120">&#8634; 120&#176;</button>
+    <button data-spin="-90">&#8634; 90&#176;</button>
+    <button data-spin="90">90&#176; &#8635;</button>
+    <button data-spin="120">120&#176; &#8635;</button>
+  </div>
+</div>
+
+<div class="variants">
+  <h2>VARIANT ROW</h2>
+  <div class="vrow">
+    <label>copies <input id="vcount" type="number" value="3" min="2" max="8"></label>
+    <label>step <input id="vstep" type="number" value="120" min="-360" max="360">&#176;</label>
+  </div>
+  <button id="vbuild">BUILD ROW FROM SELECTED FRAME</button>
+</div>
+
+<div class="hud" id="hud">&nbsp;</div>
+
+<div class="acts">
+  <button id="capture">RECAPTURE SELECTION</button>
+  <button id="commit" class="pri">COMMIT &middot; REBASE SLIDERS</button>
+  <button id="reset">RESET TO ORIGINAL</button>
+</div>
+
+<script>
+(function(){
+"use strict";
+const V={dh:0,ds:0,dl:0};
+let chips=[];
+const hud=document.getElementById('hud');
+
+/* ---------- color math (mirror of main thread) ---------- */
+function hsl2css(h,s,l){return 'hsl('+(((h%360)+360)%360).toFixed(1)+','+(s*100).toFixed(1)+'%,'+(l*100).toFixed(1)+'%)';}
+const clamp01=v=>Math.max(0,Math.min(1,v));
+
+function send(){
+  parent.postMessage({pluginMessage:{type:'shift',
+    dh:V.dh, ds:V.ds/100, dl:V.dl/100}},'*');
+  paintChips();
+}
+function paintChips(){
+  const host=document.getElementById('chips');
+  if(!chips.length){host.innerHTML='<div class="empty">select something with color</div>';return;}
+  host.innerHTML='';
+  chips.forEach(c=>{
+    const d=document.createElement('div');
+    d.className='chip';
+    d.style.background=hsl2css(c.h+V.dh,clamp01(c.s*(1+V.ds/100)),clamp01(c.l+V.dl/100));
+    host.appendChild(d);
+  });
+}
+
+/* ---------- dials ---------- */
+document.querySelectorAll('.ctl').forEach(el=>{
+  const k=el.dataset.k,mn=+el.dataset.min,mx=+el.dataset.max;
+  const out=el.querySelector('output'),knob=el.querySelector('.knob'),
+        track=el.querySelector('.track'),lbl=el.querySelector('.lbl');
+  const fmt=v=>el.dataset.fmt==='deg'?Math.round(v)+'\u00b0':Math.round(v)+'%';
+  const paint=()=>{
+    out.textContent=fmt(V[k]);
+    knob.style.left=((V[k]-mn)/(mx-mn)*100)+'%';
+  };
+  const set=v=>{V[k]=Math.max(mn,Math.min(mx,v));paint();send();};
+  track.addEventListener('pointerdown',e=>{
+    e.preventDefault();track.setPointerCapture(e.pointerId);
+    const r=track.getBoundingClientRect();
+    const fromX=x=>mn+((x-r.left)/r.width)*(mx-mn);
+    set(fromX(e.clientX));
+    const move=ev=>set(ev.shiftKey
+      ? V[k]+(fromX(ev.clientX)-V[k])*0.15
+      : fromX(ev.clientX));
+    const up=()=>{track.removeEventListener('pointermove',move);
+      track.removeEventListener('pointerup',up);};
+    track.addEventListener('pointermove',move);
+    track.addEventListener('pointerup',up);
+  });
+  lbl.addEventListener('pointerdown',e=>{
+    e.preventDefault();lbl.setPointerCapture(e.pointerId);
+    let px=e.clientX;
+    const step=(mx-mn)/300;
+    const move=ev=>{set(V[k]+(ev.clientX-px)*step*(ev.shiftKey?0.1:1));px=ev.clientX;};
+    const up=()=>{lbl.removeEventListener('pointermove',move);
+      lbl.removeEventListener('pointerup',up);};
+    lbl.addEventListener('pointermove',move);
+    lbl.addEventListener('pointerup',up);
+  });
+  el.addEventListener('dblclick',()=>set(0));
+  el.addEventListener('wheel',e=>{
+    e.preventDefault();
+    set(V[k]+(e.deltaY<0?1:-1)*(e.shiftKey?0.2:2));
+  },{passive:false});
+  paint();
+});
+
+function zero(){V.dh=0;V.ds=0;V.dl=0;
+  document.querySelectorAll('.ctl').forEach(el=>{
+    const k=el.dataset.k,mn=+el.dataset.min,mx=+el.dataset.max;
+    el.querySelector('output').textContent=el.dataset.fmt==='deg'?'0\u00b0':'0%';
+    el.querySelector('.knob').style.left=((0-mn)/(mx-mn)*100)+'%';
+  });
+}
+
+/* spin: nudge the hue dial by big steps, wrapping */
+let setHue=null;
+document.querySelectorAll('[data-spin]').forEach(b=>{
+  b.onclick=()=>{
+    let v=V.dh+(+b.dataset.spin);
+    if(v>180)v-=360;if(v<-180)v+=360;
+    V.dh=v;
+    const el=document.querySelector('.ctl[data-k="dh"]');
+    el.querySelector('output').textContent=Math.round(v)+'\u00b0';
+    const mn=+el.dataset.min,mx=+el.dataset.max;
+    el.querySelector('.knob').style.left=((v-mn)/(mx-mn)*100)+'%';
+    send();
+  };
+});
+
+/* variant row */
+document.getElementById('vcount').addEventListener('change',()=>{
+  const n=Math.max(2,Math.min(8,+document.getElementById('vcount').value||3));
+  document.getElementById('vcount').value=n;
+  document.getElementById('vstep').value=Math.round(360/n);
+});
+document.getElementById('vbuild').onclick=()=>{
+  const n=Math.max(2,Math.min(8,+document.getElementById('vcount').value||3));
+  const st=+document.getElementById('vstep').value||Math.round(360/n);
+  parent.postMessage({pluginMessage:{type:'variants',count:n,step:st}},'*');
+};
+
+document.getElementById('capture').onclick=()=>{
+  zero();parent.postMessage({pluginMessage:{type:'capture'}},'*');
+};
+document.getElementById('commit').onclick=()=>{
+  zero();parent.postMessage({pluginMessage:{type:'commit'}},'*');
+};
+document.getElementById('reset').onclick=()=>{
+  zero();parent.postMessage({pluginMessage:{type:'reset'}},'*');
+  paintChips();
+};
+
+onmessage=e=>{
+  const m=e.data.pluginMessage;
+  if(!m)return;
+  if(m.type==='captured'){
+    chips=m.chips;
+    hud.textContent=m.count+' paints across '+m.nodes+' selected node(s)';
+    paintChips();
+  }else if(m.type==='selchange'){
+    // auto-recapture only when sliders are untouched
+    if(V.dh===0&&V.ds===0&&V.dl===0)
+      parent.postMessage({pluginMessage:{type:'capture'}},'*');
+  }
+};
+addEventListener('keydown',e=>{
+  if(e.key==='Escape')parent.postMessage({pluginMessage:{type:'close'}},'*');
+});
+})();
+</script>
+</body>
+</html>

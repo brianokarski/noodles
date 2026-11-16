@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blend If Transition (Photoshop Style)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #111;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            gap: 20px;
+        }
+        h1 { font-size: 1.8em; }
+        .subtitle { color: #888; font-size: 0.9em; margin-top: -10px; }
+        canvas {
+            max-width: 90vw;
+            max-height: 65vh;
+            border-radius: 8px;
+            background: #000;
+        }
+        .controls {
+            background: #222;
+            padding: 20px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px;
+        }
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        label { min-width: 100px; font-size: 0.9em; color: #aaa; }
+        select, input[type="range"] { flex: 1; }
+        select {
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 4px;
+        }
+        input[type="range"] {
+            height: 6px;
+            -webkit-appearance: none;
+            background: #444;
+            border-radius: 3px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #4a9eff;
+            cursor: pointer;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #4a9eff;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { background: #3a8eef; }
+        .value { color: #4a9eff; min-width: 45px; text-align: right; font-weight: bold; }
+        #status { text-align: center; font-size: 0.85em; color: #888; margin-top: 10px; }
+        .info {
+            background: #1a1a2e;
+            border-left: 3px solid #4a9eff;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            font-size: 0.85em;
+            line-height: 1.5;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <h1>Blend If Transition</h1>
+    <p class="subtitle">Photoshop-style luminosity blending</p>
+    
+    <canvas id="canvas"></canvas>
+    
+    <div class="controls">
+        <div class="info">
+            Uses pixel brightness to control the transition.<br>
+            <strong>Highlights first</strong>: Bright areas transition before dark.<br>
+            <strong>Shadows first</strong>: Dark areas transition before bright.
+        </div>
+        
+        <div class="control-row">
+            <label>Mode:</label>
+            <select id="mode">
+                <option value="highlights">Highlights First</option>
+                <option value="shadows">Shadows First</option>
+                <option value="midtones">Midtones First</option>
+                <option value="extremes">Extremes First (highlights + shadows)</option>
+            </select>
+        </div>
+        
+        <div class="control-row">
+            <label>Source:</label>
+            <select id="source">
+                <option value="current">Current Layer (Image A)</option>
+                <option value="underlying">Underlying Layer (Image B)</option>
+                <option value="average">Average of Both</option>
+            </select>
+        </div>
+        
+        <div class="control-row">
+            <label>Softness:</label>
+            <input type="range" id="softness" min="0" max="50" value="10">
+            <span class="value" id="softnessValue">10</span>
+        </div>
+        
+        <div class="control-row">
+            <label>Progress:</label>
+            <input type="range" id="progress" min="0" max="100" value="0">
+            <span class="value" id="progressValue">0%</span>
+        </div>
+        
+        <button id="animate">Animate Transition</button>
+        <div id="status">Loading...</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const progressSlider = document.getElementById('progress');
+        const progressValue = document.getElementById('progressValue');
+        const softnessSlider = document.getElementById('softness');
+        const softnessValue = document.getElementById('softnessValue');
+        const modeSelect = document.getElementById('mode');
+        const sourceSelect = document.getElementById('source');
+        const animateBtn = document.getElementById('animate');
+        const status = document.getElementById('status');
+        
+        let img1, img2;
+        let data1, data2;  // Pre-cached image data
+        let luminanceMap;  // Pre-calculated luminance values
+        let isAnimating = false;
+        
+        // Calculate luminance (brightness) of a pixel
+        function getLuminance(r, g, b) {
+            // Standard luminance formula
+            return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        }
+        
+        // Load images
+        function loadImages() {
+            return new Promise((resolve, reject) => {
+                let loaded = 0;
+                
+                img1 = new Image();
+                img2 = new Image();
+                
+                const onLoad = () => {
+                    loaded++;
+                    if (loaded === 2) resolve();
+                };
+                
+                img1.onload = onLoad;
+                img2.onload = onLoad;
+                img1.onerror = () => reject('Failed to load Image1.jpg');
+                img2.onerror = () => reject('Failed to load Image2.jpg');
+                
+                img1.src = 'Image1.jpg';
+                img2.src = 'Image2.jpg';
+            });
+        }
+        
+        // Pre-calculate luminance map
+        function calculateLuminanceMap() {
+            const source = sourceSelect.value;
+            luminanceMap = new Float32Array(canvas.width * canvas.height);
+            
+            for (let i = 0; i < luminanceMap.length; i++) {
+                const pi = i * 4;
+                
+                let lum;
+                if (source === 'current') {
+                    lum = getLuminance(data1.data[pi], data1.data[pi+1], data1.data[pi+2]);
+                } else if (source === 'underlying') {
+                    lum = getLuminance(data2.data[pi], data2.data[pi+1], data2.data[pi+2]);
+                } else {
+                    // Average
+                    const lum1 = getLuminance(data1.data[pi], data1.data[pi+1], data1.data[pi+2]);
+                    const lum2 = getLuminance(data2.data[pi], data2.data[pi+1], data2.data[pi+2]);
+                    lum = (lum1 + lum2) / 2;
+                }
+                
+                luminanceMap[i] = lum;
+            }
+        }
+        
+        // Get threshold based on luminance and mode
+        function getThreshold(luminance, mode) {
+            switch (mode) {
+                case 'highlights':
+                    // Bright pixels transition first (low threshold for high luminance)
+                    return 1 - luminance;
+                    
+                case 'shadows':
+                    // Dark pixels transition first (low threshold for low luminance)
+                    return luminance;
+                    
+                case 'midtones':
+                    // Midtones first (pixels around 0.5 luminance transition first)
+                    return Math.abs(luminance - 0.5) * 2;
+                    
+                case 'extremes':
+                    // Extremes first (very dark and very bright transition first)
+                    return 1 - Math.abs(luminance - 0.5) * 2;
+                    
+                default:
+                    return luminance;
+            }
+        }
+        
+        // Smoothstep function for soft edges
+        function smoothstep(edge0, edge1, x) {
+            const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+            return t * t * (3 - 2 * t);
+        }
+        
+        // Render the transition
+        function render() {
+            const progress = progressSlider.value / 100;
+            const mode = modeSelect.value;
+            const softness = softnessSlider.value / 100;
+            
+            const output = ctx.createImageData(canvas.width, canvas.height);
+            
+            for (let i = 0; i < luminanceMap.length; i++) {
+                const pi = i * 4;
+                const lum = luminanceMap[i];
+                
+                // Get threshold based on luminance
+                const threshold = getThreshold(lum, mode);
+                
+                // Calculate mix amount with softness
+                let mix;
+                if (softness === 0) {
+                    // Hard edge
+                    mix = progress > threshold ? 1 : 0;
+                } else {
+                    // Soft edge
+                    mix = smoothstep(threshold - softness, threshold + softness, progress);
+                }
+                
+                // Blend pixels
+                output.data[pi] = data1.data[pi] * (1 - mix) + data2.data[pi] * mix;
+                output.data[pi + 1] = data1.data[pi + 1] * (1 - mix) + data2.data[pi + 1] * mix;
+                output.data[pi + 2] = data1.data[pi + 2] * (1 - mix) + data2.data[pi + 2] * mix;
+                output.data[pi + 3] = 255;
+            }
+            
+            ctx.putImageData(output, 0, 0);
+        }
+        
+        // Animation
+        function animate() {
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            animateBtn.textContent = 'Animating...';
+            progressSlider.value = 0;
+            
+            const duration = 2500;
+            const startTime = performance.now();
+            
+            function frame(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Ease in-out
+                const eased = progress < 0.5 
+                    ? 2 * progress * progress 
+                    : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                
+                progressSlider.value = eased * 100;
+                progressValue.textContent = Math.round(eased * 100) + '%';
+                render();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(frame);
+                } else {
+                    isAnimating = false;
+                    animateBtn.textContent = 'Animate Again';
+                }
+            }
+            
+            requestAnimationFrame(frame);
+        }
+        
+        // Initialize
+        async function init() {
+            try {
+                await loadImages();
+                
+                // Set canvas size
+                const scale = Math.min(1, 800 / img1.width);
+                canvas.width = Math.round(img1.width * scale);
+                canvas.height = Math.round(img1.height * scale);
+                
+                // Cache image data
+                ctx.drawImage(img1, 0, 0, canvas.width, canvas.height);
+                data1 = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                
+                ctx.drawImage(img2, 0, 0, canvas.width, canvas.height);
+                data2 = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                
+                // Calculate luminance map
+                calculateLuminanceMap();
+                
+                status.textContent = 'Ready!';
+                status.style.color = '#4a9eff';
+                
+                render();
+                
+            } catch (err) {
+                status.textContent = 'Error: ' + err;
+                status.style.color = '#f55';
+            }
+        }
+        
+        // Events
+        progressSlider.addEventListener('input', () => {
+            progressValue.textContent = progressSlider.value + '%';
+            if (!isAnimating) render();
+        });
+        
+        softnessSlider.addEventListener('input', () => {
+            softnessValue.textContent = softnessSlider.value;
+            if (!isAnimating) render();
+        });
+        
+        modeSelect.addEventListener('change', () => {
+            if (!isAnimating) render();
+        });
+        
+        sourceSelect.addEventListener('change', () => {
+            calculateLuminanceMap();
+            if (!isAnimating) render();
+        });
+        
+        animateBtn.addEventListener('click', animate);
+        
+        init();
+    </script>
+</body>
+</html>

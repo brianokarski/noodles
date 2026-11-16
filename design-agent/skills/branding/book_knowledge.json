@@ -1,0 +1,935 @@
+[
+  {
+    "source": "Designing Brand Identity",
+    "principles": [
+      {
+        "name": "Stay on Message",
+        "description": "Ensure all communications, from web content to sales scripts, project a unified and consistent message.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Project the same unified message across all communication channels.",
+        "why": "A unified message is memorable, identifiable, and customer-centered, strengthening the brand's identity.",
+        "examples": [
+          "Speaking with one distinctive voice on the web, in a tweet, and in conversations with a salesperson.",
+          "Having the company president project the same unified message in a speech."
+        ],
+        "when_to_apply": "When developing any brand communication or customer interaction.",
+        "when_to_break": "The text does not explicitly mention when to break this rule, so it should be followed consistently."
+      },
+      {
+        "name": "Aim for Clarity, Brevity, and Precision",
+        "description": "Brand messages should be concise and easy to understand, especially for busy individuals.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Cut through the clutter to produce soundbites.",
+        "why": "Ensures the message is easily and quickly understood.",
+        "examples": [
+          "Using Twitter's 140 character limit to become more concise.",
+          "Editing out modifying phrases, adverbs, and extraneous conversational text."
+        ],
+        "when_to_apply": "When crafting brand messages, especially for time-constrained audiences.",
+        "when_to_break": "The text does not explicitly mention when to break this rule, so it should be followed consistently."
+      },
+      {
+        "name": "Essential",
+        "description": "Every decision in motion graphics must have a reason. Nonessential elements should be removed to ensure excellence.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Remove any nonessential element when creating motion graphics.",
+        "why": "Ensures excellence and focuses on the core message.",
+        "examples": [],
+        "when_to_apply": "During the creation of any motion graphic element for a brand.",
+        "when_to_break": "Not applicable, this is always essential."
+      },
+      {
+        "name": "Strategic",
+        "description": "Animation should support brand essence, communicate personality, and elaborate on the static mark. It should align with brand positioning to protect equity.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Ensure animation supports brand essence, communicates personality, and aligns with brand positioning.",
+        "why": "Protects brand equity and reinforces the brand's core message.",
+        "examples": [],
+        "when_to_apply": "When developing any animated element of a brand identity.",
+        "when_to_break": "When it actively harms the brand identity."
+      },
+      {
+        "name": "Harmonious",
+        "description": "Animation should evolve from the visual language of the brand identity. The motion should be innate in the static graphic characteristics.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Make the animation evolve from existing visual language of the brand.",
+        "why": "Creates a cohesive and unified brand experience.",
+        "examples": [],
+        "when_to_apply": "When translating a static brand identity into an animated form.",
+        "when_to_break": "When the static mark provides no clear motion direction."
+      },
+      {
+        "name": "Communicative",
+        "description": "Animation should tell a story with progression, drama, build-up, climax, and payoff. It should captivate the audience and deliver the message.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Tell a story with progression, drama, build-up, climax, and payoff in the animation.",
+        "why": "Captivates the audience and ensures the message is delivered effectively.",
+        "examples": [],
+        "when_to_apply": "When the goal is to deliver an informative message using animation.",
+        "when_to_break": "When a more subtle or abstract approach is desired."
+      },
+      {
+        "name": "Resonant",
+        "description": "Pay special attention to rhythm, speed, and transitions to define the mood and emotional appeal. Movement is expression.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Carefully consider rhythm, speed and transitions to define the animation's mood.",
+        "why": "Defines the mood and heightens the emotional appeal of the piece.",
+        "examples": [],
+        "when_to_apply": "When establishing the feel and emotional impact of the animation.",
+        "when_to_break": "When a more straightforward approach is needed"
+      },
+      {
+        "name": "Balance Consistency and Flexibility",
+        "description": "Brand identity applications need to strike a balance between consistent visual language and flexibility of expression to work in harmony across all media.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Design applications to allow for flexibility while maintaining a consistent visual language.",
+        "why": "Ensures brand recognition and a unified message across diverse applications without becoming stale or inflexible.",
+        "examples": [
+          "Using a core color palette with adaptable secondary colors.",
+          "Employing a consistent logo placement but allowing for varied imagery."
+        ],
+        "when_to_apply": "When designing multiple applications across different media.",
+        "when_to_break": "When a specific application requires a unique approach to effectively communicate a particular message, provided it doesn't compromise the overall brand identity."
+      },
+      {
+        "name": "Use Real Text",
+        "description": "When designing, especially business cards, use actual text and information, not placeholder content.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Use real text when developing a design.",
+        "why": "Ensures the design works with the actual content and avoids surprises later.",
+        "examples": [
+          "Using a real name and title instead of 'Lorem Ipsum' for contact info.",
+          "Implementing a real tagline during the design phase."
+        ],
+        "when_to_apply": "During the design phase of business cards and collateral.",
+        "when_to_break": "Never. Real text is always best."
+      },
+      {
+        "name": "Show Actual Size",
+        "description": "Design elements, particularly on business cards, should be viewed at their final, printed size during the design process.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Show designs at their actual size.",
+        "why": "Helps determine the legibility of text and the impact of visual elements.",
+        "examples": [
+          "Printing a business card design at 3.5\" x 2\" to assess its readability.",
+          "Viewing a brochure layout at its intended dimensions on screen."
+        ],
+        "when_to_apply": "During the design phase of business cards.",
+        "when_to_break": "Never, this ensures the design is appropriate."
+      },
+      {
+        "name": "Consider the Back",
+        "description": "The back of a business card or collateral piece provides valuable space for additional information or marketing messages.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Deliberately consider the use of the back side of the card/brochure.",
+        "why": "Maximizes the marketing potential and utility of the design.",
+        "examples": [
+          "Using the back of a business card for a tagline or a QR code.",
+          "Including a map to the business location on the back."
+        ],
+        "when_to_apply": "During the design phase of business cards and brochures.",
+        "when_to_break": "If the design is minimalist and any content on the back would distract from the primary purpose of the card."
+      },
+      {
+        "name": "Develop System Formats",
+        "description": "Establishing standard formats for various applications ensures brand consistency and ease of production.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Develop system formats for all design elements.",
+        "why": "Maintains a unified brand image and simplifies the creation of new materials.",
+        "examples": [
+          "Creating templates for business cards, letterheads, and brochures.",
+          "Defining standard sizes and layouts for social media graphics."
+        ],
+        "when_to_apply": "When designing a suite of materials for a brand.",
+        "when_to_break": "When a completely unique and non-standard design is required for a specific purpose, and brand consistency is not a primary concern."
+      },
+      {
+        "name": "Examine Iterations",
+        "description": "Reviewing multiple design iterations helps refine the final product and ensures it meets the intended goals.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Carefully examine design iterations.",
+        "why": "Identifies strengths and weaknesses in different approaches and leads to a more effective final design.",
+        "examples": [
+          "Comparing three different logo concepts to determine which best represents the brand.",
+          "Reviewing multiple versions of a brochure layout to optimize content placement and visual appeal."
+        ],
+        "when_to_apply": "During the design process, especially when exploring different creative directions.",
+        "when_to_break": "When time is extremely limited and a quick solution is needed, but this is not ideal."
+      },
+      {
+        "name": "Consider Color Strategy",
+        "description": "Color choices must be carefully considered to align with brand values and intended message.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Develop a color strategy",
+        "why": "Impacts brand recognition and creates an emotional connection with the audience.",
+        "examples": [
+          "Selecting a specific set of brand colors and implementing them consistently across all materials.",
+          "Designing a complementary color palette for brochures or website."
+        ],
+        "when_to_apply": "Always - a considered color strategy will always improve the design",
+        "when_to_break": "If there are strict colour regulations you must abide by."
+      },
+      {
+        "name": "Prioritize Content",
+        "description": "Website structure should be based on content, not organizational structure or initial screen designs.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Begin site structure with content, not a screen design.",
+        "why": "Ensures users can easily find the information they need, rather than being forced to navigate a structure that doesn't make sense to them.",
+        "examples": [],
+        "when_to_apply": "When planning the information architecture of a website.",
+        "when_to_break": "When the site's primary goal is not information delivery, but rather a specific user experience (e.g., a highly stylized art portfolio)."
+      },
+      {
+        "name": "Avoid Counterintuitive Groupings",
+        "description": "Organize website content in a way that is logical and intuitive for the user.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Do not force content into counterintuitive groupings.",
+        "why": "Avoids confusing and frustrating users, leading to a more positive and efficient experience.",
+        "examples": [],
+        "when_to_apply": "When organizing content and defining site navigation.",
+        "when_to_break": "Intentional misdirection (e.g., a game or puzzle site)."
+      },
+      {
+        "name": "Web-Specific Content",
+        "description": "Content for the web should be written specifically for the online medium, considering readability and engagement.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Write content specifically for the web.",
+        "why": "Web users scan content quickly; therefore, information should be concise and easy to digest.",
+        "examples": [],
+        "when_to_apply": "When creating written content for a website.",
+        "when_to_break": "If repurposing existing content is a high priority and budget is very limited."
+      },
+      {
+        "name": "Usability Testing",
+        "description": "Test website usability to identify areas for improvement and ensure a positive user experience.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Conduct usability testing.",
+        "why": "Reveals potential problems in navigation, content, and overall site design that might not be apparent otherwise.",
+        "examples": [],
+        "when_to_apply": "At various stages of website development, especially after prototyping and before launch.",
+        "when_to_break": "Extremely low-budget projects where even basic testing is not feasible, but testing should be prioritized if possible."
+      },
+      {
+        "name": "Observe Etiquette",
+        "description": "Be considerate of website visitors by providing necessary warnings and information.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Observe etiquette. Alert visitors where special technology is needed, where a screen may load slowly, or where a link leaves your site.",
+        "why": "Demonstrates respect for the user's time and technical capabilities, leading to a more positive and trustworthy experience.",
+        "examples": [],
+        "when_to_apply": "Whenever a website requires specific technology, has slow loading times, or links to external sites.",
+        "when_to_break": "If a specific warning would disrupt the user experience without providing significant benefit (e.g., a very minor delay)."
+      },
+      {
+        "name": "ADA Compliance",
+        "description": "Ensure websites are accessible to visually impaired users through assistive technologies.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Comply with ADA: arrange for visually impaired visitors to use software to read the site aloud or greatly magnify text.",
+        "why": "Promotes inclusivity and ensures that the website is accessible to a wider audience.",
+        "examples": [],
+        "when_to_apply": "To all websites to promote inclusivity.",
+        "when_to_break": "Very limited circumstances where compliance is technically impossible and the target audience does not include visually impaired users (this is rarely justifiable)."
+      },
+      {
+        "name": "Clear Message, Accessible Content, Positive Experience",
+        "description": "Continuously evaluate the website to ensure a clear message, accessible content, and a positive overall experience.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "At each stage ask: Is the message clear? Is the content accessible? Is the experience positive?",
+        "why": "Ensures the website effectively communicates its purpose and provides a user-friendly environment.",
+        "examples": [],
+        "when_to_apply": "Throughout the website design and development process.",
+        "when_to_break": "Never. These are fundamental goals of good web design."
+      },
+      {
+        "name": "Unique Identity Expression",
+        "description": "Utilize every opportunity, including favicons, to express a brand's unique identity.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Seize every opportunity to express who you are.",
+        "why": "Reinforces brand recognition and helps the brand stand out.",
+        "examples": [],
+        "when_to_apply": "Always.",
+        "when_to_break": "Never."
+      },
+      {
+        "name": "Confidence to be simple",
+        "description": "Iconic brands are not afraid to present themselves in a clear, straightforward manner. They avoid unnecessary complexity and focus on communicating their core message effectively.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Prioritize simplicity in design elements by eliminating unnecessary clutter and focusing on the essential message.",
+        "why": "Simplicity enhances recognition, memorability, and clarity, ensuring the brand message resonates with the target audience.",
+        "examples": [
+          "Coca-Cola's logo is simple and recognizable.",
+          "Apple's product design is minimalistic."
+        ],
+        "when_to_apply": "When aiming for timelessness and broad appeal.",
+        "when_to_break": "When deliberately creating a complex or intricate design to convey a specific nuanced message."
+      },
+      {
+        "name": "Honesty",
+        "description": "A brand should always aim to be authentic and genuine.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Avoid exaggerating or overpromising what a brand can deliver.",
+        "why": "Honesty builds trust and loyalty with consumers, fostering long-term relationships.",
+        "examples": [
+          "A cleaning product only advertising that it can remove dirt, not that it disinfects if it does not.",
+          "A brand using real photos of their product and not embellished stock photos."
+        ],
+        "when_to_apply": "Whenever communicating brand values and product capabilities.",
+        "when_to_break": "While not directly breakable, sometimes brands exaggerate through humor or metaphor, if obviously non-literal."
+      },
+      {
+        "name": "Highly considered use of icons",
+        "description": "Iconic brands use icons in a way that is deliberate and adds meaning to the brand message.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Choose icons carefully, ensuring they align with the brand's values and effectively communicate its core message.",
+        "why": "Well-chosen icons create instant recognition and enhance the brand's overall identity.",
+        "examples": [
+          "Coca-cola's contoured bottle.",
+          "City Church Eastside's house-filled cross icon."
+        ],
+        "when_to_apply": "When creating visual representations of brand values or product attributes.",
+        "when_to_break": "If the brand relies solely on typography or photography to convey its message."
+      },
+      {
+        "name": "Attention to details",
+        "description": "Iconic brands pay close attention to every detail of their design, ensuring consistency and quality across all touchpoints.",
+        "source_book": "Designing Brand Identity",
+        "source_page": null,
+        "skill": "branding",
+        "rule": "Scrutinize every aspect of the brand's visual and verbal communication, ensuring it reflects the brand's values and commitment to excellence.",
+        "why": "Attention to detail reinforces the brand's credibility and enhances the overall customer experience.",
+        "examples": [
+          "Consistent use of brand colors across all marketing materials.",
+          "Careful selection of typography that reflects the brand's personality."
+        ],
+        "when_to_apply": "In all design and communication efforts to maintain consistency and quality.",
+        "when_to_break": "Rarely, except in intentional disruptions to challenge norms, where this should still be well considered."
+      }
+    ],
+    "concepts": [
+      {
+        "name": "Brand Equity",
+        "explanation": "Building brand equity is a key goal in branding, implying long-term value and customer loyalty."
+      },
+      {
+        "name": "Brand",
+        "explanation": "A person\u2019s gut feeling about a product, service, or company."
+      },
+      {
+        "name": "Brand Identity",
+        "explanation": "Tangible and appeals to the senses; fuels recognition, amplifies differentiation, and makes big ideas and meaning accessible."
+      },
+      {
+        "name": "Branding",
+        "explanation": "A disciplined process used to build awareness and extend customer loyalty."
+      },
+      {
+        "name": "Brand Strategy",
+        "explanation": "Aligning an organization\u2019s vision with its customers\u2019 experience. It provides a central unifying idea around which all behavior, actions, and communications are aligned. It defines positioning, differentiation, the competitive advantage, and a unique value proposition."
+      },
+      {
+        "name": "Positioning",
+        "explanation": "The scaffolding on which companies build their brands, strategize their planning, and extend their relationships with customers. It takes into account the mix of price, product, promotion, and place."
+      },
+      {
+        "name": "Brand Equity",
+        "explanation": "The value of a brand, built through increased recognition, awareness, and customer loyalty, which in turn helps make a company more successful."
+      },
+      {
+        "name": "Big Idea",
+        "explanation": "A big idea functions as an organizational totem pole around which strategy, behavior, actions, and communications are aligned. These simply worded statements are used internally as a beacon of a distinctive culture and externally as a competitive advantage that helps consumers make choices."
+      },
+      {
+        "name": "Customer Experience",
+        "explanation": "Every customer contact provides an opportunity to enhance an emotional connection. A good experience generates positive buzz; a bad experience becomes a lost opportunity sabotaging the brand."
+      },
+      {
+        "name": "Effective Name Qualities",
+        "explanation": "Meaningful: It communicates something about the essence of the brand. It supports the image that the company wants to convey. Distinctive: It is unique, as well as easy to remember, pronounce, and spell. It is differentiated from the competition."
+      },
+      {
+        "name": "Tagline",
+        "explanation": "A short phrase that captures a company\u2019s brand essence, personality, and positioning, distinguishing it from competitors."
+      },
+      {
+        "name": "Powers of Three",
+        "explanation": "The idea that a unified big idea is ideally supported by three key messages in brand communications."
+      },
+      {
+        "name": "Cultural Insight",
+        "explanation": "Understanding subtle cultural differences is crucial for brand building, including naming, logo design, image development, color, key messages, and retail spaces."
+      },
+      {
+        "name": "Vision",
+        "explanation": "A compelling vision by an effective, articulate, and passionate leader is the foundation and the inspiration for the best brands."
+      },
+      {
+        "name": "Meaning",
+        "explanation": "The best brands stand for something\u2013 a big idea, a strategic position, a defined set of values, a voice that stands apart."
+      },
+      {
+        "name": "Authenticity",
+        "explanation": "Authenticity is not possible without an organization having clarity about its market, positioning, value proposition, and competitive difference."
+      },
+      {
+        "name": "Differentiation",
+        "explanation": "Brands always compete with each other within their business category, and at some level, compete with all brands that want our attention, our loyalty, and our money."
+      },
+      {
+        "name": "Durability",
+        "explanation": "Durability is the ability to have longevity in a world in constant flux, characterized by future permutations that no one can predict."
+      },
+      {
+        "name": "Coherence",
+        "explanation": "Whenever a customer experiences a brand, it must feel familiar and have the desired effect. Consistency does not need to be rigid or limiting in order to feel like one company."
+      },
+      {
+        "name": "Flexibility",
+        "explanation": "An effective brand identity positions a company for change and growth in the future. It supports an evolving marketing strategy."
+      },
+      {
+        "name": "Commitment",
+        "explanation": "Organizations need to actively manage their assets, including the brand name, the trademarks, the integrated sales and marketing systems, and the standards."
+      },
+      {
+        "name": "Value",
+        "explanation": "Building awareness, increasing recognition, communicating uniqueness and quality, and expressing a competitive difference create measurable results."
+      },
+      {
+        "name": "Coherence",
+        "explanation": "Coherence is the quality that ensures that all the pieces of a brand hold together in a way that feels seamless to the customer. It is a baseline designed to build trust, foster loyalty, and delight the customer."
+      },
+      {
+        "name": "Marketing Flexibility",
+        "explanation": "An effective brand identity positions a company for change and growth in the future. A good system embraces the evolution of marketing strategies and methods."
+      },
+      {
+        "name": "Brand Architecture",
+        "explanation": "Brand identity systems should have long legs, which means that the marketing of any new product or service is facilitated by a durable and flexible brand architecture and an overarching logic to anticipate the future."
+      },
+      {
+        "name": "Commitment",
+        "explanation": "Actively managing a brand asset requires a top-down mandate and a bottom-up understanding of why it\u2019s important. The best companies provide their employees with tools that make it easy to be a brand champion. Building, protecting, and enhancing the brand requires desire and a disciplined approach to insure its integrity and relevance."
+      },
+      {
+        "name": "Sequence of Cognition",
+        "explanation": "The brain acknowledges and remembers shapes first, then color, and lastly form (language/content). Visual images are remembered and recognized directly, while words must be decoded into meaning."
+      },
+      {
+        "name": "Brand Awareness and Recognition",
+        "explanation": "A visual identity that is easy to remember and immediately recognizable facilitates brand awareness and recognition, triggering perceptions and unlocking associations of the brand."
+      },
+      {
+        "name": "Look and Feel",
+        "explanation": "The visual language that makes a system proprietary and immediately recognizable. It also expresses a point of view, using color, imagery, typography and composition to create cohesion and differentiation."
+      },
+      {
+        "name": "Sustainability",
+        "explanation": "Integrating economic prosperity with protecting the environment, and demonstrating care for communities and employees. Requires radical innovation in what is made, how it is made, and how it is distributed."
+      },
+      {
+        "name": "Triple Bottom Line",
+        "explanation": "A new business model that represents a fundamental shift in how businesses measure success, focusing on people, planet, and profit."
+      },
+      {
+        "name": "Brand Licensing",
+        "explanation": "The process where brand owners (licensors) grant rights to licensees to develop, manufacture, market, and sell products bearing the brand's logo, name, slogan, or other legally protected assets, in exchange for royalties."
+      },
+      {
+        "name": "Private Labeling",
+        "explanation": "A business strategy where a store (usually a large retail chain) creates and brands a product line, which is then produced by a third-party supplier."
+      },
+      {
+        "name": "Pluralistic Brand Architecture",
+        "explanation": "Using multiple brands instead of a single master brand."
+      },
+      {
+        "name": "Monolithic Brand Architecture",
+        "explanation": "Using a single master brand on all products."
+      },
+      {
+        "name": "Certification",
+        "explanation": "A process where products undergo rigorous testing by government bodies or professional associations to ensure they meet specific standards, often related to quality, safety, environmental impact, or social responsibility."
+      },
+      {
+        "name": "Personality",
+        "explanation": "The unique, authentic, and talkable soul of your brand that people can get passionate about."
+      },
+      {
+        "name": "Brand Identity Process",
+        "explanation": "A combination of investigation, strategic thinking, design excellence, and project management skills that facilitates decision making at the appropriate intervals."
+      },
+      {
+        "name": "Brand Equity",
+        "explanation": "The positive experiences with a brand help build its brand equity and increases the likelihood of repeat purchasing and lifelong customer relationships."
+      },
+      {
+        "name": "Moments of Truth",
+        "explanation": "Brand is about real value \u2014 value in human terms, which doesn\u2019t mean only numbers. It\u2019s what people do, usually together, to fulfill an implied promise."
+      },
+      {
+        "name": "Engagement",
+        "explanation": "Engagement happens when employees hear the message, believe the message, and then live or act upon it."
+      },
+      {
+        "name": "Insight",
+        "explanation": "Insight comes from a more personal and intuitive place than research and leads to compelling new customer experiences."
+      },
+      {
+        "name": "Competitive Audit",
+        "explanation": "A dynamic, data-gathering process that examines the competition\u2019s brands, key messages, and identity in the marketplace. It helps understand the competitive landscape and identify opportunities for differentiation."
+      },
+      {
+        "name": "Language Audit (Voice Audit, Message Audit, Content Audit)",
+        "explanation": "A comprehensive analysis of an organization's language use across all communication channels. It reveals how language is used and ensures consistency, clarity, and alignment with brand values."
+      },
+      {
+        "name": "Audit Readout",
+        "explanation": "A formal presentation that synthesizes key learnings from interviews, research, and audits to key decision makers. It serves as a valuable assessment tool and a reference for the creative team."
+      },
+      {
+        "name": "Narrowing the Focus",
+        "explanation": "A brand becomes stronger when you narrow the focus."
+      },
+      {
+        "name": "Owning a Word",
+        "explanation": "If you want to build a brand, you must focus your branding efforts on owning a word in the prospect\u2019s mind. A word that no one else owns."
+      },
+      {
+        "name": "Big Idea",
+        "explanation": "The big idea can always be expressed in one sentence, although the rationale could usually fill a book. It must be simple and transportable and create an emotional connection."
+      },
+      {
+        "name": "Brand Brief Brevity",
+        "explanation": "The brevity of the brand brief helps decision makers stick to the fundamental precepts of the brand."
+      },
+      {
+        "name": "Brand Strategy Success",
+        "explanation": "A true measure of brand strategy success is when employees can articulate and act on the vision, and the customer experience reflects it."
+      },
+      {
+        "name": "Sonic Branding",
+        "explanation": "Using sound to complement the existing brand, intensify the brand experience, trigger emotional responses, heighten recall, transcend cultures, and complement visual branding. Original music is often composed, and audio effects can be subliminal."
+      },
+      {
+        "name": "Motion in Branding",
+        "explanation": "Motion enhances branding by building the brand, telling stories, and bringing new life to a brand."
+      },
+      {
+        "name": "Trial applications",
+        "explanation": "Applying the brand to a group of real applications to test the viability of concepts to work within a system. This will allow decision makers to see the identity the way that a customer would see it."
+      },
+      {
+        "name": "Iterative Design",
+        "explanation": "Design is an ongoing process that involves constant movement between the 'big picture' and the fine details, with each informing the other."
+      },
+      {
+        "name": "Unified Visual Language",
+        "explanation": "A brand identity program creates a unique visual language that is expressed consistently across all applications, regardless of the medium."
+      },
+      {
+        "name": "Creative Brief Synthesis",
+        "explanation": "A creative brief synthesizes the key information (team goals, communication goals, critical application list, etc.) that the creative team needs to know in order to develop a brand identity that aligns with the overall objectives of the project."
+      },
+      {
+        "name": "Brand Touchpoints",
+        "explanation": "Points of interaction with a brand; in this context, business cards and collateral."
+      },
+      {
+        "name": "Collateral",
+        "explanation": "Marketing materials used to communicate information about a company or product."
+      },
+      {
+        "name": "Positioning Goals",
+        "explanation": "Desired perception of a brand in the market."
+      },
+      {
+        "name": "Website as Interactive Experience",
+        "explanation": "A website should be an engaging, interactive experience that brings the brand personality to life through content, sound, movement, and color."
+      },
+      {
+        "name": "Customer Control",
+        "explanation": "The internet provides customers with a no-pressure sales environment and easy access to competitors."
+      },
+      {
+        "name": "Magablog",
+        "explanation": "A website designed to look like an online publication, but featuring new posts like a blog."
+      },
+      {
+        "name": "Signage Importance",
+        "explanation": "Signage expresses the brand, builds understanding of user needs, and acts as a 24/7 mass communication medium to attract customers, influence purchasing decisions, and increase sales."
+      },
+      {
+        "name": "Packaging ROI",
+        "explanation": "Packaging is the only brand medium experienced 100% by consumers and provides a higher ROI than any other branding strategy."
+      },
+      {
+        "name": "Product Design Success Factors",
+        "explanation": "The best consumer products anticipate customer needs, express the brand promise, deliver superior function/form/value, are easy to use, provide reliable service, set expectations for future products, offer differentiation, consider sustainability, spark referrals, are created by cross-functional teams, and are consistent with touchpoints."
+      },
+      {
+        "name": "Advertising as Influence",
+        "explanation": "Advertising is a multifaceted process involving influence, information, persuasion, communication, and dramatization, aiming to create a relationship between the consumer and the product."
+      },
+      {
+        "name": "Branded Environments",
+        "explanation": "The design and ambience of a physical space can be a significant attraction and represent a brand's identity, creating a compelling experience for customers."
+      },
+      {
+        "name": "Vehicles as Moving Canvases",
+        "explanation": "Vehicles serve as a visible medium for branding, utilizing scale, legibility, and durability to communicate a brand's identity while considering various environmental and regulatory factors."
+      },
+      {
+        "name": "Strategic Launch Goals",
+        "explanation": "Increase brand awareness and understanding among all stakeholders, increase preference for the company, build loyalty, promote the new identity as a brand, create an emotional connection, and positively influence choices and/or behavior."
+      },
+      {
+        "name": "Comprehensive Plan Elements",
+        "explanation": "Includes goals and objectives of the new brand identity, communications activities supporting brand implementation, timeline for implementation and budget, alignment with company goals and research, target audiences, key messages, communications strategies, internal training strategy, and standards and guidelines strategy."
+      },
+      {
+        "name": "Brand Book",
+        "explanation": "Brand books, spirit books, and thought books inspire, educate, and build brand awareness. They serve as a communications vehicle that is accessible, portable, and personal to express the vision of a company and the meaning of a brand."
+      },
+      {
+        "name": "Unified Image",
+        "explanation": "Creating a consistent and recognizable visual identity across all branches and platforms of an organization."
+      },
+      {
+        "name": "Integrated Identity System",
+        "explanation": "Developing a cohesive and sustainable identity system that can be applied across various applications, both digital and physical."
+      },
+      {
+        "name": "Brand Architecture",
+        "explanation": "The way a master brand and local entities are structured and related to each other within a brand system. Apotek needed a brand architecture that allowed the master brand to coexist with individual pharmacy locations."
+      },
+      {
+        "name": "Brand Alignment",
+        "explanation": "Ensuring that a company's business practices, external communications, and internal culture are consistent with its core values."
+      },
+      {
+        "name": "Brand Differentiation",
+        "explanation": "Creating a unique and compelling identity that distinguishes a brand from its competitors."
+      },
+      {
+        "name": "Emotional Bond with Consumers",
+        "explanation": "Establishing a connection with customers based on feelings and values, rather than just product features or technology."
+      },
+      {
+        "name": "Brand Architecture",
+        "explanation": "A system that organizes a company\u2019s brands, products, and services to help an audience understand their relationship to one another."
+      },
+      {
+        "name": "Brand Architecture",
+        "explanation": "The structure of brands within an organizational entity. It defines how brands relate to each other and to the parent company."
+      },
+      {
+        "name": "Brand Value Proposition",
+        "explanation": "A statement that summarizes why a consumer should buy a product or use a service. It makes your brand attractive to customers."
+      },
+      {
+        "name": "Positioning Platform",
+        "explanation": "Framework defining the unique place a brand occupies in the mind of the consumer relative to competitors."
+      },
+      {
+        "name": "Brand Ecosystem",
+        "explanation": "A methodology that helps management teams set strategic priorities by charting strategic relationships, stakeholder objectives, and key messages."
+      },
+      {
+        "name": "Monolithic Brand Architecture",
+        "explanation": "The practice of applying a brand consistently across sectors and around the world."
+      },
+      {
+        "name": "Timelessness in Design",
+        "explanation": "A design should appear as though it has always existed, possessing a classic quality without being overtly retro."
+      },
+      {
+        "name": "Maintaining Recognizable Elements",
+        "explanation": "When redesigning a brand, preserving at least one key element from the original design can help maintain brand recognition and continuity."
+      },
+      {
+        "name": "Paradoxical Branding",
+        "explanation": "Using seemingly contradictory elements (like 'Heavy Bubble') can create a memorable and intriguing brand identity."
+      },
+      {
+        "name": "Brand Essence",
+        "explanation": "A co-created distillation of a brand's shared mission, vision, attributes, competitive advantage, and personality."
+      },
+      {
+        "name": "Branding-First Approach",
+        "explanation": "Prioritizing brand development and definition before other aspects of a project, such as the physical building in the case of NIZUC. This approach establishes the core ideas from which all other decisions and partnerships will emanate."
+      },
+      {
+        "name": "Brand Platform",
+        "explanation": "A foundation of core ideas that guide all decisions and partnerships related to a brand. It conceptually and visually defines the essence of a destination or organization."
+      },
+      {
+        "name": "Core Positioning Strategy",
+        "explanation": "Expresses what an organization or brand stands for, what sets them apart, and why that's relevant to their target audience."
+      },
+      {
+        "name": "Capturing Spirit and Culture",
+        "explanation": "The best Olympic trademarks engender pride, express a cultural difference, and capture the spirit of the Olympics."
+      },
+      {
+        "name": "Strong Central Idea",
+        "explanation": "Like other icons, the best Olympic trademarks have a strong central idea."
+      },
+      {
+        "name": "Mental Models",
+        "explanation": "Understanding how users conceptualize a system or process and designing interfaces and interactions that align with these mental models to create intuitive and user-friendly experiences."
+      },
+      {
+        "name": "User Archetypes",
+        "explanation": "Representations of different user groups based on their behaviors, motivations, and needs, used to inform design decisions and tailor experiences to specific user segments."
+      },
+      {
+        "name": "Conscious Consumerism",
+        "explanation": "A business model where consumers choose products that raise money for a cause (like the Global Fund to help eliminate AIDS in Africa) by purchasing (RED) products from partner companies."
+      },
+      {
+        "name": "Omakase",
+        "explanation": "In the Japanese tradition, omakase means \u201ctrust in the chef,\u201d referring to a dining experience where the chef selects and presents the dishes."
+      },
+      {
+        "name": "Brand Equity",
+        "explanation": "The value of a brand, encompassing consumer perception, loyalty, and recognition."
+      },
+      {
+        "name": "Brand as Detail",
+        "explanation": "Every aspect of a brand, including communications, behavior, products, and environment, must reflect the core brand values and identity."
+      },
+      {
+        "name": "Emotional Connection",
+        "explanation": "Creating a brand strategy that forges an emotional connection with the target audience is crucial for success."
+      },
+      {
+        "name": "Value Proposition",
+        "explanation": "A statement that summarizes why a consumer should buy a product or use a service. In the Vanguard example, it was being the \u201cIndexing Authority.\u201d"
+      },
+      {
+        "name": "Authenticity",
+        "explanation": "Being genuine and true to the brand's core values and reputation. In the Vanguard example, this was reinforced through language, tone, and strategic communications, positioning Vanguard as a trusted entity."
+      },
+      {
+        "name": "Leitmotif",
+        "explanation": "A recurring element or theme that unifies different parts of a work. In the Vanguard example, the bold, ever-changing graphic V served as the leitmotif."
+      },
+      {
+        "name": "Brand Architecture",
+        "explanation": "The structure of brands within an organizational entity. It defines how brands relate to each other."
+      },
+      {
+        "name": "Esp\u00edritu Vueling",
+        "explanation": "The guiding spirit behind the Vueling brand, embodying directness, simplicity, unexpectedness, and down-to-earth service with low prices and great service."
+      },
+      {
+        "name": "Brand Equity",
+        "explanation": "Implied value the brand projects to customers."
+      },
+      {
+        "name": "Brand Architecture",
+        "explanation": "Organizational structure of the brand."
+      },
+      {
+        "name": "Brand Essence",
+        "explanation": "The core value of the brand."
+      },
+      {
+        "name": "Brand Awareness",
+        "explanation": "How well consumers know the brand."
+      }
+    ],
+    "vocabulary": {
+      "Trademarks": "The shortest, fastest, most ubiquitous form of communication available.",
+      "Brand": "de\ufb01ned, 2",
+      "Vision": "Not defined in text",
+      "Values": "Not defined in text",
+      "Mission": "Not defined in text",
+      "Value proposition": "Not defined in text",
+      "Culture": "Not defined in text",
+      "Target market": "Not defined in text",
+      "Segments": "Not defined in text",
+      "Stakeholder perceptions": "Not defined in text",
+      "Services": "Not defined in text",
+      "Products": "Not defined in text",
+      "Infrastructure": "Not defined in text",
+      "Marketing strategy": "Not defined in text",
+      "Competition": "Not defined in text",
+      "Trends": "Not defined in text",
+      "Pricing": "Not defined in text",
+      "Distribution": "Not defined in text",
+      "Research": "Not defined in text",
+      "Environment": "Not defined in text",
+      "Economics": "Not defined in text",
+      "Sociopolitics": "Not defined in text",
+      "Strengths/weaknesses": "Not defined in text",
+      "Opportunities": "Not defined in text",
+      "Threats": "Not defined in text",
+      "Understanding": "Not defined in text",
+      "Core values": "Not defined in text",
+      "Brand attributes": "Not defined in text",
+      "Competitive advantage": "Not defined in text",
+      "Brand strategy": "Not defined in text",
+      "Differentiation": "Not defined in text",
+      "Business category": "Not defined in text",
+      "Central idea": "Not defined in text",
+      "Unifying concept": "Not defined in text",
+      "Key messages": "Not defined in text",
+      "Voice and tone": "Not defined in text",
+      "Moments of truth": "Touchpoints that firms use to create a memorable and positive experience to support brand culture.",
+      "Tagline": "A short phrase that captures a company's essence.",
+      "Nomenclature": "Company name formal, Company name informal, Taglines, Descriptors, Product names, Process names, Service names, Division names",
+      "Brand Essence": "The core identity of the brand.",
+      "Voice": "A brand's distinct manner of expression through language.",
+      "Tone": "The attitude or feeling conveyed in a brand's communication.",
+      "Brand Identity": "Includes all tangible expression from packaging to web.",
+      "Signature": "Consistent use of a logo and name.",
+      "Logotype": "A graphic mark, emblem, or symbol used to aid and promote public identification and recognition.",
+      "Brandmark": "A symbol or design that represents a brand.",
+      "Wordmark": "A logo that consists of the name of a company, institution, or product spelled out in a unique typeface or design.",
+      "Letterforms": "A unique design using one or more letterforms that act as a mnemonic device for a company name",
+      "Emblems": "A mark in which the company name is inextricably connected to a pictorial element",
+      "Pictorial marks": "An immediately recognizable literal image that has been simplified and stylized",
+      "Abstract/symbolic marks": "A symbol that conveys a big idea, and often embodies strategic ambiguity",
+      "Look": "Defined by color, scale, proportion, typography, and motion.",
+      "Feel": "Experiential and emotional.",
+      "Transparency": "The degree to which information flows freely within an organization, among managers and employees, and outward to stakeholders.",
+      "Licensor": "Brand owner who grants rights to use their brand.",
+      "Licensee": "Party who develops, manufactures, markets, and sells products under license from a brand owner.",
+      "Private Label": "A product line created and branded by a store but manufactured by a third party.",
+      "Royalties": "Payments made by the licensee to the licensor, based on sales of licensed products.",
+      "SKU": "Stock Keeping Unit",
+      "Clickstreams": "Where prospect has been (on websites).",
+      "CPV": "Cost per visitor (websites)",
+      "Quantitative research": "Quantitative research creates statistically valid market information.",
+      "Online surveys": "One of several ways to gather primary research data using the internet to gather information from respondents.",
+      "Usability testing": "Designers and human-factor engineers observe through a two-way mirror in a formal laboratory testing environment.",
+      "Product testing": "Products can be tested \u201cin home\u201d to replicate real life or at a \u201ccentral location\u201d to get a point-in-time user experience.",
+      "Eye tracking": "Eye movement recorders examine how an individual views packaging, advertisements, signs, shelf displays, or computer screens by tracking eye movements.",
+      "Segmentation": "Divides consumers and businesses into clustered groups, each with its own special interests, lifestyles, and affinity for particular goods and services.",
+      "Demographics": "Vital statistics, such as age, sex, marital status, ethnicity, family size and composition, education, income, occupation, and housing.",
+      "Psychographics": "Psychological attributes that describe an individual\u2019s lifestyle or attitudes.",
+      "Equity tracking": "Monitors ongoing brand health and advertising effectiveness.",
+      "Syndicated data": "Standardized data that is regularly recorded and sold by suppliers such as Nielsen, IRI, and NET.",
+      "Market structure": "Defines how a category is structured and how its brands interact.",
+      "Competitive intelligence": "Data and information about industries, private and public companies, and their stock activity and management.",
+      "Ethnography": "The holistic study of experience, meaning-making, and behavior in the context of daily life.",
+      "Competitive Audit": "Review of competitors' business cards/collateral",
+      "Language Audit": "Analysis of the inter-section of customer experience, design, and content is an intensive and rigorous endeavor that demands the left brain and right brain to work in tandem.",
+      "Audit Readout": "A formal presentation made to the key decision makers that synthesizes key learnings from the interviews, research, and audits.",
+      "Brand Strategy": "A plan for the development of a successful brand in order to achieve specific goals. The brand strategy sets the foundation for the creation of the brand identity.",
+      "Positioning Platform": "Development and refinement of a positioning strategy to find the dimension on which a company can compete and own.",
+      "Creative Brief": "A road map for the creative team; a succinct and strategic document approved by senior levels in an organization early in the process.",
+      "Ascenders": "The part of a lowercase letter that extends above the x-height.",
+      "Descenders": "The part of a lowercase letter that extends below the baseline.",
+      "Leading": "The space between lines of type.",
+      "Letter Spacing": "The space between individual letters in a word.",
+      "Serif": "A small stroke added to the end of a main stroke of a letter.",
+      "Sans serif": "A typeface without serifs.",
+      "Weight": "The relative thickness of a font (e.g., bold, light, regular).",
+      "Avatar": "A graphical representation of a brand used as an icon.",
+      "Trademark": "Almost anything that serves to distinguish products or services from those of a competitor.",
+      "Intellectual Property": "The legal discipline that specializes in providing the broadest scope of protection for brand identity assets, including copyrights and patents.",
+      "USPTO": "U.S. Patent and Trademark Office, the government agency responsible for registering trademarks.",
+      "Common-law (trademark search)": "Anyone can conduct a search to determine other ownership.",
+      "Touchpoints": "Applications where a brand identity program expresses itself.",
+      "Internal Audit": "Review of the company's own business cards/collateral.",
+      "Favicon": "Miniaturized storefront signs that give brands an opportunity to attract attention and stand out from the crowd. They are the 16x16 pixel icons located in a web browser\u2019s address bar.",
+      "Wireframe": "Prototypes",
+      "Signage": "Signage expresses the brand and builds on understanding the needs and habits of users in the environment.",
+      "Brand Equity": "The value of a brand, based on consumer perception and loyalty.",
+      "Ubiquity": "The state of being everywhere at the same time.",
+      "Evolutionary Approach": "A gradual change or progression in brand strategy.",
+      "Revolutionary Approach": "A sudden, radical, or complete change in brand strategy.",
+      "Olfactory": "Relating to the sense of smell.",
+      "Tactile": "Relating to the sense of touch.",
+      "Thermal": "Relating to heat or temperature.",
+      "Ephemera": "Objects with a short life, or more simply put, stuff. Companies frequently use marketing and promotion items.",
+      "Brand Champions": "Individuals who understood and could articulate a company\u2019s core values, vision, and brand essence.",
+      "Brand Book": "A resource that inspires, educates, and builds brand awareness, communicating the company's vision and brand meaning.",
+      "Spirit Book": "A compelling way to express the essence of a brand.",
+      "Standards and Guidelines": "Intelligent standards and guidelines that are easily accessible to all internal and external partners facilitate the consistency and integrity of a brand identity system",
+      "Vector graphics": "Hard-edged images created in a drawing program that can be manipulated and scaled without losing reproduction quality because they are based on mathematically defined lines and curves.",
+      "Raster or bitmap images": "Continuous-tone images that are constructed as a continuous mapping of pixels. These images cannot be scaled, rotated, or skewed outside of an image-editing application without the loss of reproduction quality.",
+      "Resolution": "The resolution of digital imagery is measured in pixels per inch (ppi), the digital equivalent of dots per inch (dpi). The end use of the image is critical for determining the optimum resolution.",
+      "ARPU": "Average Revenue Per User",
+      "LEED Platinum Certified": "A green building certification signifying a high level of environmental sustainability in design and construction.",
+      "R&D": "Research and Development",
+      "Brand Promise": "A statement of what the brand will deliver to the customer.",
+      "Brand Tools": "Resources and elements used to communicate and manage a brand, such as logos, guidelines, and templates.",
+      "Brand Advocates": "Individuals who actively promote and support a brand.",
+      "Brand Brief": "A document outlining the goals, history, and desired future direction of a brand, used to guide the design process.",
+      "Ex Post Facto Definition": "An explanation or definition created after the fact, i.e., after the brand name or concept was already established.",
+      "Visual Vocabulary": "A set of visual elements (colors, shapes, images, typography) that are consistently used to represent a brand.",
+      "DfE": "Design for the Environment protocols, which focus on creating economic value while simultaneously valuing the environment.",
+      "LEED standards": "Standards designed to boost green-building practices.",
+      "MBDC Cradle-to-Cradle Design protocol": "A design protocol used by McDonough Braungart Design Chemistry.",
+      "Colophons": "A publisher's emblem or imprint, often found at the end of a book.",
+      "Brand Architecture": "Showcases the participating brand and, at the same time, links that brand to the power of (RED).",
+      "Unaided Awareness": "In the context of the (RED) brand launch, it refers to the percentage of people who were aware of the brand without being prompted or given any cues.",
+      "Prix-fixe": "A menu with a fixed price for a complete meal.",
+      "Wordmarks": "A distinct text-only typography-based logo.",
+      "ETF": "Exchange Traded Funds",
+      "Spanglish": "A mix of Spanish and English languages.",
+      "Co-branding": "de\ufb01ned, 6",
+      "Cause branding": "de\ufb01ned, 6",
+      "Digital branding": "de\ufb01ned, 6",
+      "Country branding": "de\ufb01ned, 6",
+      "logotype": "50\u201351, 126\u201327, 249",
+      "guidelines": "95, 184\u201387",
+      "secondary research": "Research conducted using existing data and information.",
+      "segmentation": "A research process that divides a broad consumer or business market into sub-groups of consumers based on shared characteristics.",
+      "touchpoint": "A point of contact or interaction between a business and its customers.",
+      "trade dress": "The overall look and feel of a product or service that distinguishes it from competitors."
+    }
+  }
+]
