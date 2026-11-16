@@ -78,8 +78,6 @@ Built on brand projects to make a lot of something, fast.
 
 <br>
 
-**[Layer Generator](layer-generator-figma/)** | See Generators above
-
 <a href="https://github.com/brianokarski/shopify-noodles/blob/main/previews/layer-generator-figma.png"><img src="https://github.com/brianokarski/shopify-noodles/blob/main/previews/layer-generator-figma.png?raw=true" width="100%"></a>
 
 Install from Figma desktop: **Plugins → Development → Import plugin from manifest**, then pick the folder's `manifest.json`.
@@ -198,7 +196,7 @@ Single-file generators for line, pattern and texture work. All export SVG.
 
 ---
 
-## Utilities and side projects
+## Utilities
 
 **[Pomodoro](pomodoro/)** | A tiny macOS menu bar timer. Tag what you're working on, get a soft piano chime when you're done, and a weekly report of where your time went
 
