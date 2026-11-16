@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Scene Gallery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #111;
+            color: #fff;
+            min-height: 100vh;
+        }
+        header {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(0,0,0,0.5);
+        }
+        h1 { font-weight: 300; letter-spacing: 2px; }
+        .subtitle { opacity: 0.6; margin-top: 0.5rem; }
+        
+        .scene-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            flex-wrap: wrap;
+        }
+        .scene-btn {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .scene-btn:hover, .scene-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+        }
+        
+        #viewer-container {
+            width: 100%;
+            height: calc(100vh - 180px);
+            position: relative;
+        }
+        #viewer-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            padding: 0.75rem 1.5rem;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>3D Scene Gallery</h1>
+        <p class="subtitle">Click a scene below to view in 3D</p>
+    </header>
+    
+    <nav class="scene-nav" id="scene-nav"></nav>
+    
+    <div id="viewer-container">
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div id="loading-text">Loading scene...</div>
+        </div>
+        <div class="controls">🖱️ Drag to orbit • Scroll to zoom • Right-drag to pan</div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.169.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.169.0/examples/jsm/"
+        }
+    }
+    </script>
+    
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        const scenes = [
+            { file: 'outputs/still-life.ply', title: 'Still Life' }
+        ];
+
+        let renderer, scene, camera, controls, currentPoints;
+        const container = document.getElementById('viewer-container');
+        const loading = document.getElementById('loading');
+        const loadingText = document.getElementById('loading-text');
+        const nav = document.getElementById('scene-nav');
+
+        // Create scene buttons
+        scenes.forEach((s, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'scene-btn' + (i === 0 ? ' active' : '');
+            btn.textContent = s.title;
+            btn.onclick = () => loadScene(i);
+            nav.appendChild(btn);
+        });
+
+        // Sigmoid function for SH to RGB conversion
+        function sigmoid(x) {
+            return 1 / (1 + Math.exp(-x));
+        }
+
+        // Parse Gaussian Splat PLY file
+        async function parseGaussianPLY(url) {
+            loadingText.textContent = 'Downloading...';
+            const response = await fetch(url);
+            const buffer = await response.arrayBuffer();
+            
+            loadingText.textContent = 'Parsing PLY...';
+            
+            // Parse header
+            const decoder = new TextDecoder();
+            const headerEnd = findHeaderEnd(buffer);
+            const headerText = decoder.decode(new Uint8Array(buffer, 0, headerEnd));
+            
+            const lines = headerText.split('\n');
+            let vertexCount = 0;
+            let vertexProperties = [];
+            let inVertexElement = false;
+            
+            for (const line of lines) {
+                if (line.startsWith('element vertex')) {
+                    vertexCount = parseInt(line.split(' ')[2]);
+                    inVertexElement = true;
+                } else if (line.startsWith('element ') && !line.startsWith('element vertex')) {
+                    inVertexElement = false;
+                } else if (inVertexElement && line.startsWith('property float')) {
+                    vertexProperties.push({ name: line.split(' ')[2], type: 'float', size: 4 });
+                }
+            }
+            
+            console.log(`Parsing ${vertexCount} vertices with ${vertexProperties.length} properties`);
+            
+            // Find property indices
+            const propNames = vertexProperties.map(p => p.name);
+            const xIdx = propNames.indexOf('x');
+            const yIdx = propNames.indexOf('y');
+            const zIdx = propNames.indexOf('z');
+            const f_dc_0_idx = propNames.indexOf('f_dc_0');
+            const f_dc_1_idx = propNames.indexOf('f_dc_1');
+            const f_dc_2_idx = propNames.indexOf('f_dc_2');
+            
+            // Calculate bytes per vertex (each float property is 4 bytes)
+            const bytesPerVertex = vertexProperties.length * 4;
+            
+            console.log(`Bytes per vertex: ${bytesPerVertex}, property indices: x=${xIdx}, y=${yIdx}, z=${zIdx}, f_dc=${f_dc_0_idx},${f_dc_1_idx},${f_dc_2_idx}`);
+            
+            // Parse binary data
+            const dataStart = headerEnd + 1; // +1 for newline after end_header
+            const dataView = new DataView(buffer, dataStart);
+            
+            // Limit vertices for performance (sample if too many)
+            const maxVertices = Math.min(vertexCount, 500000);
+            const step = Math.ceil(vertexCount / maxVertices);
+            const actualCount = Math.ceil(vertexCount / step);
+            
+            const positions = new Float32Array(actualCount * 3);
+            const colors = new Float32Array(actualCount * 3);
+            
+            // SH coefficient for DC term
+            const SH_C0 = 0.28209479177387814;
+            
+            loadingText.textContent = `Processing ${actualCount.toLocaleString()} points...`;
+            
+            let outIdx = 0;
+            for (let i = 0; i < vertexCount && outIdx < actualCount; i += step) {
+                const offset = i * bytesPerVertex;
+                
+                // Position
+                positions[outIdx * 3] = dataView.getFloat32(offset + xIdx * 4, true);
+                positions[outIdx * 3 + 1] = dataView.getFloat32(offset + yIdx * 4, true);
+                positions[outIdx * 3 + 2] = dataView.getFloat32(offset + zIdx * 4, true);
+                
+                // Color from spherical harmonics DC term
+                const f_dc_0 = dataView.getFloat32(offset + f_dc_0_idx * 4, true);
+                const f_dc_1 = dataView.getFloat32(offset + f_dc_1_idx * 4, true);
+                const f_dc_2 = dataView.getFloat32(offset + f_dc_2_idx * 4, true);
+                
+                // Convert SH DC term to RGB: color = clamp(SH_C0 * f_dc + 0.5)
+                colors[outIdx * 3] = Math.min(1, Math.max(0, SH_C0 * f_dc_0 + 0.5));
+                colors[outIdx * 3 + 1] = Math.min(1, Math.max(0, SH_C0 * f_dc_1 + 0.5));
+                colors[outIdx * 3 + 2] = Math.min(1, Math.max(0, SH_C0 * f_dc_2 + 0.5));
+                
+                outIdx++;
+            }
+            
+            return { positions, colors, vertexCount: actualCount };
+        }
+        
+        function findHeaderEnd(buffer) {
+            const arr = new Uint8Array(buffer);
+            const endHeader = [101, 110, 100, 95, 104, 101, 97, 100, 101, 114]; // "end_header"
+            for (let i = 0; i < arr.length - endHeader.length; i++) {
+                let match = true;
+                for (let j = 0; j < endHeader.length; j++) {
+                    if (arr[i + j] !== endHeader[j]) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) return i + endHeader.length;
+            }
+            return 0;
+        }
+
+        // Initialize Three.js
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111111);
+
+            camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 0, 3);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            window.addEventListener('resize', onResize);
+            animate();
+            
+            loadScene(0);
+        }
+
+        function onResize() {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        async function loadScene(index) {
+            document.querySelectorAll('.scene-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+
+            loading.style.display = 'block';
+            loadingText.textContent = 'Loading scene...';
+
+            if (currentPoints) {
+                scene.remove(currentPoints);
+                currentPoints.geometry.dispose();
+                currentPoints.material.dispose();
+            }
+
+            try {
+                const { positions, colors, vertexCount } = await parseGaussianPLY(scenes[index].file);
+                
+                loadingText.textContent = 'Creating geometry...';
+                
+                const geometry = new THREE.BufferGeometry();
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+                // SHARP writes OpenCV camera coordinates (y down, z forward).
+                // Rotate 180° about X into three.js coordinates (y up, z toward viewer)
+                // so the scene opens facing the original camera, right way up.
+                geometry.rotateX(Math.PI);
+
+                // Center and scale
+                geometry.computeBoundingBox();
+                const center = new THREE.Vector3();
+                geometry.boundingBox.getCenter(center);
+                geometry.translate(-center.x, -center.y, -center.z);
+
+                const size = new THREE.Vector3();
+                geometry.boundingBox.getSize(size);
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scale = 2 / maxDim;
+                geometry.scale(scale, scale, scale);
+
+                const material = new THREE.PointsMaterial({
+                    size: 0.009,
+                    vertexColors: true,
+                    sizeAttenuation: true
+                });
+
+                currentPoints = new THREE.Points(geometry, material);
+                scene.add(currentPoints);
+
+                camera.position.set(0, 0, 3);
+                controls.reset();
+
+                loading.style.display = 'none';
+                console.log(`Loaded ${vertexCount} points`);
+            } catch (err) {
+                console.error('Load error:', err);
+                loadingText.textContent = 'Failed to load: ' + err.message;
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
