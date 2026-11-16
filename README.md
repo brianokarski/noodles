@@ -1,18 +1,16 @@
 # noodles 🍜
 
-Hi, I'm Brian, a brand designer at Shopify. This is where I keep the tools and experiments I've made, mostly with Claude and Cursor, mostly to get past a problem I had in the middle of real design work.
+Tools built in the middle of real brand work, when drawing it by hand was the slow option. Generators, pattern engines, Figma plugins, a few agents.
 
-A lot of these started as "I need 40 variations of this and I don't want to draw them by hand." Some turned into proper tools. Some are just toys. All of them are free to poke at, fork, or steal ideas from.
+Most are one file. Open the folder, open `index.html`, go.
 
-**How to run almost anything here:** open the folder, double-click `index.html`. Most are a single file with no build step. Anything that needs more says so in its own folder.
-
-**A note on brand:** none of these ship with Shopify brand assets, fonts or palettes. Where a tool was born on a Shopify project, I've stripped it back to a neutral default so you can load your own colours, type and marks.
+No brand assets ship in here. Load your own palette, type and marks.
 
 ---
 
 ## Generators
 
-Tools that make a lot of something fast. These were all built on real brand projects to produce assets at volume.
+Built on brand projects to make a lot of something, fast.
 
 | Tool | What it does |
 |---|---|
@@ -113,6 +111,8 @@ Single-file generators for line, pattern and texture work. All export SVG.
 
 ---
 
-## How these get made
+## Process
 
-Almost everything here was built in conversation with an AI model. My job is mostly deciding what the tool should do, knowing when the output is wrong, and pushing on the details until it feels right. If you want to talk about that process, or want help building something like this for your own work, find me on Slack.
+Built with Claude and Cursor. The model writes the code. The job is knowing what the tool should do, seeing when the output is wrong, and pushing until it holds up in front of a review.
+
+Want something like this on your project? Ping me.
