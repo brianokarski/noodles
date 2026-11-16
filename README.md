@@ -11,6 +11,8 @@ Open the folder, open `index.html`, go.
 <table>
 <tr><td width="220"><a href="panel-lab/"><b>Panel Lab</b></a></td><td>Randomized panel layouts for any artboard size. Set the canvas, columns and gap, then roll. Panels fill with shape tiles, solid fields and type, and export as SVG. Good for posters, social, and anything that needs a system that looks designed rather than templated</td></tr>
 <tr><td colspan="2"><a href="https://github.com/brianokarski/shopify-noodles/blob/main/previews/panel-lab.png"><img src="https://github.com/brianokarski/shopify-noodles/blob/main/previews/panel-lab.png?raw=true" width="100%"></a></td></tr>
+<tr><td width="220"><a href="stipple-filter/"><b>Stipple Filter</b></a></td><td>Turn any image into a stipple illustration. Three methods (Voronoi, weighted Poisson, organic halftone), full tone controls, and dot size that tracks the image. Exports SVG and PNG</td></tr>
+<tr><td colspan="2"><a href="https://github.com/brianokarski/shopify-noodles/blob/main/previews/stipple-filter.png"><img src="https://github.com/brianokarski/shopify-noodles/blob/main/previews/stipple-filter.png?raw=true" width="100%"></a></td></tr>
 <tr><td width="220"><a href="layer-generator/"><b>Layer Generator</b></a></td><td>p5 sketch for generative artwork in two modes. <i>Totem</i> is a radial layered composition, <i>Cells</i> is pixel-grid organic blobs with nuclei and debris. Built to make booth, social and print assets without hand-drawing each one</td></tr>
 <tr><td colspan="2"><a href="https://github.com/brianokarski/shopify-noodles/blob/main/previews/layer-generator.png"><img src="https://github.com/brianokarski/shopify-noodles/blob/main/previews/layer-generator.png?raw=true" width="100%"></a></td></tr>
 <tr><td width="220"><a href="layer-generator-figma/"><b>Layer Generator for Figma</b></a></td><td>The same generator inside Figma. Stack generated layers with per-layer blend modes, opacity and seeds, then apply the stack to one or many frames at once</td></tr>
@@ -32,6 +34,8 @@ Open the folder, open `index.html`, go.
 <table>
 <tr><td width="220"><a href="figma-pill-painter/"><b>Pill Painter</b></a></td><td>A pattern maker with five engines that share one canvas, one spline editor, one set of scrub dials, and drop straight into real Figma nodes. My most-used tool</td></tr>
 <tr><td colspan="2"><a href="https://github.com/brianokarski/shopify-noodles/blob/main/previews/figma-pill-painter.png"><img src="https://github.com/brianokarski/shopify-noodles/blob/main/previews/figma-pill-painter.png?raw=true" width="100%"></a></td></tr>
+<tr><td width="220"><a href="stipple-filter-figma/"><b>Stipple Filter for Figma</b></a></td><td>The same stippler inside Figma. Select images, get editable stipple SVGs back on the canvas</td></tr>
+<tr><td colspan="2"><a href="https://github.com/brianokarski/shopify-noodles/blob/main/previews/stipple-filter-figma.png"><img src="https://github.com/brianokarski/shopify-noodles/blob/main/previews/stipple-filter-figma.png?raw=true" width="100%"></a></td></tr>
 <tr><td width="220"><a href="color-matrix/"><b>Color Matrix</b></a></td><td>Lay out every pairing in a palette as a matrix to check contrast, overlaps and triads at a glance, then build the rows into Figma</td></tr>
 <tr><td colspan="2"><a href="https://github.com/brianokarski/shopify-noodles/blob/main/previews/color-matrix.png"><img src="https://github.com/brianokarski/shopify-noodles/blob/main/previews/color-matrix.png?raw=true" width="100%"></a></td></tr>
 <tr><td width="220"><a href="huehuehue/"><b>huehuehue</b></a></td><td>Shift every colour in a selection together while keeping their relationships. Rotate hue, scale saturation, nudge lightness, and the whole palette moves as one</td></tr>
@@ -112,11 +116,3 @@ Install from Figma desktop: **Plugins → Development → Import plugin from man
 <tr><td colspan="2"><a href="https://github.com/brianokarski/shopify-noodles/blob/main/previews/todo-md.png"><img src="https://github.com/brianokarski/shopify-noodles/blob/main/previews/todo-md.png?raw=true" width="100%"></a></td></tr>
 <tr><td width="220"><a href="pinrip/"><b>pinrip</b></a></td><td>Pull every image and video off a Pinterest board</td></tr>
 </table>
-
----
-
-## Process
-
-Built with Claude and Cursor. The model writes the code. The job is knowing what the tool should do, seeing when the output is wrong, and pushing until it holds up in front of a review.
-
-Want something like this on your project? Ping me.

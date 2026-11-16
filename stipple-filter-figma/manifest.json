@@ -1,0 +1,13 @@
+{
+  "name": "Stipple Filter",
+  "id": "stipple-filter-local",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["https://api.openai.com", "https://rsms.me"],
+    "reasoning": "Auto-tune sends the selected image to OpenAI. rsms.me serves the Inter webfont."
+  },
+  "documentAccess": "dynamic-page"
+}

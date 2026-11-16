@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Stipple Filter</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --panel: #141414;
+    --border: #1f1f1f;
+    --border-strong: #2a2a2a;
+    --text: #e6e6e6;
+    --text-dim: #8a8a8a;
+    --text-mute: #5a5a5a;
+    --accent: #4ade80;
+    --accent-dim: #22c55e;
+    --track: #242424;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
+    font-size: 13px;
+    line-height: 1.4;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  #sidebar {
+    width: 288px;
+    min-width: 288px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  #sidebar::-webkit-scrollbar { width: 6px; }
+  #sidebar::-webkit-scrollbar-track { background: transparent; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+  h1 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.005em;
+    padding: 20px 20px 16px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  h1 .ver {
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--text-mute);
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  h2 {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-mute);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .group {
+    padding: 18px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .group:first-of-type { border-top: none; padding-top: 0; }
+
+  details.advanced { border-top: 1px solid var(--border); }
+  details.advanced > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 16px 20px;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+    transition: color 0.12s ease;
+  }
+  details.advanced > summary::-webkit-details-marker { display: none; }
+  details.advanced > summary::after {
+    content: '';
+    width: 8px; height: 8px;
+    border-right: 1.5px solid var(--text-mute);
+    border-bottom: 1.5px solid var(--text-mute);
+    transform: rotate(-45deg);
+    transition: transform 0.18s ease;
+    margin-right: 3px;
+  }
+  details.advanced[open] > summary::after { transform: rotate(45deg); margin-right: 0; margin-top: -3px; }
+  details.advanced > summary:hover { color: var(--text); }
+  details.advanced > summary:hover::after { border-color: var(--text-dim); }
+  details.advanced > .group { border-top: 1px solid var(--border); }
+
+  label {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; font-weight: 400;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  label .val {
+    color: var(--accent);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    font-size: 11px;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 18px;
+    background: transparent;
+    outline: none;
+    cursor: pointer;
+    margin-bottom: 14px;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 2px; background: var(--track); border-radius: 1px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-top: -5px;
+    border: 2px solid var(--panel);
+    transition: transform 0.12s ease;
+  }
+  input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.15); }
+  input[type="range"]:active::-webkit-slider-thumb { background: var(--accent-dim); }
+
+  select, button {
+    width: 100%;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--border-strong);
+    background: #1a1a1a;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease;
+  }
+  select:hover { border-color: #353535; background: #1e1e1e; }
+  select {
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%238a8a8a' stroke-width='1.5'><path d='M3 4.5 6 7.5 9 4.5'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+  }
+  button {
+    border: none;
+    background: var(--accent);
+    color: #0a0a0a;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+  button:hover { background: #6ee997; }
+  button.secondary { background: #1e1e1e; color: var(--text); border: 1px solid var(--border-strong); }
+  button.secondary:hover { background: #242424; border-color: #353535; }
+  .btn-row { display: flex; gap: 6px; }
+  .btn-row button { flex: 1; }
+
+  #drop-zone {
+    margin: 0 20px;
+    border: 1px dashed var(--border-strong);
+    border-radius: 6px;
+    padding: 22px 16px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    color: var(--text-mute);
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  #drop-zone:hover { border-color: #3a3a3a; color: var(--text-dim); }
+  #drop-zone.over { border-color: var(--accent); color: var(--accent); }
+  #drop-zone input { display: none; }
+
+  /* Checkbox label rows */
+  label:has(input[type="checkbox"]) {
+    margin-bottom: 0;
+    padding: 6px 0 0;
+  }
+  input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: 3px;
+    background: #1a1a1a;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.12s ease;
+  }
+  input[type="checkbox"]:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 3px; top: 0px;
+    width: 5px; height: 8px;
+    border: solid #0a0a0a;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .color-row { display: flex; gap: 10px; align-items: center; }
+  .color-row + .color-row { margin-top: 8px; }
+  .color-row input[type="color"] {
+    -webkit-appearance: none; appearance: none;
+    width: 28px; height: 28px;
+    border: 1px solid var(--border-strong);
+    border-radius: 5px;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .color-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
+  .color-row input[type="color"]::-webkit-color-swatch { border-radius: 3px; border: none; }
+  .color-row span { font-size: 12px; color: var(--text-dim); }
+
+  /* Bottom action bar — sticky-feeling, separated from scroll content */
+  .actions {
+    margin-top: auto;
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--panel);
+    display: flex;
+    gap: 6px;
+  }
+  .actions button { flex: 1; }
+
+  #canvas-wrap {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    overflow: hidden; position: relative;
+    background: var(--bg);
+  }
+  canvas { max-width: 100%; max-height: 100%; }
+  #status {
+    position: absolute; bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10,10,10,0.9);
+    border: 1px solid var(--border-strong);
+    color: var(--accent);
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    backdrop-filter: blur(8px);
+  }
+  #status.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <h1>Stipple Filter <span class="ver">v.1.1</span></h1>
+
+  <div id="drop-zone">
+    Drop image or click to upload
+    <input type="file" id="file-input" accept="image/*">
+  </div>
+
+  <div class="group" style="margin-top: 18px;">
+    <h2>Method</h2>
+    <select id="method">
+      <option value="lloyd">Voronoi Stipple</option>
+      <option value="poisson">Weighted Poisson Disk (fast)</option>
+      <option value="halftone">Organic Halftone</option>
+    </select>
+    <span id="halftone-controls" style="display:none;margin-top:10px;">
+      <label style="margin-top:4px;"><span>Layout</span></label>
+      <select id="halftone-layout">
+        <option value="hex">Hex rows</option>
+        <option value="rotated">Rotated hex (30°)</option>
+        <option value="golden">Golden spiral</option>
+        <option value="uniform">Uniform (relaxed)</option>
+      </select>
+    </span>
+  </div>
+
+  <div class="group">
+    <h2>Density</h2>
+    <label><span>Spacing</span><span class="val" id="v-spacing">5.5</span></label>
+    <input type="range" id="spacing" min="1.5" max="12" step="0.25" value="5.5">
+
+    <label><span>Dot size</span><span class="val" id="v-dotsize">4</span></label>
+    <input type="range" id="dot-size" min="0.3" max="6" step="0.1" value="4">
+
+    <label><span>Size varies with tone</span>
+      <input type="checkbox" id="size-vary" checked>
+    </label>
+  </div>
+
+  <details class="advanced">
+    <summary>Advanced Settings</summary>
+
+    <div class="group">
+      <h2>Tone</h2>
+      <label><span>Darken midtones</span><span class="val" id="v-gamma">1.4</span></label>
+      <input type="range" id="gamma" min="0.3" max="3.0" step="0.05" value="1.4">
+
+      <label><span>Crush shadows</span><span class="val" id="v-black">0</span></label>
+      <input type="range" id="black-pt" min="0" max="100" step="1" value="0">
+
+      <label><span>Show light detail</span><span class="val" id="v-white">0</span></label>
+      <input type="range" id="white-pt" min="0" max="100" step="1" value="0">
+
+      <label><span>Contrast</span><span class="val" id="v-contrast">0</span></label>
+      <input type="range" id="contrast" min="0" max="100" step="1" value="0">
+
+      <label><span>Tone steps</span><span class="val" id="v-poster">8</span></label>
+      <input type="range" id="posterize" min="0" max="8" step="1" value="8">
+    </div>
+
+    <div class="group">
+      <h2>Organic feel</h2>
+      <label><span>Jitter</span><span class="val" id="v-jitter">0</span></label>
+      <input type="range" id="jitter" min="0" max="1.0" step="0.02" value="0">
+
+      <label><span>Size randomness</span><span class="val" id="v-sizerand">0</span></label>
+      <input type="range" id="size-rand" min="0" max="0.5" step="0.01" value="0">
+
+      <span id="lloyd-controls">
+        <label><span>Lloyd iterations</span><span class="val" id="v-lloyd">14</span></label>
+        <input type="range" id="lloyd-iter" min="1" max="40" step="1" value="14">
+      </span>
+    </div>
+  </details>
+
+  <div class="group">
+    <h2>Color</h2>
+    <div class="color-row">
+      <input type="color" id="dot-color" value="#1c1c1a">
+      <span>Dot color</span>
+    </div>
+    <div class="color-row">
+      <input type="color" id="bg-color" value="#f5f0e8">
+      <span>Background</span>
+    </div>
+    <label style="margin-top:12px;"><span>Invert brightness</span>
+      <input type="checkbox" id="invert">
+    </label>
+  </div>
+
+  <div class="group">
+    <h2>Export</h2>
+    <div class="btn-row">
+      <button class="secondary" onclick="exportSVG()">SVG</button>
+      <button class="secondary" onclick="exportPNG()">PNG</button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button onclick="randomize()">Randomize</button>
+    <button class="secondary" onclick="regenerate()">Regenerate</button>
+  </div>
+</div>
+
+<div id="canvas-wrap">
+  <canvas id="c"></canvas>
+  <div id="status"></div>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const statusEl = document.getElementById('status');
+
+let sourceImg = null;
+let imgData = null;
+let brightnessMap = null; // Pre-computed float32 brightness
+let dots = [];
+let imgW = 0, imgH = 0;
+
+// --- Controls ---
+const C = {
+  get method()   { return document.getElementById('method').value; },
+  get spacing()  { return +document.getElementById('spacing').value; },
+  get dotSize()  { return +document.getElementById('dot-size').value; },
+  get sizeVary() { return document.getElementById('size-vary').checked; },
+  get gamma()    { return +document.getElementById('gamma').value; },
+  get blackPt()  { return +document.getElementById('black-pt').value; },
+  get whitePt()  { return 255 - (+document.getElementById('white-pt').value); },
+  get dotColor() { return document.getElementById('dot-color').value; },
+  get bgColor()  { return document.getElementById('bg-color').value; },
+  get invert()   { return document.getElementById('invert').checked; },
+  get jitter()   { return +document.getElementById('jitter').value; },
+  get sizeRand() { return +document.getElementById('size-rand').value; },
+  get lloydIter(){ return +document.getElementById('lloyd-iter').value; },
+  get halftoneLayout() { return document.getElementById('halftone-layout').value; },
+  get contrast() { return +document.getElementById('contrast').value; },
+  get posterize(){ return +document.getElementById('posterize').value; },
+};
+
+// Show/hide method-specific controls
+function updateMethodControls() {
+  document.getElementById('lloyd-controls').style.display = C.method === 'lloyd' ? '' : 'none';
+  document.getElementById('halftone-controls').style.display = C.method === 'halftone' ? '' : 'none';
+}
+document.getElementById('method').addEventListener('change', updateMethodControls);
+updateMethodControls();
+
+// Live value display
+document.querySelectorAll('input[type="range"]').forEach(el => {
+  el.addEventListener('input', () => {
+    const map = {
+      'spacing': 'v-spacing', 'dot-size': 'v-dotsize',
+      'gamma': 'v-gamma', 'black-pt': 'v-black', 'white-pt': 'v-white',
+      'jitter': 'v-jitter', 'size-rand': 'v-sizerand', 'lloyd-iter': 'v-lloyd',
+      'contrast': 'v-contrast', 'posterize': 'v-poster',
+    };
+    const vEl = document.getElementById(map[el.id]);
+    if (vEl) vEl.textContent = el.value;
+  });
+});
+
+// Auto-regenerate on control change
+document.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('change', () => { if (sourceImg) regenerate(); });
+});
+
+// --- File loading ---
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('over');
+  if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+
+function loadFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      sourceImg = img;
+      const maxDim = 1200;
+      let w = img.width, h = img.height;
+      if (w > maxDim || h > maxDim) {
+        const s = maxDim / Math.max(w, h);
+        w = Math.round(w * s); h = Math.round(h * s);
+      }
+      imgW = w; imgH = h;
+
+      const tmp = document.createElement('canvas');
+      tmp.width = w; tmp.height = h;
+      const tCtx = tmp.getContext('2d');
+      tCtx.drawImage(img, 0, 0, w, h);
+      imgData = tCtx.getImageData(0, 0, w, h);
+
+      // Pre-compute brightness map
+      brightnessMap = new Float32Array(w * h);
+      const d = imgData.data;
+      for (let i = 0; i < w * h; i++) {
+        const j = i * 4;
+        brightnessMap[i] = 0.299 * d[j] + 0.587 * d[j+1] + 0.114 * d[j+2];
+      }
+
+      dropZone.textContent = file.name;
+      regenerate();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// --- Tone processing pipeline ---
+function applyTone(b) {
+  // Levels
+  const range = C.whitePt - C.blackPt;
+  b = Math.max(0, Math.min(255, (b - C.blackPt) / range * 255));
+
+  // Gamma
+  b = 255 * Math.pow(b / 255, C.gamma);
+
+  // Contrast — S-curve centered at 128
+  if (C.contrast > 0) {
+    const f = (259 * (C.contrast * 2.55 + 255)) / (255 * (259 - C.contrast * 2.55));
+    b = Math.max(0, Math.min(255, f * (b - 128) + 128));
+  }
+
+  // Posterize — snap to N discrete levels
+  if (C.posterize > 0) {
+    const levels = C.posterize + 1;
+    b = Math.round(b / 255 * levels) / levels * 255;
+  }
+
+  if (C.invert) b = 255 - b;
+
+  return 1 - b / 255; // darkness: 0 = white, 1 = black
+}
+
+// --- Brightness sampling ---
+function sampleDarkness(x, y) {
+  const ix = Math.max(0, Math.min(imgW - 1, Math.round(x)));
+  const iy = Math.max(0, Math.min(imgH - 1, Math.round(y)));
+  return applyTone(brightnessMap[iy * imgW + ix]);
+}
+
+// Bilinear sampled darkness for smoother gradients
+function sampleDarknessBilinear(x, y) {
+  x = Math.max(0, Math.min(imgW - 1, x));
+  y = Math.max(0, Math.min(imgH - 1, y));
+  const x0 = Math.floor(x), y0 = Math.floor(y);
+  const x1 = Math.min(x0 + 1, imgW - 1), y1 = Math.min(y0 + 1, imgH - 1);
+  const fx = x - x0, fy = y - y0;
+
+  const b00 = brightnessMap[y0 * imgW + x0];
+  const b10 = brightnessMap[y0 * imgW + x1];
+  const b01 = brightnessMap[y1 * imgW + x0];
+  const b11 = brightnessMap[y1 * imgW + x1];
+
+  const b = b00 * (1-fx)*(1-fy) + b10 * fx*(1-fy) + b01 * (1-fx)*fy + b11 * fx*fy;
+  return applyTone(b);
+}
+
+
+// ===========================================
+// METHOD 1: Weighted Poisson Disk Sampling
+// ===========================================
+// Uses a spatial grid to enforce minimum distance between dots.
+// Distance varies inversely with image darkness — dark areas pack tighter.
+function generatePoisson() {
+  dots = [];
+  const baseSpacing = C.spacing;
+  const minSpace = baseSpacing * 0.5;  // tightest packing in darkest areas
+  const maxSpace = baseSpacing * 4.0;  // loosest in lightest areas
+
+  // Spatial hash for fast neighbor lookups
+  const cellSize = minSpace;
+  const gridW = Math.ceil(imgW / cellSize);
+  const gridH = Math.ceil(imgH / cellSize);
+  const grid = new Int32Array(gridW * gridH).fill(-1);
+
+  function gridIdx(x, y) {
+    return Math.floor(y / cellSize) * gridW + Math.floor(x / cellSize);
+  }
+
+  function tooClose(x, y, minDist) {
+    const cx = Math.floor(x / cellSize);
+    const cy = Math.floor(y / cellSize);
+    const r = Math.ceil(minDist / cellSize) + 1;
+
+    for (let dy = -r; dy <= r; dy++) {
+      for (let dx = -r; dx <= r; dx++) {
+        const nx = cx + dx, ny = cy + dy;
+        if (nx < 0 || nx >= gridW || ny < 0 || ny >= gridH) continue;
+        const idx = grid[ny * gridW + nx];
+        if (idx === -1) continue;
+        const d = dots[idx];
+        const dist = Math.hypot(d.x - x, d.y - y);
+        if (dist < minDist) return true;
+      }
+    }
+    return false;
+  }
+
+  // Phase 1: Seed with a jittered grid for even coverage
+  const seedStep = minSpace * 1.5;
+  const candidates = [];
+  for (let y = seedStep / 2; y < imgH; y += seedStep) {
+    for (let x = seedStep / 2; x < imgW; x += seedStep) {
+      candidates.push([
+        x + (Math.random() - 0.5) * seedStep * 0.8,
+        y + (Math.random() - 0.5) * seedStep * 0.8
+      ]);
+    }
+  }
+  // Shuffle for randomness
+  for (let i = candidates.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+  }
+
+  for (const [x, y] of candidates) {
+    if (x < 0 || x >= imgW || y < 0 || y >= imgH) continue;
+
+    const darkness = sampleDarknessBilinear(x, y);
+    if (darkness < 0.02) continue; // Skip near-white
+
+    // Accept with probability proportional to darkness
+    if (Math.random() > darkness) continue;
+
+    // Required spacing: tight in dark, loose in light
+    const reqDist = minSpace + (maxSpace - minSpace) * (1 - darkness);
+
+    // Apply organic jitter
+    const jAmount = C.jitter * reqDist * 0.5;
+    const jx = x + (Math.random() - 0.5) * 2 * jAmount;
+    const jy = y + (Math.random() - 0.5) * 2 * jAmount;
+
+    if (jx < 0 || jx >= imgW || jy < 0 || jy >= imgH) continue;
+    if (tooClose(jx, jy, reqDist * 0.7)) continue;
+
+    const idx = dots.length;
+    const dotR = computeDotRadius(darkness);
+    dots.push({ x: jx, y: jy, r: dotR });
+
+    const gi = gridIdx(jx, jy);
+    if (gi >= 0 && gi < grid.length) grid[gi] = idx;
+  }
+
+  // Phase 2: Fill gaps with additional random attempts in dark areas
+  const extraAttempts = Math.floor(candidates.length * 0.5);
+  for (let i = 0; i < extraAttempts; i++) {
+    const x = Math.random() * imgW;
+    const y = Math.random() * imgH;
+
+    const darkness = sampleDarknessBilinear(x, y);
+    if (darkness < 0.3) continue;
+    if (Math.random() > darkness * 0.5) continue;
+
+    const reqDist = minSpace + (maxSpace - minSpace) * (1 - darkness);
+
+    const jAmount = C.jitter * reqDist * 0.5;
+    const jx = x + (Math.random() - 0.5) * 2 * jAmount;
+    const jy = y + (Math.random() - 0.5) * 2 * jAmount;
+
+    if (jx < 0 || jx >= imgW || jy < 0 || jy >= imgH) continue;
+    if (tooClose(jx, jy, reqDist * 0.6)) continue;
+
+    const idx = dots.length;
+    const dotR = computeDotRadius(darkness);
+    dots.push({ x: jx, y: jy, r: dotR });
+
+    const gi = gridIdx(jx, jy);
+    if (gi >= 0 && gi < grid.length) grid[gi] = idx;
+  }
+}
+
+
+// ===========================================
+// METHOD 2: Organic Halftone
+// ===========================================
+function generateHalftone() {
+  dots = [];
+  const spacing = C.spacing;
+  const layout = C.halftoneLayout;
+
+  // Generate candidate grid points based on layout
+  let candidates;
+
+  if (layout === 'hex') {
+    // Classic hex rows — offset every other row
+    candidates = [];
+    for (let row = 0; row * spacing < imgH; row++) {
+      const offsetX = (row % 2) * spacing * 0.5;
+      for (let col = 0; col * spacing < imgW; col++) {
+        candidates.push([
+          col * spacing + offsetX + spacing * 0.5,
+          row * spacing + spacing * 0.5,
+        ]);
+      }
+    }
+
+  } else if (layout === 'rotated') {
+    // Hex grid rotated 30° — breaks axis-aligned lines
+    const angle = Math.PI / 6; // 30 degrees
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+    const rowH = spacing * 0.866; // sqrt(3)/2
+    // Overscan to fill the image after rotation
+    const diag = Math.hypot(imgW, imgH);
+    const margin = diag * 0.5;
+    candidates = [];
+
+    for (let row = 0; row * rowH < diag + margin; row++) {
+      const offsetX = (row % 2) * spacing * 0.5;
+      for (let col = 0; col * spacing < diag + margin; col++) {
+        const lx = col * spacing + offsetX - margin * 0.5;
+        const ly = row * rowH - margin * 0.5;
+        // Rotate around image center
+        const cx = imgW / 2, cy = imgH / 2;
+        const rx = cos * (lx - cx) - sin * (ly - cy) + cx;
+        const ry = sin * (lx - cx) + cos * (ly - cy) + cy;
+        if (rx >= 0 && rx < imgW && ry >= 0 && ry < imgH) {
+          candidates.push([rx, ry]);
+        }
+      }
+    }
+
+  } else if (layout === 'golden') {
+    // Golden-angle spiral — no grid lines at all, very uniform
+    const area = imgW * imgH;
+    const dotArea = spacing * spacing;
+    const n = Math.ceil(area / dotArea) * 1.3; // overshoot, will cull
+    const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ~137.5°
+    // Sunflower spiral scaled to image
+    const maxR = Math.hypot(imgW, imgH) * 0.52;
+    candidates = [];
+
+    for (let i = 0; i < n; i++) {
+      const r = maxR * Math.sqrt(i / n);
+      const theta = i * goldenAngle;
+      const x = imgW / 2 + r * Math.cos(theta);
+      const y = imgH / 2 + r * Math.sin(theta);
+      if (x >= 0 && x < imgW && y >= 0 && y < imgH) {
+        candidates.push([x, y]);
+      }
+    }
+
+  } else if (layout === 'uniform') {
+    // Perfect offset grid: rows evenly spaced, every other row shifted by spacing/2
+    candidates = [];
+
+    for (let row = 0; row * spacing < imgH + spacing; row++) {
+      const offsetX = (row % 2) * spacing * 0.5;
+      const y = row * spacing + spacing * 0.5;
+      if (y > imgH) break;
+      for (let col = 0; ; col++) {
+        const x = col * spacing + offsetX + spacing * 0.5;
+        if (x > imgW) break;
+        candidates.push([x, y]);
+      }
+    }
+
+  }
+
+  // --- Apply tone: cull by darkness, jitter, size ---
+  for (const [bx, by] of candidates) {
+    if (bx < 0 || bx >= imgW || by < 0 || by >= imgH) continue;
+
+    const darkness = sampleDarknessBilinear(bx, by);
+    if (darkness < 0.02) continue;
+
+    // Probabilistic culling in lighter areas
+    if (darkness < 0.5 && Math.random() > darkness * 2) continue;
+
+    // Jitter
+    const jAmount = C.jitter * spacing * 0.45;
+    const x = bx + (Math.random() - 0.5) * 2 * jAmount;
+    const y = by + (Math.random() - 0.5) * 2 * jAmount;
+
+    dots.push({ x, y, r: computeDotRadius(darkness) });
+  }
+}
+
+
+// ===========================================
+// METHOD 3: Weighted Voronoi Stippling (Lloyd)
+// ===========================================
+// Async — yields between iterations so the browser stays responsive.
+// Uses a spatial grid for O(1) nearest-neighbor instead of brute-force O(n).
+
+async function generateLloyd() {
+  const iterations = C.lloydIter;
+  const spacing = C.spacing;
+
+  // Initial seed: jittered grid, filtered by darkness
+  let points = [];
+  const step = spacing * 1.2;
+
+  for (let y = step / 2; y < imgH; y += step) {
+    for (let x = step / 2; x < imgW; x += step) {
+      const darkness = sampleDarknessBilinear(x, y);
+      if (Math.random() < darkness) {
+        points.push([
+          x + (Math.random() - 0.5) * step,
+          y + (Math.random() - 0.5) * step,
+        ]);
+      }
+    }
+  }
+
+  if (points.length === 0) { dots = []; return; }
+
+  // Coarser sample step for speed — 2px is plenty for smooth centroids
+  const sampleStep = Math.max(2, Math.round(spacing * 0.5));
+
+  for (let iter = 0; iter < iterations; iter++) {
+    showStatus(`Lloyd iteration ${iter + 1}/${iterations}  (${points.length.toLocaleString()} pts)`);
+
+    // --- Build spatial grid of point indices for fast lookup ---
+    // Cell size ~ max expected Voronoi cell radius
+    const cellSize = spacing * 2.5;
+    const gW = Math.ceil(imgW / cellSize);
+    const gH = Math.ceil(imgH / cellSize);
+    const grid = new Array(gW * gH);
+    for (let i = 0; i < grid.length; i++) grid[i] = [];
+
+    for (let i = 0; i < points.length; i++) {
+      const gx = Math.floor(points[i][0] / cellSize);
+      const gy = Math.floor(points[i][1] / cellSize);
+      if (gx >= 0 && gx < gW && gy >= 0 && gy < gH) {
+        grid[gy * gW + gx].push(i);
+      }
+    }
+
+    // --- Accumulate weighted centroids ---
+    const sums = new Float64Array(points.length * 3); // [wx, wy, w]
+
+    for (let sy = 0; sy < imgH; sy += sampleStep) {
+      for (let sx = 0; sx < imgW; sx += sampleStep) {
+        const darkness = sampleDarkness(sx, sy); // faster non-bilinear at coarse step
+        if (darkness < 0.01) continue;
+
+        // Search the grid cell + neighbors for nearest point
+        const gcx = Math.floor(sx / cellSize);
+        const gcy = Math.floor(sy / cellSize);
+        let minD = Infinity, minIdx = -1;
+
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            const nx = gcx + dx, ny = gcy + dy;
+            if (nx < 0 || nx >= gW || ny < 0 || ny >= gH) continue;
+            const bucket = grid[ny * gW + nx];
+            for (let k = 0; k < bucket.length; k++) {
+              const idx = bucket[k];
+              const px = points[idx][0] - sx;
+              const py = points[idx][1] - sy;
+              const d = px * px + py * py;
+              if (d < minD) { minD = d; minIdx = idx; }
+            }
+          }
+        }
+
+        if (minIdx === -1) continue;
+
+        const w = darkness;
+        sums[minIdx * 3]     += sx * w;
+        sums[minIdx * 3 + 1] += sy * w;
+        sums[minIdx * 3 + 2] += w;
+      }
+    }
+
+    // Move points to weighted centroids
+    for (let i = 0; i < points.length; i++) {
+      const totalW = sums[i * 3 + 2];
+      if (totalW > 0) {
+        points[i][0] = sums[i * 3] / totalW;
+        points[i][1] = sums[i * 3 + 1] / totalW;
+      }
+    }
+
+    // Remove points that drifted out of bounds or into very light areas
+    points = points.filter(([x, y]) => {
+      if (x < 0 || x >= imgW || y < 0 || y >= imgH) return false;
+      return sampleDarkness(x, y) > 0.02;
+    });
+
+    // Yield to browser every iteration so the UI stays alive
+    await new Promise(r => requestAnimationFrame(r));
+  }
+
+  // Convert to dot objects
+  dots = points.map(([x, y]) => {
+    const darkness = sampleDarknessBilinear(x, y);
+    const jAmount = C.jitter * spacing * 0.15;
+    return {
+      x: x + (Math.random() - 0.5) * 2 * jAmount,
+      y: y + (Math.random() - 0.5) * 2 * jAmount,
+      r: computeDotRadius(darkness),
+    };
+  });
+}
+
+
+// --- Shared: dot radius with optional size variation ---
+function computeDotRadius(darkness) {
+  let r = C.dotSize / 2;
+
+  if (C.sizeVary) {
+    // Larger dots in darker areas, smaller in lighter
+    r *= 0.4 + 0.8 * darkness;
+  }
+
+  // Organic size randomness
+  r *= 1 + (Math.random() - 0.5) * 2 * C.sizeRand;
+  return Math.max(0.2, r);
+}
+
+
+// --- Main generate + render pipeline ---
+let generating = false;
+let regenerateQueued = false;
+
+async function regenerate() {
+  if (!brightnessMap) return;
+
+  // If already running, queue a re-run after it finishes
+  if (generating) { regenerateQueued = true; return; }
+  generating = true;
+
+  showStatus('Generating...');
+  const t0 = performance.now();
+
+  // Yield a frame so "Generating..." shows before heavy work
+  await new Promise(r => requestAnimationFrame(r));
+
+  switch (C.method) {
+    case 'poisson':  generatePoisson(); break;
+    case 'halftone': generateHalftone(); break;
+    case 'lloyd':    await generateLloyd(); break;
+  }
+
+  render();
+  const ms = Math.round(performance.now() - t0);
+  showStatus(`${dots.length.toLocaleString()} dots in ${ms}ms`);
+
+  generating = false;
+  if (regenerateQueued) {
+    regenerateQueued = false;
+    regenerate();
+  }
+}
+
+function render() {
+  const wrap = document.getElementById('canvas-wrap');
+  const scale = Math.min(
+    (wrap.clientWidth - 40) / imgW,
+    (wrap.clientHeight - 40) / imgH,
+    2
+  );
+  canvas.width = Math.round(imgW * scale);
+  canvas.height = Math.round(imgH * scale);
+
+  ctx.save();
+  ctx.scale(scale, scale);
+
+  ctx.fillStyle = C.bgColor;
+  ctx.fillRect(0, 0, imgW, imgH);
+
+  ctx.fillStyle = C.dotColor;
+  for (const d of dots) {
+    ctx.beginPath();
+    ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+
+// --- Export ---
+function exportSVG() {
+  if (!dots.length) return;
+
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${imgW} ${imgH}" width="${imgW}" height="${imgH}">\n`;
+  svg += `<rect width="${imgW}" height="${imgH}" fill="${C.bgColor}"/>\n`;
+  svg += `<g fill="${C.dotColor}">\n`;
+  for (const d of dots) {
+    svg += `<circle cx="${d.x.toFixed(2)}" cy="${d.y.toFixed(2)}" r="${d.r.toFixed(2)}"/>\n`;
+  }
+  svg += `</g>\n</svg>`;
+
+  download(svg, 'stipple.svg', 'image/svg+xml');
+  showStatus('SVG exported');
+}
+
+function exportPNG() {
+  if (!dots.length) return;
+
+  const exp = document.createElement('canvas');
+  exp.width = imgW; exp.height = imgH;
+  const ectx = exp.getContext('2d');
+
+  ectx.fillStyle = C.dotColor;
+
+  for (const d of dots) {
+    ectx.beginPath();
+    ectx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+    ectx.fill();
+  }
+
+  exp.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'stipple.png';
+    a.click(); URL.revokeObjectURL(url);
+    showStatus('PNG exported');
+  });
+}
+
+function download(content, name, type) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function showStatus(msg) {
+  statusEl.textContent = msg;
+  statusEl.classList.add('show');
+  clearTimeout(showStatus._t);
+  showStatus._t = setTimeout(() => statusEl.classList.remove('show'), 3000);
+}
+
+window.addEventListener('resize', () => { if (dots.length) render(); });
+
+function randomize() {
+  function rand(min, max, step) {
+    const steps = Math.round((max - min) / step);
+    return min + Math.round(Math.random() * steps) * step;
+  }
+
+  function setSlider(id, val, displayId) {
+    const el = document.getElementById(id);
+    el.value = val;
+    const vEl = document.getElementById(displayId);
+    if (vEl) vEl.textContent = parseFloat(val).toFixed(String(el.step).includes('.') ? String(el.step).split('.')[1].length : 0);
+  }
+
+  // Only touch the tone/fidelity sliders — aesthetic params stay locked
+  setSlider('gamma',     rand(1.0, 2.2, 0.05),   'v-gamma');
+  setSlider('black-pt',  rand(0, 40, 1),         'v-black');
+  setSlider('white-pt',  rand(0, 50, 1),         'v-white');
+  setSlider('contrast',  rand(0, 35, 1),         'v-contrast');
+  setSlider('posterize', rand(4, 8, 1),          'v-poster');
+
+  if (sourceImg) regenerate();
+}
+</script>
+</body>
+</html>
